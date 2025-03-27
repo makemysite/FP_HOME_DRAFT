@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 
 const Hero: React.FC = () => {
@@ -18,7 +19,7 @@ const Hero: React.FC = () => {
       </div>
       <div className="gap-5 flex max-md:flex-col max-md:items-stretch">
         <div className="w-6/12 max-md:w-full max-md:ml-0">
-          <div className="flex w-full flex-col items-stretch text-lg mt-3 max-md:max-w-full max-md:mt-[38px]">
+          <div className="flex w-full flex-col items-center text-lg mt-3 max-md:max-w-full max-md:mt-[38px]">
             <h1 className="text-[#170F49] text-center text-[50px] font-bold leading-[62px] max-md:max-w-full max-md:text-[40px] max-md:leading-[55px] max-md:mr-1">
               Automate & Grow
               <br />
