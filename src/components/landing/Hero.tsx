@@ -15,7 +15,7 @@ const Hero: React.FC = () => {
   return (
     <section className="w-full max-w-[1334px] max-md:max-w-full mt-[52px]">
       <div className="w-full flex justify-center">
-        <div className="text-[rgba(233,138,35,1)] text-base font-bold leading-none tracking-[3.84px] text-center uppercase">
+        <div className="text-[rgba(233,138,35,1)] text-base font-bold leading-none tracking-[3.84px] text-center uppercase -ml-[25px]">
           FIELD SERVICE SOFTWARE
         </div>
       </div>
