@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 
 const Features: React.FC = () => {
@@ -48,6 +49,9 @@ const Features: React.FC = () => {
       <h2 className="text-[#170F49] text-center text-[50px] font-bold leading-[62px] w-[668px] mt-7 max-md:max-w-full max-md:text-[40px] max-md:leading-[55px]">
         Spend Less Time Managing and More Time Growing
       </h2>
+      <div className="text-[#26393F] text-center text-lg font-normal leading-loose mt-[29px] max-md:max-w-full">
+        Automate Your Service Business With Our Exclusive Features
+      </div>
       <button className="bg-[rgba(245,246,251,1)] border w-[175px] max-w-full text-lg text-[rgba(7,15,24,1)] font-normal text-center mt-[29px] px-5 py-[21px] rounded-[56px] border-[rgba(233,138,35,1)] border-solid hover:bg-[rgba(245,246,251,0.8)] transition-colors">
         View all features
       </button>
@@ -148,3 +152,4 @@ const Features: React.FC = () => {
 };
 
 export default Features;
+
