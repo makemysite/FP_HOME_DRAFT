@@ -14,8 +14,10 @@ const Hero: React.FC = () => {
 
   return (
     <section className="w-full max-w-[1334px] max-md:max-w-full mt-[52px]">
-      <div className="text-[rgba(233,138,35,1)] text-base font-bold leading-none tracking-[3.84px] text-center uppercase">
-        FIELD SERVICE SOFTWARE
+      <div className="w-full flex justify-center">
+        <div className="text-[rgba(233,138,35,1)] text-base font-bold leading-none tracking-[3.84px] text-center uppercase">
+          FIELD SERVICE SOFTWARE
+        </div>
       </div>
       <div className="gap-5 flex max-md:flex-col max-md:items-stretch">
         <div className="w-6/12 max-md:w-full max-md:ml-0">
