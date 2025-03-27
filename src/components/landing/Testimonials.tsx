@@ -1,6 +1,60 @@
-import React from "react";
+
+import React, { useEffect, useState } from "react";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+} from "@/components/ui/carousel";
+import { Star } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+// Define the testimonial data structure
+interface Testimonial {
+  quote: string;
+  name: string;
+  company: string;
+}
+
+const testimonials: Testimonial[] = [
+  {
+    quote: "Without any doubt I recommend Alcaline Solutions as one of the best web design and digital marketing agencies. One of the best agencies I've came across so far. Wouldn't be hesitated to introduce their work to someone else.",
+    name: "Romeena De Silva",
+    company: "Janet Cosmetics"
+  },
+  {
+    quote: "The team at Alcaline Solutions has transformed our field service operations. Their software is intuitive and has helped us increase productivity by 40%. Customer support is responsive and always ready to help.",
+    name: "Michael Rodriguez",
+    company: "Elite Maintenance Services"
+  },
+  {
+    quote: "After trying several field service solutions, we finally found Alcaline. The scheduling and dispatching features have eliminated double-bookings and our technicians love the mobile app. It's been a game-changer for our business.",
+    name: "Sarah Johnson",
+    company: "Precision HVAC Solutions"
+  },
+  {
+    quote: "We've been using Alcaline Solutions for over a year now, and the ROI has been incredible. The invoicing system alone has reduced our billing time by 65%. I can't imagine running our business without it now.",
+    name: "David Chen",
+    company: "Pacific Plumbing Co."
+  },
+  {
+    quote: "The customization options available with Alcaline's software allowed us to tailor it perfectly to our electrical contracting business. The team was responsive throughout implementation and training was excellent.",
+    name: "Emily Taylor",
+    company: "Voltage Electric Inc."
+  }
+];
 
 const Testimonials: React.FC = () => {
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  // Auto-rotate testimonials
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveIndex((current) => (current + 1) % testimonials.length);
+    }, 5000); // Change testimonial every 5 seconds
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <section
       id="testimonials"
@@ -17,47 +71,74 @@ const Testimonials: React.FC = () => {
           working with us
         </h2>
       </div>
-      <div className="flex w-[727px] max-w-full gap-[40px_66px] text-lg text-[#718096] font-normal text-center leading-9 flex-wrap mt-[51px] max-md:mt-10">
-        <img
-          src="https://cdn.builder.io/api/v1/image/assets/a720917f9ee741a78621d5e6666ab10a/f4add18242878713b4547350495fce8416570985?placeholderIfAbsent=true"
-          alt="Quote Open"
-          className="aspect-[1] object-contain w-10 shrink-0"
-        />
-        <blockquote className="grow shrink w-[503px] mt-3 max-md:max-w-full">
-          Without any doubt I recommend Alcaline Solutions as one of the best
-          web design and digital marketing agencies. One of the best agencies
-          I've came across so far. Wouldn't be hesitated to introduce their work
-          to someone else.
-        </blockquote>
-        <img
-          src="https://cdn.builder.io/api/v1/image/assets/a720917f9ee741a78621d5e6666ab10a/2ce440a684a36a9d5fafa6e3e787b5eb52f448fc?placeholderIfAbsent=true"
-          alt="Quote Close"
-          className="aspect-[1] object-contain w-10 shrink-0 mt-[121px] max-md:mt-10"
-        />
-      </div>
-      <div className="flex flex-col items-center text-center justify-center mt-8">
-        <div className="flex">
-          {[1, 2, 3, 4, 5].map((star) => (
-            <svg
-              key={star}
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="#E98A23"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path d="M12 17.27L18.18 21L16.54 13.97L22 9.24L14.81 8.63L12 2L9.19 8.63L2 9.24L7.46 13.97L5.82 21L12 17.27Z" />
-            </svg>
+      
+      <Carousel
+        className="w-full max-w-[727px] mt-[51px] max-md:mt-10"
+        opts={{
+          loop: true,
+          align: "center",
+        }}
+        setApi={(api) => {
+          if (api) {
+            api.scrollTo(activeIndex);
+          }
+        }}
+      >
+        <CarouselContent>
+          {testimonials.map((testimonial, index) => (
+            <CarouselItem key={index} className="flex flex-col items-center">
+              <div className="flex w-full max-w-[727px] gap-[40px_66px] text-lg text-[#718096] font-normal text-center leading-9 flex-wrap">
+                <img
+                  src="https://cdn.builder.io/api/v1/image/assets/a720917f9ee741a78621d5e6666ab10a/f4add18242878713b4547350495fce8416570985?placeholderIfAbsent=true"
+                  alt="Quote Open"
+                  className="aspect-[1] object-contain w-10 shrink-0"
+                />
+                <blockquote className="grow shrink w-[503px] mt-3 max-md:max-w-full">
+                  {testimonial.quote}
+                </blockquote>
+                <img
+                  src="https://cdn.builder.io/api/v1/image/assets/a720917f9ee741a78621d5e6666ab10a/2ce440a684a36a9d5fafa6e3e787b5eb52f448fc?placeholderIfAbsent=true"
+                  alt="Quote Close"
+                  className="aspect-[1] object-contain w-10 shrink-0 mt-[121px] max-md:mt-10"
+                />
+              </div>
+              <div className="flex flex-col items-center text-center justify-center mt-8">
+                <div className="flex">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <Star
+                      key={star}
+                      className={cn("h-6 w-6 fill-[#E98A23] text-[#E98A23]")}
+                    />
+                  ))}
+                </div>
+                <div className="flex flex-col items-center justify-center mt-[15px]">
+                  <div className="text-[#E98A23] text-lg font-bold tracking-[-0.09px]">
+                    {testimonial.name}
+                  </div>
+                  <div className="text-black text-sm font-normal leading-loose">
+                    {testimonial.company}
+                  </div>
+                </div>
+              </div>
+            </CarouselItem>
           ))}
-        </div>
-        <div className="flex flex-col items-center justify-center mt-[15px]">
-          <div className="text-[#E98A23] text-lg font-bold tracking-[-0.09px]">
-            Romeena De Silva
-          </div>
-          <div className="text-black text-sm font-normal leading-loose">
-            Janet Cosmetics
-          </div>
-        </div>
+        </CarouselContent>
+      </Carousel>
+      
+      {/* Indicator dots */}
+      <div className="flex justify-center gap-2 mt-8">
+        {testimonials.map((_, index) => (
+          <button
+            key={index}
+            className={`h-2 w-2 rounded-full transition-all ${
+              activeIndex === index
+                ? "bg-[#E98A23] w-6"
+                : "bg-gray-300"
+            }`}
+            onClick={() => setActiveIndex(index)}
+            aria-label={`Go to testimonial ${index + 1}`}
+          />
+        ))}
       </div>
     </section>
   );
