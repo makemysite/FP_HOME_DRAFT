@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 
 const Hero: React.FC = () => {
@@ -14,19 +15,17 @@ const Hero: React.FC = () => {
   return (
     <section className="w-full max-w-[1334px] max-md:max-w-full mt-[52px]">
       <div className="w-full flex flex-col">
-        <div className="flex flex-col">
-          <div className="text-[rgba(233,138,35,1)] text-base font-bold leading-none tracking-[3.84px] uppercase mb-3">
-            FIELD SERVICE SOFTWARE
-          </div>
-          <h1 className="text-[#170F49] text-[50px] font-bold leading-[62px] max-md:max-w-full max-md:text-[40px] max-md:leading-[55px] max-md:mr-1">
-            Automate & Grow
-            <br />
-            Your Field Service Business
-          </h1>
-        </div>
         <div className="gap-5 flex max-md:flex-col max-md:items-stretch">
           <div className="w-6/12 max-md:w-full max-md:ml-0">
             <div className="flex w-full flex-col items-center text-lg mt-3 max-md:max-w-full max-md:mt-[38px]">
+              <div className="text-[rgba(233,138,35,1)] text-base font-bold leading-none tracking-[3.84px] uppercase mb-3">
+                FIELD SERVICE SOFTWARE
+              </div>
+              <h1 className="text-[#170F49] text-[50px] font-bold leading-[62px] max-md:max-w-full max-md:text-[40px] max-md:leading-[55px] max-md:mr-1">
+                Automate & Grow
+                <br />
+                Your Field Service Business
+              </h1>
               <p className="text-[#26393f] text-center font-normal leading-[30px] mt-3 max-md:max-w-full max-md:mr-1">
                 Gain full control over scheduling, dispatching, tracking, and
                 invoicing with Field Promax. Fill in your email below and Take our{" "}
