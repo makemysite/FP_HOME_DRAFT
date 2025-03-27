@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 
 const Features: React.FC = () => {
@@ -152,4 +151,3 @@ const Features: React.FC = () => {
 };
 
 export default Features;
-
