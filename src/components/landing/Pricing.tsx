@@ -1,10 +1,29 @@
+
 import React, { useState } from "react";
 import CheckIcon from "../ui/CheckIcon";
+import { Switch } from "../ui/switch";
 
 const Pricing: React.FC = () => {
   const [billingCycle, setBillingCycle] = useState<"monthly" | "annually">(
     "monthly",
   );
+
+  const toggleBillingCycle = () => {
+    setBillingCycle(billingCycle === "monthly" ? "annually" : "monthly");
+  };
+
+  // Define pricing based on billing cycle
+  const pricing = {
+    light: billingCycle === "monthly" ? 
+      { amount: "99", period: "monthly" } : 
+      { amount: "999", period: "annually" },
+    standard: billingCycle === "monthly" ? 
+      { amount: "149", period: "monthly" } : 
+      { amount: "1499", period: "annually" },
+    premium: billingCycle === "monthly" ? 
+      { amount: "199", period: "monthly" } : 
+      { amount: "1999", period: "annually" }
+  };
 
   return (
     <section
@@ -22,19 +41,14 @@ const Pricing: React.FC = () => {
         venenatis eu sit massa volutpat.
       </p>
 
-      <div className="flex w-[244px] max-w-full items-stretch gap-5 text-lg text-[#170F49] font-normal whitespace-nowrap leading-loose justify-between mt-[26px]">
-        <button
-          className={`relative ${billingCycle === "monthly" ? 'font-bold after:content-[""] after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-[rgba(233,138,35,1)]' : ""}`}
-          onClick={() => setBillingCycle("monthly")}
-        >
-          Monthly
-        </button>
-        <button
-          className={`relative ${billingCycle === "annually" ? 'font-bold after:content-[""] after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-[rgba(233,138,35,1)]' : ""}`}
-          onClick={() => setBillingCycle("annually")}
-        >
-          Annually
-        </button>
+      <div className="flex items-center gap-4 mt-8">
+        <span className={`text-lg ${billingCycle === "monthly" ? "font-bold text-[#170F49]" : "text-[#6f6c90]"}`}>Monthly</span>
+        <Switch 
+          checked={billingCycle === "annually"} 
+          onCheckedChange={toggleBillingCycle} 
+          className="data-[state=checked]:bg-[rgba(233,138,35,1)]"
+        />
+        <span className={`text-lg ${billingCycle === "annually" ? "font-bold text-[#170F49]" : "text-[#6f6c90]"}`}>Annually</span>
       </div>
 
       <button className="bg-[rgba(245,246,251,1)] border w-[175px] max-w-full text-lg text-[rgba(7,15,24,1)] font-normal text-center mt-[46px] p-[19px] rounded-[56px] border-[rgba(233,138,35,1)] border-solid max-md:mt-10 hover:bg-[rgba(245,246,251,0.8)] transition-colors">
@@ -69,10 +83,10 @@ const Pricing: React.FC = () => {
                 </p>
                 <div className="flex items-center gap-2.5 whitespace-nowrap mt-[13px]">
                   <div className="text-[#170F49] text-[54px] font-bold leading-none self-stretch my-auto max-md:text-[40px]">
-                    $99
+                    ${pricing.light.amount}
                   </div>
                   <div className="self-stretch text-xl text-[#26393F] font-medium leading-[1.1] w-[86px] my-auto pt-5">
-                    /monthly
+                    /{pricing.light.period}
                   </div>
                 </div>
                 <div className="text-[#170F49] text-lg font-bold leading-none mt-[17px]">
@@ -137,10 +151,10 @@ const Pricing: React.FC = () => {
                 </p>
                 <div className="flex items-stretch gap-[29px] whitespace-nowrap mt-[13px]">
                   <div className="text-[#170F49] text-[54px] font-bold leading-none basis-auto max-md:text-[40px]">
-                    $149
+                    ${pricing.standard.amount}
                   </div>
                   <div className="text-[#26393F] text-xl font-medium leading-[1.1] mt-8">
-                    /monthly
+                    /{pricing.standard.period}
                   </div>
                 </div>
                 <div className="text-[#170F49] text-lg font-bold leading-none mt-[17px]">
@@ -206,10 +220,10 @@ const Pricing: React.FC = () => {
                   </p>
                   <div className="flex items-center gap-2.5 whitespace-nowrap mt-[13px]">
                     <div className="text-white text-[54px] font-bold leading-none self-stretch my-auto max-md:text-[40px]">
-                      $199
+                      ${pricing.premium.amount}
                     </div>
                     <div className="self-stretch text-xl text-[#D9DBE9] font-medium leading-[1.1] w-[87px] my-auto pt-5">
-                      /monthly
+                      /{pricing.premium.period}
                     </div>
                   </div>
                   <div className="text-white text-lg font-bold leading-none mt-[17px]">
