@@ -13,12 +13,12 @@ const Hero: React.FC = () => {
 
   return (
     <section className="w-full max-w-[1334px] max-md:max-w-full mt-[52px]">
-      <div className="w-full flex flex-col items-center">
-        <div className="flex flex-col items-center">
-          <div className="text-[rgba(233,138,35,1)] text-base font-bold leading-none tracking-[3.84px] text-center uppercase mb-3">
+      <div className="w-full flex flex-col">
+        <div className="flex flex-col">
+          <div className="text-[rgba(233,138,35,1)] text-base font-bold leading-none tracking-[3.84px] uppercase mb-3">
             FIELD SERVICE SOFTWARE
           </div>
-          <h1 className="text-[#170F49] text-center text-[50px] font-bold leading-[62px] max-md:max-w-full max-md:text-[40px] max-md:leading-[55px] max-md:mr-1">
+          <h1 className="text-[#170F49] text-[50px] font-bold leading-[62px] max-md:max-w-full max-md:text-[40px] max-md:leading-[55px] max-md:mr-1">
             Automate & Grow
             <br />
             Your Field Service Business
