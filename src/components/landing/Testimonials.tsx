@@ -72,58 +72,63 @@ const Testimonials: React.FC = () => {
         </h2>
       </div>
       
-      <Carousel
-        className="w-full max-w-[727px] mt-[51px] max-md:mt-10"
-        opts={{
-          loop: true,
-          align: "center",
-        }}
-        setApi={(api) => {
-          if (api) {
-            api.scrollTo(activeIndex);
-          }
-        }}
-      >
-        <CarouselContent>
-          {testimonials.map((testimonial, index) => (
-            <CarouselItem key={index} className="flex flex-col items-center">
-              <div className="flex w-full max-w-[727px] gap-[40px_66px] text-lg text-[#718096] font-normal text-center leading-9 flex-wrap">
-                <img
-                  src="https://cdn.builder.io/api/v1/image/assets/a720917f9ee741a78621d5e6666ab10a/f4add18242878713b4547350495fce8416570985?placeholderIfAbsent=true"
-                  alt="Quote Open"
-                  className="aspect-[1] object-contain w-10 shrink-0"
-                />
-                <blockquote className="grow shrink w-[503px] mt-3 max-md:max-w-full">
-                  {testimonial.quote}
-                </blockquote>
-                <img
-                  src="https://cdn.builder.io/api/v1/image/assets/a720917f9ee741a78621d5e6666ab10a/2ce440a684a36a9d5fafa6e3e787b5eb52f448fc?placeholderIfAbsent=true"
-                  alt="Quote Close"
-                  className="aspect-[1] object-contain w-10 shrink-0 mt-[121px] max-md:mt-10"
-                />
-              </div>
-              <div className="flex flex-col items-center text-center justify-center mt-8">
-                <div className="flex">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <Star
-                      key={star}
-                      className={cn("h-6 w-6 fill-[#E98A23] text-[#E98A23]")}
-                    />
-                  ))}
+      <div className="w-full max-w-[727px] mt-[51px] relative max-md:mt-10">
+        {/* Fixed quotation marks */}
+        <img
+          src="https://cdn.builder.io/api/v1/image/assets/a720917f9ee741a78621d5e6666ab10a/f4add18242878713b4547350495fce8416570985?placeholderIfAbsent=true"
+          alt="Quote Open"
+          className="absolute left-0 top-3 aspect-[1] object-contain w-10 shrink-0 z-10"
+        />
+        <img
+          src="https://cdn.builder.io/api/v1/image/assets/a720917f9ee741a78621d5e6666ab10a/2ce440a684a36a9d5fafa6e3e787b5eb52f448fc?placeholderIfAbsent=true"
+          alt="Quote Close"
+          className="absolute right-0 bottom-[121px] aspect-[1] object-contain w-10 shrink-0 z-10 max-md:bottom-auto max-md:top-[60%]"
+        />
+        
+        {/* Carousel with just the testimonial content */}
+        <Carousel
+          className="w-full"
+          opts={{
+            loop: true,
+            align: "center",
+          }}
+          setApi={(api) => {
+            if (api) {
+              api.scrollTo(activeIndex);
+            }
+          }}
+        >
+          <CarouselContent>
+            {testimonials.map((testimonial, index) => (
+              <CarouselItem key={index} className="flex flex-col items-center">
+                <div className="flex w-full gap-[40px_66px] text-lg text-[#718096] font-normal text-center leading-9 flex-wrap px-16">
+                  <blockquote className="w-full mt-3 max-md:max-w-full min-h-[200px] flex items-center justify-center">
+                    {testimonial.quote}
+                  </blockquote>
                 </div>
-                <div className="flex flex-col items-center justify-center mt-[15px]">
-                  <div className="text-[#E98A23] text-lg font-bold tracking-[-0.09px]">
-                    {testimonial.name}
+                <div className="flex flex-col items-center text-center justify-center mt-8">
+                  <div className="flex">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <Star
+                        key={star}
+                        className={cn("h-6 w-6 fill-[#E98A23] text-[#E98A23]")}
+                      />
+                    ))}
                   </div>
-                  <div className="text-black text-sm font-normal leading-loose">
-                    {testimonial.company}
+                  <div className="flex flex-col items-center justify-center mt-[15px]">
+                    <div className="text-[#E98A23] text-lg font-bold tracking-[-0.09px]">
+                      {testimonial.name}
+                    </div>
+                    <div className="text-black text-sm font-normal leading-loose">
+                      {testimonial.company}
+                    </div>
                   </div>
                 </div>
-              </div>
-            </CarouselItem>
-          ))}
-        </CarouselContent>
-      </Carousel>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+        </Carousel>
+      </div>
       
       {/* Indicator dots */}
       <div className="flex justify-center gap-2 mt-8">
