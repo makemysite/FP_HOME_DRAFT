@@ -5,6 +5,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Blog Integration Example</title>
+  <meta name="description" content="Blog post">
+  <meta property="og:title" content="Blog">
+  <meta property="og:description" content="Blog post">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="">
   <style>
     body {
       font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
@@ -15,28 +20,60 @@
       color: #333;
     }
     
-    header {
-      padding-bottom: 20px;
-      margin-bottom: 30px;
+    header, footer {
+      margin: 20px 0;
+      padding: 20px 0;
+      border-top: 1px solid #eee;
+      border-bottom: 1px solid #eee;
     }
     
-    .blog-container {
-      max-width: 800px;
-      margin: 0 auto;
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .logo {
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+    
+    nav ul {
+      display: flex;
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    
+    nav ul li {
+      margin-left: 20px;
+    }
+    
+    nav ul li a {
+      color: #333;
+      text-decoration: none;
+    }
+    
+    nav ul li a:hover {
+      text-decoration: underline;
     }
     
     footer {
-      margin-top: 50px;
-      padding-top: 20px;
       text-align: center;
-      border-top: 1px solid #eee;
     }
   </style>
-  <link rel="stylesheet" href="/blog-styles.css">
 </head>
 <body>
   <header>
-    <h1>Our Blog</h1>
+    <div class="logo">Your Company</div>
+    <nav>
+      <ul>
+        <li><a href="/">Home</a></li>
+        <li><a href="/about">About</a></li>
+        <li><a href="/blog">Blog</a></li>
+        <li><a href="/contact">Contact</a></li>
+      </ul>
+    </nav>
   </header>
 
   <main>
@@ -53,27 +90,28 @@
   <script>
     // Initialize the blog embed client
     window.BlogEmbed.configure({
-      // Using the provided Supabase API URL and API key
+      // Replace with your actual Supabase API URL and API key
       apiUrl: 'https://emdldcecqgrdgronpcoc.supabase.co/rest/v1',
       apiKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVtZGxkY2VjcWdyZGdyb25wY29jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDMxNDQ5OTcsImV4cCI6MjA1ODcyMDk5N30.7f6V0MkrBtBSmao3boXqlEwy7IyB_lxAKtQtb-3M2NE',
       containerId: 'blog-container',
       baseRoute: '/blog'
     });
     
-    // Determine whether to load blog listing or single post
+    // Get the current URL path
     const currentPath = window.location.pathname;
     
+    // If we're on a blog post page (e.g., /blog/electrical-license-reciprocity-florida/)
     if (currentPath.match(/\/blog\/([^\/]+)/)) {
       // Extract the slug from the URL
-      const slug = currentPath.split('/').pop();
-      console.log('Loading single post with slug:', slug);
+      const pathParts = currentPath.split('/');
+      const blogIndex = pathParts.indexOf('blog');
+      const slug = blogIndex >= 0 && blogIndex + 1 < pathParts.length ? pathParts[blogIndex + 1] : null;
       
-      // Load the specific blog post
-      window.BlogEmbed.loadPost(slug);
-    } else if (currentPath === '/blog' || currentPath === '/blog/') {
-      console.log('Loading blog listing page');
-      // Load all blog posts for the blog listing page
-      window.BlogEmbed.loadPosts();
+      if (slug) {
+        console.log('Loading single post with slug:', slug);
+        // Load the specific blog post
+        window.BlogEmbed.loadPost(slug);
+      }
     }
   </script>
 </body>
