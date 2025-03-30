@@ -118,7 +118,10 @@ export function useBlog() {
       return;
     }
     
-    console.log(`Starting blog post render for slug: ${slug}`);
+    // Normalize the slug - remove trailing slash if present
+    const normalizedSlug = slug.endsWith('/') ? slug.slice(0, -1) : slug;
+    
+    console.log(`Starting blog post render for slug: ${normalizedSlug}`);
     renderingRef.current = true;
     safeSetState(setLoading, true);
     safeSetState(setRenderError, null);
@@ -145,9 +148,9 @@ export function useBlog() {
       if (unmountedRef.current) return;
       
       // Then render the post with debugging
-      console.log(`Calling blogService.renderBlogPost for slug: ${slug}`);
-      await blogService.renderBlogPost('blog-post-container', slug, {
-        fallbackContent: `The blog post "${slug}" could not be found.`,
+      console.log(`Calling blogService.renderBlogPost for slug: ${normalizedSlug}`);
+      await blogService.renderBlogPost('blog-post-container', normalizedSlug, {
+        fallbackContent: `The blog post "${normalizedSlug}" could not be found.`,
         retryOnFailure: true,
         retryAttempts: 3
       });
@@ -164,8 +167,8 @@ export function useBlog() {
         
         // Handle "not found" errors
         if (error instanceof Error && error.message && error.message.includes("not found")) {
-          console.log(`Blog post "${slug}" not found, redirecting to blog index`);
-          safeSetState(setRenderError, `Blog post "${slug}" not found`);
+          console.log(`Blog post "${normalizedSlug}" not found, redirecting to blog index`);
+          safeSetState(setRenderError, `Blog post "${normalizedSlug}" not found`);
         } else {
           toast({
             title: "Error loading blog post",

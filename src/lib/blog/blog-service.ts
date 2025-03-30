@@ -207,7 +207,10 @@ class BlogService {
    * Renders a single blog post in the specified container with enhanced error handling
    */
   async renderBlogPost(containerId: string, slug: string, options: BlogEmbedOptions = {}): Promise<void> {
-    console.log(`BlogService: Rendering blog post with slug "${slug}" in container ${containerId}`);
+    // Normalize the slug - handle both with and without trailing slash
+    const normalizedSlug = slug.endsWith('/') ? slug : `${slug}/`;
+    
+    console.log(`BlogService: Rendering blog post with normalized slug "${normalizedSlug}" in container ${containerId}`);
     
     if (this.unmounting) {
       console.warn("BlogService: Cannot render during unmounting process");
@@ -267,8 +270,9 @@ class BlogService {
       // Perform the render operation with enhanced safety
       console.log("Calling EnhancedBlogEmbed.renderBlogPost with options:", mergedOptions);
       try {
-        await this.blogEmbed.renderBlogPost(containerId, slug, mergedOptions);
-        console.log(`Blog post rendering completed for slug "${slug}" in container ${containerId}`);
+        // Pass the normalized slug to the embed component
+        await this.blogEmbed.renderBlogPost(containerId, normalizedSlug, mergedOptions);
+        console.log(`Blog post rendering completed for slug "${normalizedSlug}" in container ${containerId}`);
       } catch (renderError) {
         console.error("Error in EnhancedBlogEmbed.renderBlogPost:", renderError);
         // We'll handle this in the outer catch block

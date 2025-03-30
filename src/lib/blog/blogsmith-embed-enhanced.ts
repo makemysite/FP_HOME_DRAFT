@@ -1,4 +1,3 @@
-
 import BlogEmbed, { BlogEmbedOptions } from './blogsmith-embed';
 
 /**
@@ -117,6 +116,10 @@ class EnhancedBlogEmbed extends BlogEmbed {
   }
   
   async renderBlogPost(containerId: string, slug: string, options: BlogEmbedOptions = {}): Promise<void> {
+    // Normalize the slug to handle both with and without trailing slash
+    const normalizedSlug = slug.endsWith('/') ? slug : `${slug}/`;
+    console.log(`EnhancedBlogEmbed: Using normalized slug "${normalizedSlug}" for rendering`);
+    
     // Check if there's already a rendering operation in progress for this container
     if (this.containerRenderLocks.get(containerId)) {
       console.warn(`Container #${containerId} is already being rendered, skipping this request`);
@@ -147,7 +150,8 @@ class EnhancedBlogEmbed extends BlogEmbed {
       };
       
       try {
-        await super.renderBlogPost(containerId, slug, enhancedOptions);
+        // Pass the normalized slug to the parent class method
+        await super.renderBlogPost(containerId, normalizedSlug, enhancedOptions);
       } catch (error) {
         console.error(`Error rendering blog post in container #${containerId}:`, error);
         this.enhancedActiveContainers.delete(containerId);

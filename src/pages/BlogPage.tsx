@@ -97,9 +97,10 @@ const BlogPage: React.FC = () => {
     isProcessingRoute.current = true;
     
     const path = location.pathname;
-    const slug = path.replace('/blog/', '').replace(/\/$/, '');
+    // Normalize slug: remove '/blog/' prefix and trailing slash
+    let slug = path.replace('/blog/', '').replace(/\/$/, '');
     
-    console.log(`Current path: ${path}, slug: ${slug}`);
+    console.log(`Current path: ${path}, normalized slug: ${slug}`);
     
     safeCleanup();
     
