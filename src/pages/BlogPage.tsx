@@ -1,6 +1,6 @@
 
-import React, { useEffect, useRef, useCallback } from "react";
-import { useLocation } from "react-router-dom";
+import React, { useEffect, useRef, useCallback, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import BlogHeader from "@/components/blog/BlogHeader";
 import BlogContainer from "@/components/blog/BlogContainer";
 import { useBlog } from "@/hooks/use-blog";
@@ -10,6 +10,8 @@ import { AlertTriangle } from "lucide-react";
 
 const BlogPage: React.FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const [contentError, setContentError] = useState(false);
   const { 
     loading, 
     dataLoaded,
@@ -23,24 +25,30 @@ const BlogPage: React.FC = () => {
   const isProcessingRoute = useRef(false);
   const previousPath = useRef(location.pathname);
   const retryCount = useRef(0);
+  const maxRetries = 3;
   
   // Safe way to run cleanup that prevents race conditions
   const safeCleanup = useCallback(() => {
+    console.log("Running safe cleanup");
     // Defer cleanup to avoid DOM manipulation during render/unmount cycle
     setTimeout(() => {
       try {
         if (isMounted.current) {
+          console.log("Executing deferred cleanup");
           cleanup();
         }
       } catch (error) {
         console.error("Error during deferred cleanup:", error);
       }
-    }, 0);
+    }, 50);
   }, [cleanup]);
   
   // Set up mount/unmount tracking
   useEffect(() => {
     console.log("BlogPage mounted");
+    // Reset error state on mount
+    setContentError(false);
+    
     // Set mounted flag on component mount
     isMounted.current = true;
     
@@ -57,7 +65,7 @@ const BlogPage: React.FC = () => {
         } catch (error) {
           console.error("Error during cleanup on unmount:", error);
         }
-      }, 50);
+      }, 100);
     };
   }, [cleanup]);
   
@@ -67,9 +75,12 @@ const BlogPage: React.FC = () => {
     if (!isMounted.current || isProcessingRoute.current) return;
     
     // If the path hasn't changed, don't reprocess
-    if (previousPath.current === location.pathname) return;
+    if (previousPath.current === location.pathname && dataLoaded) return;
     
     console.log(`Processing route change from ${previousPath.current} to ${location.pathname}`);
+    
+    // Reset error state on route change
+    setContentError(false);
     
     // Update previous path
     previousPath.current = location.pathname;
@@ -94,7 +105,7 @@ const BlogPage: React.FC = () => {
         }
         
         // Add small delay to ensure cleanup has completed
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await new Promise(resolve => setTimeout(resolve, 100));
         
         // Check again if we're still mounted
         if (!isMounted.current) {
@@ -111,6 +122,7 @@ const BlogPage: React.FC = () => {
       } catch (error) {
         console.error("Error rendering blog content:", error);
         if (isMounted.current) {
+          setContentError(true);
           toast({
             title: "Error Loading Content",
             description: "There was a problem loading the blog content. Please try again.",
@@ -126,20 +138,20 @@ const BlogPage: React.FC = () => {
     };
     
     // Small timeout to ensure DOM is ready before rendering
-    setTimeout(renderContent, 50);
+    setTimeout(renderContent, 150);
     
     // Cleanup function to handle component unmount during async operation
     return () => {
       isProcessingRoute.current = false;
     };
-  }, [location.pathname, renderBlogList, renderBlogPost, safeCleanup]);
+  }, [location.pathname, renderBlogList, renderBlogPost, safeCleanup, dataLoaded]);
 
   // Retry logic if data doesn't load
   useEffect(() => {
-    // If we're still loading after 5 seconds, try again (up to 3 times)
+    // If we're still loading after 8 seconds, try again (up to maxRetries times)
     let timeoutId: number | undefined;
     
-    if (loading && !dataLoaded && retryCount.current < 3) {
+    if (loading && !dataLoaded && retryCount.current < maxRetries) {
       timeoutId = window.setTimeout(() => {
         if (isMounted.current && loading && !dataLoaded) {
           console.log(`Retrying content load, attempt ${retryCount.current + 1}`);
@@ -159,9 +171,18 @@ const BlogPage: React.FC = () => {
                 if (slug) renderBlogPost(slug);
               }
             }
-          }, 100);
+          }, 200);
         }
-      }, 5000);
+      }, 8000);
+    } else if (!loading && !dataLoaded && retryCount.current >= maxRetries && isMounted.current) {
+      // Mark as error if we've tried maxRetries times and still no data
+      setContentError(true);
+      
+      toast({
+        title: "Content Loading Failed",
+        description: "We couldn't load the blog content after multiple attempts. Please try again later.",
+        variant: "destructive",
+      });
     }
     
     return () => {
@@ -196,6 +217,12 @@ const BlogPage: React.FC = () => {
         <p className="text-gray-500">
           Please try again later or check your connection to the blog database.
         </p>
+        <button 
+          onClick={() => window.location.reload()}
+          className="mt-4 px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-md text-gray-800 transition-colors"
+        >
+          Refresh page
+        </button>
       </div>
     </div>
   );
@@ -209,16 +236,16 @@ const BlogPage: React.FC = () => {
           {/* Blog list container */}
           {(location.pathname === '/blog' || location.pathname === '/blog/') && (
             <>
-              <BlogContainer id="blog-list-container" loading={loading} type="list" />
-              {!loading && !dataLoaded && retryCount.current >= 3 && <EmptyState />}
+              <BlogContainer id="blog-list-container" loading={loading} type="list" error={contentError} />
+              {!loading && !dataLoaded && retryCount.current >= maxRetries && <EmptyState />}
             </>
           )}
           
           {/* Blog post container */}
           {location.pathname !== '/blog' && location.pathname !== '/blog/' && (
             <>
-              <BlogContainer id="blog-post-container" loading={loading} type="post" />
-              {!loading && !dataLoaded && retryCount.current >= 3 && <EmptyState />}
+              <BlogContainer id="blog-post-container" loading={loading} type="post" error={contentError} />
+              {!loading && !dataLoaded && retryCount.current >= maxRetries && <EmptyState />}
             </>
           )}
         </div>

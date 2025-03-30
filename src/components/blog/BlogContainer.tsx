@@ -7,9 +7,10 @@ interface BlogContainerProps {
   id: string;
   loading: boolean;
   type: "list" | "post";
+  error?: boolean;
 }
 
-const BlogContainer: React.FC<BlogContainerProps> = ({ id, loading, type }) => {
+const BlogContainer: React.FC<BlogContainerProps> = ({ id, loading, type, error = false }) => {
   return (
     <div 
       id={id} 
@@ -45,12 +46,25 @@ const BlogContainer: React.FC<BlogContainerProps> = ({ id, loading, type }) => {
       )}
       
       {/* This div will be populated by the BlogEmbed library */}
-      {!loading && (
-        <div className="w-full min-h-[50px]">
-          {/* Custom fallback message that will be replaced by actual content */}
-          <div className="blog-embed-loading text-center p-4">
-            <AlertTriangle className="h-5 w-5 text-yellow-500 mx-auto mb-2" />
-            <p>Loading blog content...</p>
+      {!loading && !error && (
+        <div className="w-full min-h-[200px]">
+          {/* Static loading message that will be replaced by the blog embed library */}
+          <div className="blog-embed-loading text-center p-8">
+            <AlertTriangle className="h-6 w-6 text-yellow-500 mx-auto mb-3" />
+            <p className="text-gray-600">Loading blog content...</p>
+          </div>
+        </div>
+      )}
+      
+      {/* Error state */}
+      {error && (
+        <div className="w-full min-h-[200px] flex items-center justify-center">
+          <div className="text-center p-8 max-w-md">
+            <AlertTriangle className="h-8 w-8 text-red-500 mx-auto mb-3" />
+            <h3 className="text-lg font-medium text-red-700 mb-2">Content Loading Error</h3>
+            <p className="text-gray-600">
+              We couldn't load the blog content. Please try refreshing the page.
+            </p>
           </div>
         </div>
       )}
