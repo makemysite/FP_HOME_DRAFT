@@ -4,6 +4,7 @@ import Navbar from "@/components/landing/Navbar";
 import Hero from "@/components/landing/Hero";
 import Features from "@/components/landing/Features";
 import Pricing from "@/components/landing/Pricing";
+import BlogHighlights from "@/components/landing/BlogHighlights";
 import Testimonials from "@/components/landing/Testimonials";
 
 const Index = () => {
@@ -17,7 +18,7 @@ const Index = () => {
         <Hero />
         <Features />
         <Pricing />
-        {/* Removed BlogHighlights */}
+        <BlogHighlights />
         <Testimonials />
       </main>
     </div>
