@@ -1,4 +1,3 @@
-
 /**
  * Build script for the BlogSmith client library
  * In a real implementation, this would transpile the TypeScript and bundle it
