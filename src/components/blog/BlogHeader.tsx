@@ -6,7 +6,7 @@ import { ArrowLeft } from "lucide-react";
 
 const BlogHeader: React.FC = () => {
   return (
-    <>
+    <div className="mb-12">
       <div className="flex items-center mb-8">
         <Link to="/">
           <Button variant="ghost" size="sm" className="gap-2">
@@ -23,7 +23,7 @@ const BlogHeader: React.FC = () => {
           and cloud-based solutions.
         </p>
       </div>
-    </>
+    </div>
   );
 };
 
