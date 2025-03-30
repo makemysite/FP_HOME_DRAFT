@@ -24,6 +24,7 @@ export function useBlog() {
     console.log("Blog hook mounted");
     unmountedRef.current = false;
     
+    // Simplified cleanup function with proper nesting
     return () => {
       console.log("Blog hook unmounting");
       
@@ -46,10 +47,7 @@ export function useBlog() {
         }
       }, 150); // Increased delay to ensure React finishes its own cleanup
       
-      // If component gets remounted quickly, this would be called
-      return () => {
-        clearTimeout(timeoutId);
-      };
+      // No additional return needed here - this is already the cleanup function
     };
   }, []);
 
@@ -105,7 +103,9 @@ export function useBlog() {
       await blogService.renderBlogList('blog-list-container', {
         fallbackContent: "No blog posts are currently available. Please check back later.",
         retryOnFailure: true,
-        retryAttempts: 3
+        retryAttempts: 3,
+        safeRendering: true,
+        useRequestAnimationFrame: true
       });
       
       if (!unmountedRef.current) {
@@ -171,7 +171,9 @@ export function useBlog() {
       await blogService.renderBlogPost('blog-post-container', normalizedSlug, {
         fallbackContent: `The blog post "${normalizedSlug}" could not be found.`,
         retryOnFailure: true,
-        retryAttempts: 3
+        retryAttempts: 3,
+        safeRendering: true,
+        useRequestAnimationFrame: true
       });
       
       if (!unmountedRef.current) {
