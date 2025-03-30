@@ -64,6 +64,9 @@ const BlogPage: React.FC = () => {
             {/* Blog list container - this will be populated by BlogEmbed */}
             <div id="blog-list-container" ref={blogListRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {/* Content will be rendered by BlogEmbed */}
+              <div className="col-span-full text-center py-12 text-gray-500">
+                Loading blog posts from BlogSmith...
+              </div>
             </div>
             
             {/* Blog post container - this will be populated by BlogEmbed for single posts */}
@@ -129,6 +132,19 @@ const BlogPage: React.FC = () => {
           color: #c97520;
         }
         
+        /* Empty state and loading styling */
+        .blog-embed-loading, .blog-embed-empty, .blog-embed-error {
+          width: 100%;
+          padding: 2rem;
+          text-align: center;
+          color: #6b7280;
+          font-size: 1.125rem;
+        }
+        
+        .blog-embed-error {
+          color: #ef4444;
+        }
+        
         /* Single post styling */
         .blog-embed-post-image {
           width: 100%;
@@ -152,7 +168,7 @@ const BlogPage: React.FC = () => {
         }
         
         .blog-embed-post-content {
-          margin-top: a1.5rem;
+          margin-top: 1.5rem;
           line-height: 1.8;
         }
       `}</style>
