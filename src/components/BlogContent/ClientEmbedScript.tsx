@@ -5,7 +5,7 @@ import React, { useEffect } from 'react';
 declare global {
   interface Window {
     BlogEmbed?: {
-      configure: (config: { apiUrl: string; apiKey: string; containerId: string }) => void;
+      configure: (config: { apiUrl: string; apiKey: string; containerId: string; baseRoute?: string }) => void;
       loadPosts: () => void;
       loadPost: (slug: string) => void;
     };
@@ -16,6 +16,7 @@ interface ClientEmbedScriptProps {
   containerId: string;
   apiKey: string;
   apiUrl?: string;
+  baseRoute?: string;
   slug?: string;
   mode?: 'list' | 'single';
 }
@@ -24,6 +25,7 @@ const ClientEmbedScript: React.FC<ClientEmbedScriptProps> = ({
   containerId,
   apiKey,
   apiUrl = 'https://emdldcecqgrdgronpcoc.supabase.co/rest/v1',
+  baseRoute = '/blog',
   slug,
   mode
 }) => {
@@ -40,11 +42,12 @@ const ClientEmbedScript: React.FC<ClientEmbedScriptProps> = ({
       if (window.BlogEmbed) {
         console.log('Blog embed script loaded successfully');
         
-        // Configure the embed
+        // Configure the embed with the updated parameters
         window.BlogEmbed.configure({
           apiUrl,
           apiKey,
-          containerId
+          containerId,
+          baseRoute
         });
         
         // Determine whether to load blog listing or single post
@@ -73,7 +76,7 @@ const ClientEmbedScript: React.FC<ClientEmbedScriptProps> = ({
         document.body.removeChild(scriptElement);
       }
     };
-  }, [containerId, apiKey, apiUrl, slug, mode]);
+  }, [containerId, apiKey, apiUrl, baseRoute, slug, mode]);
   
   return <div id={containerId} className="blog-container"></div>;
 };

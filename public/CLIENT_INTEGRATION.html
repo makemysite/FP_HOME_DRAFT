@@ -15,6 +15,11 @@
       color: #333;
     }
     
+    header {
+      padding-bottom: 20px;
+      margin-bottom: 30px;
+    }
+    
     .blog-container {
       max-width: 800px;
       margin: 0 auto;
@@ -30,6 +35,10 @@
   <link rel="stylesheet" href="/blog-styles.css">
 </head>
 <body>
+  <header>
+    <h1>Our Blog</h1>
+  </header>
+
   <main>
     <!-- Blog container - This is where the blog content will be loaded -->
     <div id="blog-container"></div>
@@ -44,10 +53,11 @@
   <script>
     // Initialize the blog embed client
     window.BlogEmbed.configure({
-      // Replace with your actual Supabase API URL and API key
+      // Using the provided Supabase API URL and API key
       apiUrl: 'https://emdldcecqgrdgronpcoc.supabase.co/rest/v1',
-      apiKey: 'YOUR_API_KEY_HERE',
-      containerId: 'blog-container'
+      apiKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVtZGxkY2VjcWdyZGdyb25wY29jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDMxNDQ5OTcsImV4cCI6MjA1ODcyMDk5N30.7f6V0MkrBtBSmao3boXqlEwy7IyB_lxAKtQtb-3M2NE',
+      containerId: 'blog-container',
+      baseRoute: '/blog'
     });
     
     // Determine whether to load blog listing or single post
