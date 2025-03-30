@@ -1,0 +1,106 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blog Integration Example</title>
+  <meta name="description" content="Blog Integration Example page">
+  <meta property="og:title" content="Blog Integration">
+  <meta property="og:description" content="Example of integrating the blog functionality into any website">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="">
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      line-height: 1.5;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      color: #333;
+    }
+    
+    header, footer {
+      margin: 20px 0;
+      padding: 20px 0;
+      border-top: 1px solid #eee;
+      border-bottom: 1px solid #eee;
+    }
+    
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .logo {
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+    
+    nav ul {
+      display: flex;
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    
+    nav ul li {
+      margin-left: 20px;
+    }
+    
+    nav ul li a {
+      color: #333;
+      text-decoration: none;
+    }
+    
+    nav ul li a:hover {
+      text-decoration: underline;
+    }
+    
+    footer {
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">Blog Integration Demo</div>
+    <nav>
+      <ul>
+        <li><a href="/">Home</a></li>
+        <li><a href="/about">About</a></li>
+        <li><a href="/blog">Blog</a></li>
+        <li><a href="/contact">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <h1>Blog Integration Demo</h1>
+    <p>This is an example page demonstrating how to integrate the blog functionality into any website.</p>
+    
+    <!-- Blog container - This is where the blog content will be loaded -->
+    <div id="blog-container"></div>
+  </main>
+  
+  <footer>
+    <p>&copy; 2023 Your Company. All rights reserved.</p>
+  </footer>
+
+  <!-- Include the blog embed script -->
+  <script src="BlogEmbed.js"></script>
+  <script>
+    // Initialize the blog embed client
+    window.BlogEmbed.configure({
+      apiUrl: 'https://emdldcecqgrdgronpcoc.supabase.co/rest/v1',
+      apiKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVtZGxkY2VjcWdyZGdyb25wY29jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDMxNDQ5OTcsImV4cCI6MjA1ODcyMDk5N30.7f6V0MkrBtBSmao3boXqlEwy7IyB_lxAKtQtb-3M2NE',
+      containerId: 'blog-container',
+      baseRoute: '/blog-integration'
+    });
+    
+    // Load an example blog post
+    window.BlogEmbed.loadPost('electrical-license-reciprocity-florida');
+  </script>
+</body>
+</html>
