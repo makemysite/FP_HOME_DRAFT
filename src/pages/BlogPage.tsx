@@ -17,6 +17,7 @@ const SafeAsyncComponent: React.FC<{
   useEffect(() => {
     isMounted.current = true;
     return () => {
+      console.log("SafeAsyncComponent unmounting");
       isMounted.current = false;
     };
   }, []);
@@ -34,7 +35,7 @@ const BlogPage: React.FC = () => {
     renderBlogList, 
     renderBlogPost, 
     cleanup,
-    normalizeSlug  // Use the normalize slug function from the hook
+    normalizeSlug
   } = useBlog();
   
   const isMounted = useRef(true);
@@ -44,12 +45,18 @@ const BlogPage: React.FC = () => {
   const maxRetries = 3;
   // Use useRef to store the timeout ID for retries
   const retryTimeoutRef = useRef<number | undefined>(undefined);
+  // Track active container to avoid double rendering
+  const activeContainerRef = useRef<string | null>(null);
   
   const safeCleanup = useCallback(() => {
     console.log("Running safe cleanup");
     if (!isMounted.current) return;
     
-    setTimeout(() => {
+    // Clear any active container reference
+    activeContainerRef.current = null;
+    
+    // Use a short delay for the cleanup to avoid race conditions
+    const timeoutId = setTimeout(() => {
       try {
         if (isMounted.current) {
           console.log("Executing deferred cleanup");
@@ -58,7 +65,11 @@ const BlogPage: React.FC = () => {
       } catch (error) {
         console.error("Error during deferred cleanup:", error);
       }
-    }, 50);
+    }, 100);
+    
+    return () => {
+      clearTimeout(timeoutId);
+    };
   }, [cleanup]);
   
   useEffect(() => {
@@ -75,16 +86,8 @@ const BlogPage: React.FC = () => {
         clearTimeout(retryTimeoutRef.current);
         retryTimeoutRef.current = undefined;
       }
-      
-      setTimeout(() => {
-        try {
-          cleanup();
-        } catch (error) {
-          console.error("Error during cleanup on unmount:", error);
-        }
-      }, 100);
     };
-  }, [cleanup]);
+  }, []);
   
   useEffect(() => {
     if (!isMounted.current || isProcessingRoute.current) return;
@@ -103,46 +106,53 @@ const BlogPage: React.FC = () => {
     
     console.log(`Current path: ${path}, normalized slug: '${slug}'`);
     
-    safeCleanup();
+    // Run cleanup first with promise to ensure it's complete
+    const cleanupPromise = new Promise<void>((resolve) => {
+      safeCleanup();
+      // Give a small delay to ensure cleanup is complete
+      setTimeout(resolve, 50);
+    });
     
-    const renderContent = async () => {
-      try {
-        if (!isMounted.current) {
-          isProcessingRoute.current = false;
-          return;
+    cleanupPromise.then(() => {
+      const renderContent = async () => {
+        try {
+          if (!isMounted.current) {
+            isProcessingRoute.current = false;
+            return;
+          }
+          
+          // Record which container we're about to render to
+          if (path === '/blog' || path === '/blog/') {
+            activeContainerRef.current = 'blog-list-container';
+          } else if (path.startsWith('/blog/') && slug) {
+            activeContainerRef.current = 'blog-post-container';
+          }
+          
+          console.log(`Rendering content for path: ${path}`);
+          if (path === '/blog' || path === '/blog/') {
+            await renderBlogList();
+          } else if (path.startsWith('/blog/') && slug) {
+            await renderBlogPost(slug);
+          }
+        } catch (error) {
+          console.error("Error rendering blog content:", error);
+          if (isMounted.current) {
+            setContentError(true);
+            toast({
+              title: "Error Loading Content",
+              description: "There was a problem loading the blog content. Please try again.",
+              variant: "destructive",
+            });
+          }
+        } finally {
+          if (isMounted.current) {
+            isProcessingRoute.current = false;
+          }
         }
-        
-        await new Promise(resolve => setTimeout(resolve, 100));
-        
-        if (!isMounted.current) {
-          isProcessingRoute.current = false;
-          return;
-        }
-        
-        console.log(`Rendering content for path: ${path}`);
-        if (path === '/blog' || path === '/blog/') {
-          await renderBlogList();
-        } else if (path.startsWith('/blog/') && slug) {
-          await renderBlogPost(slug);
-        }
-      } catch (error) {
-        console.error("Error rendering blog content:", error);
-        if (isMounted.current) {
-          setContentError(true);
-          toast({
-            title: "Error Loading Content",
-            description: "There was a problem loading the blog content. Please try again.",
-            variant: "destructive",
-          });
-        }
-      } finally {
-        if (isMounted.current) {
-          isProcessingRoute.current = false;
-        }
-      }
-    };
-    
-    setTimeout(renderContent, 150);
+      };
+      
+      setTimeout(renderContent, 50);
+    });
     
     return () => {
       isProcessingRoute.current = false;

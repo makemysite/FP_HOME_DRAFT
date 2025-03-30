@@ -12,31 +12,41 @@ interface BlogContainerProps {
 
 const BlogContainer: React.FC<BlogContainerProps> = ({ id, loading, type, error = false }) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const unmountingRef = useRef(false);
   
   // Safely handle elements on mount/unmount to prevent DOM node errors
   useEffect(() => {
     console.log(`BlogContainer ${id} mounted`);
+    unmountingRef.current = false;
     
     return () => {
       console.log(`BlogContainer ${id} unmounting`);
+      unmountingRef.current = true;
+      
+      // Use immediate state flag to prevent any further DOM operations
+      // This helps prevent React "object cannot be found" errors
       
       // Safe cleanup before unmount to prevent DOM errors
       if (containerRef.current) {
-        // Clear inner HTML to prevent React from trying to manipulate nodes
-        // that might be removed by other scripts
         try {
-          // First check if the element exists and is still in the DOM
+          // First check if container still exists in DOM
           const element = document.getElementById(id);
-          if (element && document.body.contains(element) && element.contains(containerRef.current)) {
-            requestAnimationFrame(() => {
-              try {
-                if (containerRef.current) {
-                  containerRef.current.innerHTML = '';
-                }
-              } catch (err) {
-                console.error(`Error clearing ${id} in RAF:`, err);
-              }
-            });
+          if (!element || !document.body.contains(element)) {
+            console.log(`Container #${id} already removed from DOM, skipping cleanup`);
+            return;
+          }
+          
+          // Use empty text node replacement technique to safely clean up
+          // This approach is less likely to conflict with React's own DOM cleanup
+          const emptyNode = document.createTextNode("");
+          if (containerRef.current.parentNode) {
+            try {
+              // Replace with empty text node instead of removing
+              containerRef.current.parentNode.replaceChild(emptyNode, containerRef.current);
+              console.log(`Safely replaced container ${id} with empty node`);
+            } catch (err) {
+              console.error(`Error during safe replacement for ${id}:`, err);
+            }
           }
         } catch (err) {
           console.error(`Error during ${id} cleanup:`, err);
@@ -52,6 +62,7 @@ const BlogContainer: React.FC<BlogContainerProps> = ({ id, loading, type, error 
       className={type === "list" ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" : "prose max-w-none"}
       data-loading={loading ? "true" : "false"}
       data-error={error ? "true" : "false"}
+      data-unmounting={unmountingRef.current ? "true" : "false"}
     >
       {loading && type === "list" && (
         Array(6).fill(0).map((_, i) => (

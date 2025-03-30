@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
@@ -25,25 +26,30 @@ export function useBlog() {
     
     return () => {
       console.log("Blog hook unmounting");
+      
+      // Set unmounting flag FIRST before any other operations
+      unmountedRef.current = true;
+      
       // Signal to BlogService that we're unmounting
       blogService.prepareForUnmount();
       
-      // Set unmounting flag first to prevent further state updates
-      unmountedRef.current = true;
-      
-      // Perform immediate cleanup when unmounting - with safety checks
-      try {
-        // Perform cleanup after a small delay to avoid race conditions with React rendering
-        setTimeout(() => {
-          try {
+      // Delay the actual cleanup to avoid race conditions with React's own unmounting process
+      const timeoutId = setTimeout(() => {
+        try {
+          // Only proceed if we haven't been remounted somehow
+          if (unmountedRef.current) {
+            console.log("Executing delayed cleanup");
             blogService.cleanupAllContainers();
-          } catch (error) {
-            console.error("Error during delayed unmount cleanup:", error);
           }
-        }, 100); // Increased to 100ms for better stability
-      } catch (error) {
-        console.error("Error during unmount cleanup:", error);
-      }
+        } catch (error) {
+          console.error("Error during delayed unmount cleanup:", error);
+        }
+      }, 150); // Increased delay to ensure React finishes its own cleanup
+      
+      // If component gets remounted quickly, this would be called
+      return () => {
+        clearTimeout(timeoutId);
+      };
     };
   }, []);
 
@@ -237,6 +243,6 @@ export function useBlog() {
     cleanup,
     safeSetState,
     unmountedRef,
-    normalizeSlug  // Export the normalize function for use in other components
+    normalizeSlug
   };
 }
