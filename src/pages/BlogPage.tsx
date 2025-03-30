@@ -1,51 +1,101 @@
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import BlogEmbed from "@/lib/blog/blogsmith-embed";
 import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "@/hooks/use-toast";
 
 const BlogPage: React.FC = () => {
-  const blogListRef = useRef<HTMLDivElement>(null);
-  const blogPostRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
   const [loading, setLoading] = useState(true);
+  const [isMounted, setIsMounted] = useState(false);
   
   useEffect(() => {
+    // Set mounted state to true
+    setIsMounted(true);
+    
+    // Clean up function to set mounted to false when component unmounts
+    return () => {
+      setIsMounted(false);
+    };
+  }, []);
+  
+  useEffect(() => {
+    // Only run blog initialization when component is mounted
+    if (!isMounted) return;
+    
     // Show loading state while we determine route and fetch data
     setLoading(true);
-    
-    // Initialize BlogEmbed
-    const blogEmbed = new BlogEmbed();
     
     // Determine if we're viewing a single post or the blog list
     const path = location.pathname;
     const slug = path.replace('/blog/', '');
     
-    if (path === '/blog' || path === '/blog/') {
-      // We're on the main blog page, render the blog list
-      if (blogListRef.current) {
-        blogEmbed.renderBlogList('blog-list-container', {
-          limit: 8,
-          showDescription: true,
-          showImage: true
-        }).finally(() => setLoading(false));
+    // Initialize BlogEmbed
+    const blogEmbed = new BlogEmbed();
+    
+    try {
+      if (path === '/blog' || path === '/blog/') {
+        // We're on the main blog page, render the blog list
+        const blogListContainer = document.getElementById('blog-list-container');
+        if (blogListContainer) {
+          blogEmbed.renderBlogList('blog-list-container', {
+            limit: 8,
+            showDescription: true,
+            showImage: true
+          })
+          .then(() => {
+            if (isMounted) setLoading(false);
+          })
+          .catch(error => {
+            console.error("Error rendering blog list:", error);
+            if (isMounted) {
+              setLoading(false);
+              toast({
+                title: "Error loading blogs",
+                description: "Could not load blog posts. Please try again later.",
+                variant: "destructive",
+              });
+            }
+          });
+        }
+      } else if (path.startsWith('/blog/') && slug !== '') {
+        // We're on a single blog post page, render that post
+        const blogPostContainer = document.getElementById('blog-post-container');
+        if (blogPostContainer) {
+          console.log(`Rendering blog post with slug: ${slug}`);
+          blogEmbed.renderBlogPost('blog-post-container', slug)
+            .then(() => {
+              if (isMounted) setLoading(false);
+            })
+            .catch(error => {
+              console.error("Error rendering blog post:", error);
+              if (isMounted) {
+                setLoading(false);
+                toast({
+                  title: "Error loading blog post",
+                  description: "Could not load the blog post. Please try again later.",
+                  variant: "destructive",
+                });
+              }
+            });
+        }
       }
-    } else if (path.startsWith('/blog/') && slug !== '') {
-      // We're on a single blog post page, render that post
-      if (blogPostRef.current) {
-        console.log(`Rendering blog post with slug: ${slug}`);
-        blogEmbed.renderBlogPost('blog-post-container', slug)
-          .finally(() => setLoading(false));
+    } catch (error) {
+      console.error("Error in blog page:", error);
+      if (isMounted) {
+        setLoading(false);
+        toast({
+          title: "An error occurred",
+          description: "Something went wrong. Please try again later.",
+          variant: "destructive",
+        });
       }
     }
     
-    // Cleanup function
-    return () => {
-      // Clean up any event listeners or subscriptions if needed
-    };
-  }, [location.pathname]);
+  }, [location.pathname, isMounted]);
 
   return (
     <div className="bg-white min-h-screen">
@@ -70,7 +120,7 @@ const BlogPage: React.FC = () => {
 
           <div className="mt-12">
             {/* Blog list container - this will be populated by BlogEmbed */}
-            <div id="blog-list-container" ref={blogListRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div id="blog-list-container" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {loading && location.pathname === '/blog' && (
                 Array(6).fill(0).map((_, i) => (
                   <div key={i} className="flex flex-col gap-4">
@@ -84,7 +134,7 @@ const BlogPage: React.FC = () => {
             </div>
             
             {/* Blog post container - this will be populated by BlogEmbed for single posts */}
-            <div id="blog-post-container" ref={blogPostRef} className="prose max-w-none">
+            <div id="blog-post-container" className="prose max-w-none">
               {loading && location.pathname !== '/blog' && (
                 <div className="space-y-6">
                   <Skeleton className="w-full h-[400px] rounded-lg" />

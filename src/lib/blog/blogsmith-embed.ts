@@ -123,12 +123,21 @@ class BlogEmbed {
     }
   }
 
-  // Method to render a list of blog posts
-  async renderBlogList(containerId: string, options: BlogEmbedOptions = {}): Promise<void> {
+  // Method to safely check if a container exists
+  private getContainer(containerId: string): HTMLElement | null {
     const container = document.getElementById(containerId);
     if (!container) {
       console.error(`Container with ID "${containerId}" not found`);
-      return;
+      return null;
+    }
+    return container;
+  }
+
+  // Method to render a list of blog posts
+  async renderBlogList(containerId: string, options: BlogEmbedOptions = {}): Promise<void> {
+    const container = this.getContainer(containerId);
+    if (!container) {
+      throw new Error(`Container with ID "${containerId}" not found`);
     }
 
     const { limit = 10, showDescription = true, showImage = true } = options;
@@ -138,6 +147,12 @@ class BlogEmbed {
     
     // Fetch posts from Supabase
     const posts = await this.fetchBlogPosts(limit);
+
+    // Check if container still exists after async operation
+    if (!document.getElementById(containerId)) {
+      console.warn(`Container #${containerId} no longer exists, aborting render`);
+      return;
+    }
 
     // Add blog-embed-list class for styling
     container.classList.add('blog-embed-list');
@@ -169,6 +184,12 @@ class BlogEmbed {
       `;
     }).join('');
 
+    // Check again if container still exists
+    if (!document.getElementById(containerId)) {
+      console.warn(`Container #${containerId} no longer exists, aborting render`);
+      return;
+    }
+
     // Set the HTML
     container.innerHTML = postsHtml;
 
@@ -178,10 +199,9 @@ class BlogEmbed {
 
   // Method to render a single blog post
   async renderBlogPost(containerId: string, slug: string): Promise<void> {
-    const container = document.getElementById(containerId);
+    const container = this.getContainer(containerId);
     if (!container) {
-      console.error(`Container with ID "${containerId}" not found`);
-      return;
+      throw new Error(`Container with ID "${containerId}" not found`);
     }
 
     // Show loading state
@@ -189,6 +209,12 @@ class BlogEmbed {
     
     // Fetch post from Supabase with all related content
     const { post, sections, faqs } = await this.fetchBlogPost(slug);
+    
+    // Check if container still exists after async operation
+    if (!document.getElementById(containerId)) {
+      console.warn(`Container #${containerId} no longer exists, aborting render`);
+      return;
+    }
     
     if (!post) {
       container.innerHTML = '<div class="blog-embed-error">Blog post not found</div>';
@@ -221,7 +247,7 @@ class BlogEmbed {
 
     // Add sections with their content
     if (sections && sections.length > 0) {
-      sections.forEach((section, index) => {
+      sections.forEach((section) => {
         postHtml += `
           <div class="blog-embed-section" id="section-${section.id}">
             <h2 class="blog-embed-section-title">${section.title}</h2>
@@ -318,6 +344,12 @@ class BlogEmbed {
     // Close the article tag
     postHtml += `</article>`;
 
+    // Final check if container still exists
+    if (!document.getElementById(containerId)) {
+      console.warn(`Container #${containerId} no longer exists, aborting render`);
+      return;
+    }
+
     // Set the HTML
     container.innerHTML = postHtml;
 
@@ -327,54 +359,62 @@ class BlogEmbed {
 
   // Add SEO metadata to the page
   private addSEOMetadata(title: string, description: string, image?: string): void {
-    // Add schema.org structured data
-    const schemaData = {
-      "@context": "https://schema.org",
-      "@type": "Article",
-      "headline": title,
-      "description": description,
-      "image": image || "",
-      "publisher": {
-        "@type": "Organization",
-        "name": "BlogSmith",
-        "logo": {
-          "@type": "ImageObject",
-          "url": "https://example.com/logo.png"
+    try {
+      // Add schema.org structured data
+      const schemaData = {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": title,
+        "description": description,
+        "image": image || "",
+        "publisher": {
+          "@type": "Organization",
+          "name": "BlogSmith",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://example.com/logo.png"
+          }
         }
+      };
+
+      let script = document.querySelector('script[type="application/ld+json"]');
+      if (!script) {
+        script = document.createElement('script');
+        script.setAttribute('type', 'application/ld+json');
+        document.head.appendChild(script);
       }
-    };
+      script.textContent = JSON.stringify(schemaData);
 
-    let script = document.querySelector('script[type="application/ld+json"]');
-    if (!script) {
-      script = document.createElement('script');
-      script.setAttribute('type', 'application/ld+json');
-      document.head.appendChild(script);
-    }
-    script.textContent = JSON.stringify(schemaData);
-
-    // Add meta tags for SEO and social sharing
-    this.setMetaTag('title', title);
-    this.setMetaTag('description', description);
-    this.setMetaTag('og:title', title);
-    this.setMetaTag('og:description', description);
-    if (image) {
-      this.setMetaTag('og:image', image);
+      // Add meta tags for SEO and social sharing
+      this.setMetaTag('title', title);
+      this.setMetaTag('description', description);
+      this.setMetaTag('og:title', title);
+      this.setMetaTag('og:description', description);
+      if (image) {
+        this.setMetaTag('og:image', image);
+      }
+    } catch (error) {
+      console.error("Error setting SEO metadata:", error);
     }
   }
 
   // Helper method to set or update meta tags
   private setMetaTag(name: string, content: string): void {
-    let meta = document.querySelector(`meta[name="${name}"], meta[property="${name}"]`);
-    if (!meta) {
-      meta = document.createElement('meta');
-      if (name.startsWith('og:')) {
-        meta.setAttribute('property', name);
-      } else {
-        meta.setAttribute('name', name);
+    try {
+      let meta = document.querySelector(`meta[name="${name}"], meta[property="${name}"]`);
+      if (!meta) {
+        meta = document.createElement('meta');
+        if (name.startsWith('og:')) {
+          meta.setAttribute('property', name);
+        } else {
+          meta.setAttribute('name', name);
+        }
+        document.head.appendChild(meta);
       }
-      document.head.appendChild(meta);
+      meta.setAttribute('content', content);
+    } catch (error) {
+      console.error(`Error setting meta tag ${name}:`, error);
     }
-    meta.setAttribute('content', content);
   }
 }
 
