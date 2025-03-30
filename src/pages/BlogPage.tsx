@@ -1,4 +1,5 @@
-import React, { useEffect } from "react";
+
+import React, { useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import BlogHeader from "@/components/blog/BlogHeader";
 import BlogContainer from "@/components/blog/BlogContainer";
@@ -14,24 +15,50 @@ const BlogPage: React.FC = () => {
     cleanup
   } = useBlog();
   
-  // Handle blog rendering based on URL
+  // Reference to track if component is mounted
+  const isMounted = useRef(true);
+  
+  // Set up mount/unmount tracking
   useEffect(() => {
+    isMounted.current = true;
+    
+    return () => {
+      isMounted.current = false;
+      cleanup();
+    };
+  }, [cleanup]);
+  
+  // Handle blog rendering based on URL with safe checks
+  useEffect(() => {
+    if (!isMounted.current) return;
+    
     const path = location.pathname;
     const slug = path.replace('/blog/', '').replace(/\/$/, ''); // Remove trailing slash if present
     
     console.log(`Current path: ${path}, slug: ${slug}`);
     
-    if (path === '/blog' || path === '/blog/') {
-      renderBlogList();
-    } else if (path.startsWith('/blog/') && slug) {
-      renderBlogPost(slug);
-    }
-    
-    return () => {
-      // Clean up when component unmounts or route changes
-      cleanup();
+    const renderContent = async () => {
+      try {
+        if (path === '/blog' || path === '/blog/') {
+          await renderBlogList();
+        } else if (path.startsWith('/blog/') && slug) {
+          await renderBlogPost(slug);
+        }
+      } catch (error) {
+        console.error("Error rendering blog content:", error);
+        if (isMounted.current) {
+          toast({
+            title: "Error Loading Content",
+            description: "There was a problem loading the blog content. Please try again.",
+            variant: "destructive",
+          });
+        }
+      }
     };
-  }, [location.pathname, renderBlogList, renderBlogPost, cleanup]);
+    
+    renderContent();
+    
+  }, [location.pathname, renderBlogList, renderBlogPost]);
 
   // Check for error from previous navigation
   useEffect(() => {

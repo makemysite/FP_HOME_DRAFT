@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
 import blogService from '@/lib/blog/blog-service';
@@ -11,11 +11,11 @@ export function useBlog() {
   const navigate = useNavigate();
 
   // Safe state setter that only updates if component is still mounted
-  const safeSetState = <T,>(setter: React.Dispatch<React.SetStateAction<T>>, value: T) => {
+  const safeSetState = useCallback(<T,>(setter: React.Dispatch<React.SetStateAction<T>>, value: T) => {
     if (!unmountedRef.current) {
       setter(value);
     }
-  };
+  }, []);
 
   // Sets up the unmount tracking
   useEffect(() => {
@@ -23,18 +23,28 @@ export function useBlog() {
     
     return () => {
       unmountedRef.current = true;
+      // Perform immediate cleanup when unmounting
+      blogService.cleanupAllContainers();
     };
   }, []);
 
-  // Render blog list function
-  const renderBlogList = async () => {
+  // Render blog list function with enhanced safety
+  const renderBlogList = useCallback(async () => {
     if (unmountedRef.current) return;
+    
     safeSetState(setLoading, true);
     safeSetState(setRenderError, null);
     
     try {
+      // Clean up any existing blog post container first
+      blogService.cleanupContainer('blog-post-container');
+      
+      // Then render the list
       await blogService.renderBlogList('blog-list-container');
-      if (!unmountedRef.current) safeSetState(setLoading, false);
+      
+      if (!unmountedRef.current) {
+        safeSetState(setLoading, false);
+      }
     } catch (error) {
       console.error("Error rendering blog list:", error);
       if (!unmountedRef.current) {
@@ -46,17 +56,25 @@ export function useBlog() {
         });
       }
     }
-  };
+  }, [safeSetState]);
 
-  // Render blog post function
-  const renderBlogPost = async (slug: string) => {
+  // Render blog post function with enhanced safety
+  const renderBlogPost = useCallback(async (slug: string) => {
     if (unmountedRef.current) return;
+    
     safeSetState(setLoading, true);
     safeSetState(setRenderError, null);
     
     try {
+      // Clean up any existing blog list container first
+      blogService.cleanupContainer('blog-list-container');
+      
+      // Then render the post
       await blogService.renderBlogPost('blog-post-container', slug);
-      if (!unmountedRef.current) safeSetState(setLoading, false);
+      
+      if (!unmountedRef.current) {
+        safeSetState(setLoading, false);
+      }
     } catch (error) {
       console.error("Error rendering blog post:", error);
       if (!unmountedRef.current) {
@@ -74,17 +92,17 @@ export function useBlog() {
         }
       }
     }
-  };
+  }, [safeSetState]);
 
-  // Cleanup function to be called on unmount
-  const cleanup = () => {
+  // Cleanup function with additional safety
+  const cleanup = useCallback(() => {
     blogService.cleanupContainer('blog-list-container');
     blogService.cleanupContainer('blog-post-container');
-  };
+  }, []);
 
   // Handle 404 redirects
   useEffect(() => {
-    if (renderError) {
+    if (renderError && !unmountedRef.current) {
       navigate('/blog', { 
         replace: true,
         state: { error: renderError }

@@ -5,49 +5,85 @@ import BlogEmbed from './blogsmith-embed';
  * Enhanced version of BlogEmbed with additional safety features
  */
 class EnhancedBlogEmbed extends BlogEmbed {
+  // Create a local active containers set for tracking
+  private enhancedActiveContainers: Set<string> = new Set();
+  
   /**
-   * Safely updates a container with new content
-   * Implements extra checks to prevent DOM manipulation errors
+   * Override the base class render methods to use our enhanced container tracking
    */
-  safelyUpdateContainer(container: HTMLElement | null, content: string, containerId: string): boolean {
-    if (!container) {
-      // Container not available, remove from tracking
-      this.activeContainers.delete(containerId);
-      return false;
+  async renderBlogList(containerId: string, options: any = {}): Promise<void> {
+    this.enhancedActiveContainers.add(containerId);
+    try {
+      await super.renderBlogList(containerId, options);
+    } catch (error) {
+      this.enhancedActiveContainers.delete(containerId);
+      throw error;
     }
+  }
+  
+  async renderBlogPost(containerId: string, slug: string): Promise<void> {
+    this.enhancedActiveContainers.add(containerId);
+    try {
+      await super.renderBlogPost(containerId, slug);
+    } catch (error) {
+      this.enhancedActiveContainers.delete(containerId);
+      throw error;
+    }
+  }
+  
+  /**
+   * Override the container cleanup methods to ensure safe DOM operations
+   */
+  cleanupContainer(containerId: string): void {
+    this.enhancedActiveContainers.delete(containerId);
     
     try {
-      // Extra check to ensure the container is still in the DOM
-      if (!document.body.contains(container)) {
-        console.warn(`Container #${containerId} is no longer in the DOM, aborting update`);
-        this.activeContainers.delete(containerId);
-        return false;
+      const container = document.getElementById(containerId);
+      if (container) {
+        // Safe approach to remove all child nodes
+        while (container.firstChild) {
+          container.removeChild(container.firstChild);
+        }
       }
       
-      // Using a temporary document fragment for safer DOM manipulation
-      const fragment = document.createDocumentFragment();
-      const tempDiv = document.createElement('div');
-      tempDiv.innerHTML = content;
-      
-      // Clear the container first using a safe approach
-      while (container.firstChild) {
-        container.firstChild.remove();
-      }
-      
-      // Move nodes from temp div to fragment
-      while (tempDiv.firstChild) {
-        fragment.appendChild(tempDiv.firstChild);
-      }
-      
-      // Append fragment to container (single DOM operation)
-      container.appendChild(fragment);
-      
-      return true;
+      // Call super implementation
+      super.cleanupContainer(containerId);
     } catch (error) {
-      console.error(`Error updating container ${containerId} content:`, error);
-      this.activeContainers.delete(containerId);
-      return false;
+      console.error(`Error cleaning up container ${containerId}:`, error);
     }
+  }
+  
+  cleanupAllContainers(): void {
+    // Make a copy to avoid iteration issues
+    const containers = Array.from(this.enhancedActiveContainers);
+    
+    // Clear our tracking first
+    this.enhancedActiveContainers.clear();
+    
+    // Clean each container
+    containers.forEach(id => {
+      try {
+        const container = document.getElementById(id);
+        if (container) {
+          // Safe approach to remove all child nodes
+          while (container.firstChild) {
+            container.removeChild(container.firstChild);
+          }
+        }
+      } catch (error) {
+        console.error(`Error cleaning up container ${id}:`, error);
+      }
+    });
+    
+    // Call super implementation
+    super.cleanupAllContainers();
+  }
+  
+  /**
+   * Check if a container is being tracked by our enhanced tracking
+   */
+  isEnhancedContainerActive(containerId: string): boolean {
+    return this.enhancedActiveContainers.has(containerId);
   }
 }
 
