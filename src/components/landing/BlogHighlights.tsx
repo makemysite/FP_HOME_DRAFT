@@ -1,4 +1,6 @@
+
 import React from "react";
+import { Link } from "react-router-dom";
 import ArrowRightIcon from "../ui/ArrowRightIcon";
 
 const BlogHighlights: React.FC = () => {
@@ -51,9 +53,11 @@ const BlogHighlights: React.FC = () => {
       <h2 className="text-[#170F49] text-center text-[50px] font-bold leading-[62px] w-[668px] mt-[27px] max-md:max-w-full max-md:text-[40px] max-md:leading-[55px]">
         Spend Less Time Managing and More Time Growing
       </h2>
-      <button className="bg-[rgba(245,246,251,1)] border w-[175px] max-w-full text-lg text-[rgba(7,15,24,1)] font-normal text-center mt-[71px] px-[33px] py-[19px] rounded-[56px] border-[rgba(233,138,35,1)] border-solid max-md:mt-10 max-md:px-5 hover:bg-[rgba(245,246,251,0.8)] transition-colors">
-        View all Blogs
-      </button>
+      <Link to="/blog">
+        <button className="bg-[rgba(245,246,251,1)] border w-[175px] max-w-full text-lg text-[rgba(7,15,24,1)] font-normal text-center mt-[71px] px-[33px] py-[19px] rounded-[56px] border-[rgba(233,138,35,1)] border-solid max-md:mt-10 max-md:px-5 hover:bg-[rgba(245,246,251,0.8)] transition-colors">
+          View all Blogs
+        </button>
+      </Link>
 
       <div className="self-stretch flex flex-col items-center text-base font-medium mt-[47px] max-md:max-w-full max-md:mt-10">
         <div className="flex gap-[40px_60px] max-md:max-w-full max-md:flex-wrap max-md:justify-center">
