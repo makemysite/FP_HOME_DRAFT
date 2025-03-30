@@ -6,6 +6,7 @@ class BlogService {
   private blogEmbed: EnhancedBlogEmbed | null = null;
   private activeContainers: Set<string> = new Set();
   private isInitialized: boolean = false;
+  private unmounting: boolean = false;
   
   constructor() {
     try {
@@ -20,7 +21,7 @@ class BlogService {
    */
   private initializeBlogEmbed(): void {
     try {
-      if (!this.isInitialized) {
+      if (!this.isInitialized && !this.unmounting) {
         this.blogEmbed = new EnhancedBlogEmbed();
         this.isInitialized = true;
         console.log("BlogService: Successfully initialized EnhancedBlogEmbed");
@@ -37,6 +38,11 @@ class BlogService {
    * Ensures the blog embed instance exists, initializing it if needed
    */
   private ensureBlogEmbed(): boolean {
+    if (this.unmounting) {
+      console.warn("BlogService: Cannot ensure blog embed during unmounting");
+      return false;
+    }
+    
     if (!this.blogEmbed) {
       try {
         this.initializeBlogEmbed();
@@ -52,6 +58,11 @@ class BlogService {
    * Renders a blog list in the specified container with enhanced error handling
    */
   async renderBlogList(containerId: string, options: BlogEmbedOptions = {}): Promise<void> {
+    if (this.unmounting) {
+      console.warn("BlogService: Cannot render during unmounting process");
+      return;
+    }
+    
     if (!this.ensureBlogEmbed() || !this.blogEmbed) {
       console.error("BlogEmbed not available, cannot render blog list");
       this.displayFallbackContent(containerId, "Unable to load blog content. Please try again later.");
@@ -103,6 +114,11 @@ class BlogService {
    * Renders a single blog post in the specified container with enhanced error handling
    */
   async renderBlogPost(containerId: string, slug: string, options: BlogEmbedOptions = {}): Promise<void> {
+    if (this.unmounting) {
+      console.warn("BlogService: Cannot render during unmounting process");
+      return;
+    }
+    
     if (!this.ensureBlogEmbed() || !this.blogEmbed) {
       console.error("BlogEmbed not available, cannot render blog post");
       this.displayFallbackContent(containerId, "Unable to load blog content. Please try again later.");
@@ -160,6 +176,8 @@ class BlogService {
    */
   private displayFallbackContent(containerId: string, message: string): void {
     try {
+      if (this.unmounting) return;
+      
       const container = document.getElementById(containerId);
       if (container && document.body.contains(container)) {
         container.innerHTML = `
@@ -175,6 +193,7 @@ class BlogService {
   
   /**
    * Safely cleans up a container's DOM content with additional checks
+   * Uses safer innerHTML emptying to prevent DOM node removal issues
    */
   cleanupContainer(containerId: string): void {
     try {
@@ -199,8 +218,23 @@ class BlogService {
         return;
       }
       
-      // Then clean up the DOM content using the enhanced class
-      this.blogEmbed.cleanupContainer(containerId);
+      // First empty container with innerHTML for safety
+      try {
+        container.innerHTML = '';
+      } catch (innerError) {
+        console.error(`Error clearing container ${containerId} with innerHTML:`, innerError);
+      }
+      
+      // Then call enhanced cleanup on a short timeout to prevent race conditions
+      setTimeout(() => {
+        if (!this.unmounting && this.blogEmbed) {
+          try {
+            this.blogEmbed.cleanupContainer(containerId);
+          } catch (cleanupError) {
+            console.error(`Delayed cleanup error for container ${containerId}:`, cleanupError);
+          }
+        }
+      }, 0);
     } catch (error) {
       console.error(`Error cleaning up container ${containerId}:`, error);
     }
@@ -214,31 +248,47 @@ class BlogService {
   }
   
   /**
+   * Check if we're in the unmounting process
+   */
+  isUnmounting(): boolean {
+    return this.unmounting;
+  }
+  
+  /**
    * Clean up all containers with safer approach
    */
   cleanupAllContainers(): void {
     try {
+      // Set unmounting flag to prevent further operations
+      this.unmounting = true;
+      
       // Make a copy of the set to avoid iteration issues during deletion
       const containers = Array.from(this.activeContainers);
       
       // Clear our tracking set first
       this.activeContainers.clear();
       
+      // First clear all container inner HTML
+      containers.forEach(id => {
+        try {
+          const container = document.getElementById(id);
+          if (container && document.body.contains(container)) {
+            container.innerHTML = '';
+          }
+        } catch (innerError) {
+          console.error(`Error clearing container ${id}:`, innerError);
+        }
+      });
+      
       // Also tell the BlogEmbed instance to clean up if it exists
       if (this.blogEmbed) {
-        // Instead of cleaning all at once, clean each individually with checks
-        containers.forEach(id => {
+        setTimeout(() => {
           try {
-            const container = document.getElementById(id);
-            if (container && document.body.contains(container)) {
-              this.blogEmbed?.cleanupContainer(id);
-            } else {
-              console.warn(`Container #${id} does not exist or is not in DOM during cleanup`);
-            }
-          } catch (containerError) {
-            console.error(`Error cleaning up container ${id}:`, containerError);
+            this.blogEmbed?.cleanupAllContainers();
+          } catch (cleanupError) {
+            console.error("Error in delayed cleanupAllContainers:", cleanupError);
           }
-        });
+        }, 0);
       }
     } catch (error) {
       console.error(`Error in cleanupAllContainers:`, error);
@@ -246,10 +296,21 @@ class BlogService {
   }
   
   /**
+   * Set a flag to indicate that an unmount is in progress
+   * This should be called before unmounting to prevent race conditions
+   */
+  prepareForUnmount(): void {
+    this.unmounting = true;
+  }
+  
+  /**
    * Reinitialize the service if needed
    */
   reinitialize(): void {
     try {
+      // Reset unmounting flag
+      this.unmounting = false;
+      
       // Clean up existing resources
       this.cleanupAllContainers();
       

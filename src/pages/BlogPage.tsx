@@ -1,5 +1,5 @@
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useCallback } from "react";
 import { useLocation } from "react-router-dom";
 import BlogHeader from "@/components/blog/BlogHeader";
 import BlogContainer from "@/components/blog/BlogContainer";
@@ -18,6 +18,21 @@ const BlogPage: React.FC = () => {
   // Reference to track if component is mounted
   const isMounted = useRef(true);
   const isProcessingRoute = useRef(false);
+  const previousPath = useRef(location.pathname);
+  
+  // Safe way to run cleanup that prevents race conditions
+  const safeCleanup = useCallback(() => {
+    // Defer cleanup to avoid DOM manipulation during render/unmount cycle
+    setTimeout(() => {
+      try {
+        if (isMounted.current) {
+          cleanup();
+        }
+      } catch (error) {
+        console.error("Error during deferred cleanup:", error);
+      }
+    }, 0);
+  }, [cleanup]);
   
   // Set up mount/unmount tracking
   useEffect(() => {
@@ -36,7 +51,7 @@ const BlogPage: React.FC = () => {
         } catch (error) {
           console.error("Error during cleanup on unmount:", error);
         }
-      }, 0);
+      }, 50);
     };
   }, [cleanup]);
   
@@ -45,6 +60,13 @@ const BlogPage: React.FC = () => {
     // Prevent concurrent renders and check mount status
     if (!isMounted.current || isProcessingRoute.current) return;
     
+    // If the path hasn't changed, don't reprocess
+    if (previousPath.current === location.pathname) return;
+    
+    // Update previous path
+    previousPath.current = location.pathname;
+    
+    // Set processing flag
     isProcessingRoute.current = true;
     
     const path = location.pathname;
@@ -52,10 +74,25 @@ const BlogPage: React.FC = () => {
     
     console.log(`Current path: ${path}, slug: ${slug}`);
     
+    // First run cleanup with delay to ensure React has finished its cycle
+    safeCleanup();
+    
     const renderContent = async () => {
       try {
         // Double-check we're still mounted before rendering
-        if (!isMounted.current) return;
+        if (!isMounted.current) {
+          isProcessingRoute.current = false;
+          return;
+        }
+        
+        // Add small delay to ensure cleanup has completed
+        await new Promise(resolve => setTimeout(resolve, 10));
+        
+        // Check again if we're still mounted
+        if (!isMounted.current) {
+          isProcessingRoute.current = false;
+          return;
+        }
         
         if (path === '/blog' || path === '/blog/') {
           await renderBlogList();
@@ -80,17 +117,17 @@ const BlogPage: React.FC = () => {
     };
     
     // Small timeout to ensure DOM is ready before rendering
-    setTimeout(renderContent, 10);
+    setTimeout(renderContent, 50);
     
     // Cleanup function to handle component unmount during async operation
     return () => {
       isProcessingRoute.current = false;
     };
-  }, [location.pathname, renderBlogList, renderBlogPost]);
+  }, [location.pathname, renderBlogList, renderBlogPost, safeCleanup]);
 
   // Check for error from previous navigation
   useEffect(() => {
-    if (location.state && location.state.error && location.pathname === '/blog') {
+    if (location.state && location.state.error && location.pathname === '/blog' && isMounted.current) {
       toast({
         title: "Blog Post Not Found",
         description: location.state.error,
@@ -186,6 +223,11 @@ const BlogPage: React.FC = () => {
         
         .blog-embed-error {
           color: #ef4444;
+          background-color: #fff3f3;
+          border: 1px solid #ffd0d0;
+          border-radius: 5px;
+          padding: 15px;
+          margin: 10px 0;
         }
         
         /* Single post styling */

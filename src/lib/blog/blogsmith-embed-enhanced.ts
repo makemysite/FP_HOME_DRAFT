@@ -9,6 +9,7 @@ class EnhancedBlogEmbed extends BlogEmbed {
   // Create a local active containers set for tracking
   private enhancedActiveContainers: Set<string> = new Set();
   private containerRenderLocks: Map<string, boolean> = new Map();
+  private pendingNodeOperations: Map<string, NodeJS.Timeout> = new Map();
   
   constructor() {
     // Initialize the base class with enhanced configuration
@@ -144,68 +145,68 @@ class EnhancedBlogEmbed extends BlogEmbed {
   }
   
   /**
-   * Enhanced container cleanup with additional safety checks
-   * This is the critical method we need to fix to resolve DOM NotFoundError
+   * Clear any pending node operations for a container
+   */
+  private clearPendingOperations(containerId: string): void {
+    if (this.pendingNodeOperations.has(containerId)) {
+      const timeoutId = this.pendingNodeOperations.get(containerId);
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+      this.pendingNodeOperations.delete(containerId);
+    }
+  }
+  
+  /**
+   * Enhanced container cleanup with additional safety checks and deferred processing
+   * to prevent race conditions with React's DOM manipulation
    */
   cleanupContainer(containerId: string): void {
     // Remove from our enhanced tracking first
     this.enhancedActiveContainers.delete(containerId);
     
+    // Clear any pending operations
+    this.clearPendingOperations(containerId);
+    
     try {
       // Get container with additional exist check
       const container = document.getElementById(containerId);
       
-      // If container exists and is in the DOM
-      if (container && document.body.contains(container)) {
-        // Use a safer approach - set innerHTML to empty string first
-        try {
-          container.innerHTML = '';
-        } catch (error) {
-          console.error(`Error clearing container ${containerId} with innerHTML:`, error);
-          
-          // Fallback: try to remove children individually with safety checks
-          try {
-            let child = container.firstChild;
-            while (child && document.body.contains(container)) {
-              // Store the next sibling before removing the current child
-              const nextSibling = child.nextSibling;
-              try {
-                // Check if child is still a child of container before removing
-                if (child.parentNode === container) {
-                  container.removeChild(child);
-                }
-              } catch (childError) {
-                console.error(`Error removing individual child:`, childError);
-                // Break to avoid infinite loop
-                break;
-              }
-              // Move to next sibling
-              child = nextSibling;
-            }
-          } catch (fallbackError) {
-            console.error(`Fallback child removal failed:`, fallbackError);
-          }
-        }
-      } else {
+      // If container doesn't exist or isn't in the DOM, just remove tracking
+      if (!container || !document.body.contains(container)) {
         console.warn(`Container #${containerId} does not exist or is not in DOM, skipping cleanup`);
+        this.containerRenderLocks.set(containerId, false);
+        return;
       }
       
-      // Remove render lock in any case
-      this.containerRenderLocks.set(containerId, false);
-      
-      // Also call the parent implementation for proper tracking there
-      super.cleanupContainer(containerId);
+      // Use a safer approach - set innerHTML to empty string 
+      // instead of DOM node removal
+      try {
+        // Make a "safe" copy of children to avoid live collection issues
+        const safeHtml = container.innerHTML;
+        container.innerHTML = '';
+        
+        // Call parent implementation in a deferred way to let React finish its current work
+        const timeoutId = setTimeout(() => {
+          try {
+            // Double check the container still exists before calling parent cleanup
+            if (document.getElementById(containerId) && document.body.contains(container)) {
+              super.cleanupContainer(containerId);
+            }
+            this.pendingNodeOperations.delete(containerId);
+          } catch (error) {
+            console.error(`Error in deferred parent cleanup for container ${containerId}:`, error);
+          }
+        }, 0);
+        
+        this.pendingNodeOperations.set(containerId, timeoutId);
+      } catch (error) {
+        console.error(`Error clearing container ${containerId} with innerHTML:`, error);
+      }
     } catch (error) {
       console.error(`Error in cleanup for container ${containerId}:`, error);
       // Always clear lock in case of error
       this.containerRenderLocks.set(containerId, false);
-      
-      // Still try to call parent cleanup
-      try {
-        super.cleanupContainer(containerId);
-      } catch (parentError) {
-        console.error(`Error in parent cleanup for container ${containerId}:`, parentError);
-      }
     }
   }
   
@@ -219,6 +220,10 @@ class EnhancedBlogEmbed extends BlogEmbed {
     // Reset all render locks
     this.containerRenderLocks.clear();
     
+    // Clear all pending operations
+    containers.forEach(id => this.clearPendingOperations(id));
+    this.pendingNodeOperations.clear();
+    
     // Clean each container with enhanced safety
     containers.forEach(id => {
       try {
@@ -229,29 +234,6 @@ class EnhancedBlogEmbed extends BlogEmbed {
             container.innerHTML = '';
           } catch (error) {
             console.error(`Error clearing container ${id} with innerHTML:`, error);
-            
-            // Fallback: try to remove children individually with safety checks
-            try {
-              let child = container.firstChild;
-              while (child && document.body.contains(container)) {
-                // Store the next sibling before removing the current child
-                const nextSibling = child.nextSibling;
-                try {
-                  // Check if child is still a child of container before removing
-                  if (child.parentNode === container) {
-                    container.removeChild(child);
-                  }
-                } catch (childError) {
-                  console.error(`Error removing individual child:`, childError);
-                  // Break to avoid infinite loop
-                  break;
-                }
-                // Move to next sibling
-                child = nextSibling;
-              }
-            } catch (fallbackError) {
-              console.error(`Fallback child removal failed:`, fallbackError);
-            }
           }
         } else {
           console.warn(`Container #${id} does not exist or is not in DOM, skipping cleanup`);
@@ -261,12 +243,14 @@ class EnhancedBlogEmbed extends BlogEmbed {
       }
     });
     
-    // Also call parent cleanup for proper cleanup there
-    try {
-      super.cleanupAllContainers();
-    } catch (parentError) {
-      console.error('Error in parent cleanupAllContainers:', parentError);
-    }
+    // Also call parent cleanup in a deferred way
+    setTimeout(() => {
+      try {
+        super.cleanupAllContainers();
+      } catch (parentError) {
+        console.error('Error in parent cleanupAllContainers:', parentError);
+      }
+    }, 0);
   }
   
   /**
@@ -288,6 +272,12 @@ class EnhancedBlogEmbed extends BlogEmbed {
    */
   destroy(): void {
     try {
+      // Clear all pending operations
+      Array.from(this.pendingNodeOperations.keys()).forEach(id => {
+        this.clearPendingOperations(id);
+      });
+      this.pendingNodeOperations.clear();
+      
       // Clean up all containers first
       this.cleanupAllContainers();
       
@@ -295,17 +285,16 @@ class EnhancedBlogEmbed extends BlogEmbed {
       this.containerRenderLocks.clear();
       this.enhancedActiveContainers.clear();
       
-      // Call parent destroy
-      super.destroy();
+      // Call parent destroy in a deferred way
+      setTimeout(() => {
+        try {
+          super.destroy();
+        } catch (error) {
+          console.error('Error in deferred parent destroy:', error);
+        }
+      }, 0);
     } catch (error) {
       console.error('Error destroying EnhancedBlogEmbed instance:', error);
-      
-      // Still try to call parent destroy
-      try {
-        super.destroy();
-      } catch (parentError) {
-        console.error('Error in parent destroy:', parentError);
-      }
     }
   }
 }
