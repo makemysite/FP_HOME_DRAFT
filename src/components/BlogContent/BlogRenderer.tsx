@@ -12,6 +12,7 @@ interface BlogContent {
   src?: string;
   alt?: string;
   caption?: string;
+  content?: any; // Added to handle nested content objects
 }
 
 interface BlogSection {
@@ -54,16 +55,21 @@ const BlogRenderer = ({ post }: BlogRendererProps) => {
         </div>
       );
     } else if (content.type === "image") {
+      // Check both content.src and content.content?.src/url for image source
+      const imageSrc = content.src || content.content?.src || content.content?.url || "";
+      const imageAlt = content.alt || content.content?.alt || "";
+      const imageCaption = content.caption || content.content?.caption || "";
+      
       return (
-        <figure className="my-6">
+        <figure className="blog-embed-content-image my-6">
           <img
-            src={content.src}
-            alt={content.alt || ""}
+            src={imageSrc}
+            alt={imageAlt}
             className="mx-auto rounded-md max-w-full"
           />
-          {content.caption && (
+          {imageCaption && (
             <figcaption className="text-center text-sm text-gray-500 mt-2">
-              {content.caption}
+              {imageCaption}
             </figcaption>
           )}
         </figure>
@@ -74,16 +80,21 @@ const BlogRenderer = ({ post }: BlogRendererProps) => {
 
   // Render sections with their content
   const renderSections = (sections: BlogSection[]) => {
-    return sections.map((section) => (
-      <section key={section.id} id={section.id} className="mb-10">
-        <h2 className="text-2xl font-bold mb-4">{section.title}</h2>
-        <div className="blog-content">
-          {section.content.map((content) => (
-            <div key={content.id}>{renderContent(content)}</div>
-          ))}
-        </div>
-      </section>
-    ));
+    return sections.map((section) => {
+      // Ensure content array exists and has items
+      const sectionContent = section.content || [];
+      
+      return (
+        <section key={section.id} id={section.id} className="mb-10">
+          <h2 className="text-2xl font-bold mb-4">{section.title}</h2>
+          <div className="blog-content">
+            {sectionContent.map((content) => (
+              <div key={content.id}>{renderContent(content)}</div>
+            ))}
+          </div>
+        </section>
+      );
+    });
   };
 
   // Render conclusion
@@ -127,15 +138,15 @@ const BlogRenderer = ({ post }: BlogRendererProps) => {
       </header>
 
       {/* Table of Contents */}
-      {post.sections.length > 0 && (
+      {post.sections && post.sections.length > 0 && (
         <TableOfContents sections={post.sections} />
       )}
 
       {/* Main Content */}
       <div className="blog-content-wrapper">
-        {renderSections(post.sections)}
+        {renderSections(post.sections || [])}
         {renderConclusion()}
-        {post.faqs.length > 0 && <FAQAccordion faqs={post.faqs} />}
+        {post.faqs && post.faqs.length > 0 && <FAQAccordion faqs={post.faqs} />}
       </div>
     </article>
   );

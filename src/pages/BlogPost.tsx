@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { getBlogPostBySlug } from "@/lib/blog/queries";
+import BlogRenderer from "@/components/BlogContent/BlogRenderer";
 
 // Fix the type annotation for useParams
 type BlogPostParams = {
@@ -62,61 +63,6 @@ const BlogPost: React.FC = () => {
     
   }, [slug, toast]);
 
-  const renderContent = () => {
-    if (!blogPost) return null;
-    
-    return (
-      <div className="prose max-w-none">
-        <h1 className="text-3xl font-bold mb-4">{blogPost.title}</h1>
-        {blogPost.description && (
-          <p className="text-lg text-gray-600 mb-6">{blogPost.description}</p>
-        )}
-        
-        {blogPost.heroImage && (
-          <img 
-            src={blogPost.heroImage} 
-            alt={blogPost.title} 
-            className="w-full h-auto max-h-96 object-cover rounded-lg mb-8"
-          />
-        )}
-        
-        {blogPost.sections?.map((section: any, index: number) => (
-          <div key={section.id || index} className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">{section.title}</h2>
-            {section.content?.map((content: any, contentIndex: number) => (
-              <div key={content.id || contentIndex} className="mb-4">
-                {content.type === 'text' && (
-                  <div dangerouslySetInnerHTML={{ __html: content.content.text }} />
-                )}
-                {content.type === 'image' && content.content.url && (
-                  <img 
-                    src={content.content.url} 
-                    alt={content.content.caption || ''} 
-                    className="w-full h-auto rounded-lg my-4"
-                  />
-                )}
-              </div>
-            ))}
-          </div>
-        ))}
-        
-        {blogPost.faqs && blogPost.faqs.length > 0 && (
-          <div className="mt-12 bg-gray-50 p-6 rounded-lg">
-            <h2 className="text-2xl font-semibold mb-6">Frequently Asked Questions</h2>
-            <div className="space-y-6">
-              {blogPost.faqs.map((faq: any, index: number) => (
-                <div key={faq.id || index}>
-                  <h3 className="text-xl font-medium mb-2">{faq.question}</h3>
-                  <p className="text-gray-600">{faq.answer}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  };
-
   return (
     <div className="bg-white min-h-screen flex flex-col">
       <header className="w-full">
@@ -159,7 +105,7 @@ const BlogPost: React.FC = () => {
               </Button>
             </div>
           ) : (
-            renderContent()
+            <BlogRenderer post={blogPost} />
           )}
         </div>
       </main>

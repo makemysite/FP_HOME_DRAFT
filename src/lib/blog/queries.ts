@@ -68,28 +68,51 @@ export async function getBlogPostBySlug(slug: string): Promise<any | null> {
   }
 }
 
-// Simple transformer function to format the blog post data
+// Enhanced transformer function to properly format the blog post data
 export function transformBlogPostData(data: any): any {
   if (!data) return null;
   
-  // Basic transformation - can be expanded based on requirements
+  // Basic transformation with improved handling of nested content
   return {
     id: data.id,
     title: data.title,
     slug: data.slug,
     description: data.description,
-    content: data,
     heroImage: data.hero_image,
-    publishedAt: data.created_at,
+    createdAt: data.created_at,
     updatedAt: data.updated_at,
     category: data.category,
     sections: data.sections?.map((section: any) => ({
       id: section.id,
       title: section.title,
       position: section.position,
-      content: section.content?.sort((a: any, b: any) => a.position - b.position) || []
-    })).sort((a: any, b: any) => a.position - b.position) || [],
-    faqs: data.faqs?.sort((a: any, b: any) => a.position - b.position) || []
+      content: section.content?.map((item: any) => {
+        // Handle different content structures
+        if (item.type === 'text') {
+          return {
+            id: item.id,
+            type: 'text',
+            text: item.content?.text || item.text || ''
+          };
+        } else if (item.type === 'image') {
+          return {
+            id: item.id,
+            type: 'image',
+            src: item.content?.src || item.content?.url || item.src || '',
+            alt: item.content?.alt || item.alt || '',
+            caption: item.content?.caption || item.caption || ''
+          };
+        }
+        // Return the original item if type is unknown
+        return item;
+      }).sort((a: any, b: any) => (a.position || 0) - (b.position || 0)) || []
+    })).sort((a: any, b: any) => (a.position || 0) - (b.position || 0)) || [],
+    conclusion: data.conclusion || '',
+    faqs: data.faqs?.map((faq: any) => ({
+      id: faq.id,
+      question: faq.question || '',
+      answer: faq.answer || ''
+    })).sort((a: any, b: any) => (a.position || 0) - (b.position || 0)) || []
   };
 }
 
@@ -113,7 +136,7 @@ export async function getAllBlogPosts(): Promise<any[]> {
       slug: post.slug,
       description: post.description,
       heroImage: post.hero_image,
-      publishedAt: post.created_at,
+      createdAt: post.created_at,
       category: post.category
     }));
   } catch (error) {
