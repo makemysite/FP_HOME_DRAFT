@@ -24,6 +24,19 @@ class EnhancedBlogEmbed extends BlogEmbed {
   }
   
   /**
+   * Safely check if a DOM element exists and is in the document
+   */
+  private doesElementExist(containerId: string): boolean {
+    try {
+      const element = document.getElementById(containerId);
+      return !!element && document.body.contains(element);
+    } catch (error) {
+      console.error(`Error checking if ${containerId} exists:`, error);
+      return false;
+    }
+  }
+  
+  /**
    * Override the base class render methods to use our enhanced container tracking
    * with additional race condition prevention
    */
@@ -34,18 +47,16 @@ class EnhancedBlogEmbed extends BlogEmbed {
       return;
     }
     
+    // First check if container exists to avoid race conditions
+    if (!this.doesElementExist(containerId)) {
+      console.warn(`Container #${containerId} does not exist or is not in DOM, skipping render`);
+      return;
+    }
+    
     // Set render lock for this container
     this.containerRenderLocks.set(containerId, true);
     
     try {
-      // First check if container exists to avoid race conditions
-      const containerExists = document.getElementById(containerId);
-      if (!containerExists) {
-        console.warn(`Container #${containerId} does not exist, skipping render`);
-        this.containerRenderLocks.set(containerId, false);
-        return;
-      }
-      
       this.enhancedActiveContainers.add(containerId);
       
       // Add enhanced options for better error handling and resilience
@@ -58,19 +69,46 @@ class EnhancedBlogEmbed extends BlogEmbed {
       };
       
       try {
+        // Update the loading UI before the actual operation starts
+        const container = document.getElementById(containerId);
+        if (container && document.body.contains(container)) {
+          container.innerHTML = `
+            <div class="blog-embed-loading text-center p-8">
+              <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-500 mb-3"></div>
+              <p>Loading blog posts...</p>
+            </div>
+          `;
+        }
+        
+        // Wait a moment for the loading UI to render
+        await new Promise(resolve => setTimeout(resolve, 50));
+        
+        // Check again if the container still exists
+        if (!this.doesElementExist(containerId)) {
+          console.warn(`Container #${containerId} no longer exists, aborting render`);
+          this.containerRenderLocks.set(containerId, false);
+          return;
+        }
+        
         await super.renderBlogList(containerId, enhancedOptions);
       } catch (error) {
         console.error(`Error rendering blog list in container #${containerId}:`, error);
         this.enhancedActiveContainers.delete(containerId);
+        
         // Attempt to show error message in container
         try {
-          const container = document.getElementById(containerId);
-          if (container && document.body.contains(container)) {
-            container.innerHTML = `<div class="blog-embed-error">Error loading blog posts. Please try again later.</div>`;
+          if (this.doesElementExist(containerId)) {
+            const container = document.getElementById(containerId);
+            if (container) {
+              container.innerHTML = `<div class="blog-embed-error">Error loading blog posts. Please try again later.</div>`;
+            }
           }
         } catch (displayError) {
           console.error(`Failed to display error message:`, displayError);
         }
+        
+        // Rethrow for higher-level handling
+        throw error;
       }
     } finally {
       // Always release the render lock
@@ -169,40 +207,39 @@ class EnhancedBlogEmbed extends BlogEmbed {
     this.clearPendingOperations(containerId);
     
     try {
-      // Get container with additional exist check
-      const container = document.getElementById(containerId);
-      
-      // If container doesn't exist or isn't in the DOM, just remove tracking
-      if (!container || !document.body.contains(container)) {
+      // Check if container exists in DOM
+      if (!this.doesElementExist(containerId)) {
         console.warn(`Container #${containerId} does not exist or is not in DOM, skipping cleanup`);
         this.containerRenderLocks.set(containerId, false);
         return;
       }
       
-      // Use a safer approach - set innerHTML to empty string 
-      // instead of DOM node removal
+      // Use a safer approach - set innerHTML to empty string instead of DOM node removal
       try {
-        // Make a "safe" copy of children to avoid live collection issues
-        const safeHtml = container.innerHTML;
-        container.innerHTML = '';
-        
-        // Call parent implementation in a deferred way to let React finish its current work
-        const timeoutId = setTimeout(() => {
-          try {
-            // Double check the container still exists before calling parent cleanup
-            if (document.getElementById(containerId) && document.body.contains(container)) {
-              super.cleanupContainer(containerId);
-            }
-            this.pendingNodeOperations.delete(containerId);
-          } catch (error) {
-            console.error(`Error in deferred parent cleanup for container ${containerId}:`, error);
-          }
-        }, 0);
-        
-        this.pendingNodeOperations.set(containerId, timeoutId);
+        const container = document.getElementById(containerId);
+        if (container) {
+          // Make a "safe" copy of children to avoid live collection issues
+          const safeHtml = container.innerHTML;
+          container.innerHTML = '';
+        }
       } catch (error) {
         console.error(`Error clearing container ${containerId} with innerHTML:`, error);
       }
+      
+      // Call parent implementation in a deferred way to let React finish its current work
+      const timeoutId = setTimeout(() => {
+        try {
+          // Double check the container still exists before calling parent cleanup
+          if (this.doesElementExist(containerId)) {
+            super.cleanupContainer(containerId);
+          }
+          this.pendingNodeOperations.delete(containerId);
+        } catch (error) {
+          console.error(`Error in deferred parent cleanup for container ${containerId}:`, error);
+        }
+      }, 0);
+      
+      this.pendingNodeOperations.set(containerId, timeoutId);
     } catch (error) {
       console.error(`Error in cleanup for container ${containerId}:`, error);
       // Always clear lock in case of error
@@ -227,13 +264,15 @@ class EnhancedBlogEmbed extends BlogEmbed {
     // Clean each container with enhanced safety
     containers.forEach(id => {
       try {
-        const container = document.getElementById(id);
-        if (container && document.body.contains(container)) {
-          // Safe approach - set innerHTML to empty string
-          try {
-            container.innerHTML = '';
-          } catch (error) {
-            console.error(`Error clearing container ${id} with innerHTML:`, error);
+        if (this.doesElementExist(id)) {
+          const container = document.getElementById(id);
+          if (container) {
+            // Safe approach - set innerHTML to empty string
+            try {
+              container.innerHTML = '';
+            } catch (error) {
+              console.error(`Error clearing container ${id} with innerHTML:`, error);
+            }
           }
         } else {
           console.warn(`Container #${id} does not exist or is not in DOM, skipping cleanup`);
