@@ -100,51 +100,61 @@ class EnhancedBlogEmbed extends BlogEmbed {
   
   /**
    * Enhanced container cleanup with additional safety checks
+   * This is the critical method we need to fix to resolve DOM NotFoundError
    */
   cleanupContainer(containerId: string): void {
-    // Remove from our enhanced tracking
+    // Remove from our enhanced tracking first
     this.enhancedActiveContainers.delete(containerId);
     
     try {
+      // Get container with additional exist check
       const container = document.getElementById(containerId);
       
-      // Additional check to ensure container exists and is in DOM
+      // If container exists and is in the DOM
       if (container && document.body.contains(container)) {
-        // Safe approach to remove all child nodes - check parent existence before each removal
-        // Only attempt to remove children one by one while the parent exists
-        while (container.firstChild && document.body.contains(container)) {
+        // Use a safer approach - set innerHTML to empty string first
+        try {
+          container.innerHTML = '';
+        } catch (error) {
+          console.error(`Error clearing container ${containerId} with innerHTML:`, error);
+          
+          // Fallback: try to remove children individually with safety checks
           try {
-            container.removeChild(container.firstChild);
-          } catch (error) {
-            console.error(`Error removing child from container ${containerId}:`, error);
-            break; // Break the loop if an error occurs to prevent infinite loops
+            let child = container.firstChild;
+            while (child && document.body.contains(container)) {
+              // Store the next sibling before removing the current child
+              const nextSibling = child.nextSibling;
+              try {
+                // Check if child is still a child of container before removing
+                if (child.parentNode === container) {
+                  container.removeChild(child);
+                }
+              } catch (childError) {
+                console.error(`Error removing individual child:`, childError);
+                // Break to avoid infinite loop
+                break;
+              }
+              // Move to next sibling
+              child = nextSibling;
+            }
+          } catch (fallbackError) {
+            console.error(`Fallback child removal failed:`, fallbackError);
           }
         }
-        
-        // Clear HTML as a fallback if all else fails
-        try {
-          if (document.body.contains(container)) {
-            container.innerHTML = '';
-          }
-        } catch (error) {
-          console.error(`Error clearing container ${containerId} innerHTML:`, error);
-        }
+      } else {
+        console.warn(`Container #${containerId} does not exist or is not in DOM, skipping cleanup`);
       }
       
-      // Remove render lock for this container
+      // Remove render lock in any case
       this.containerRenderLocks.set(containerId, false);
-      
-      // Call super implementation only if it's safe
-      if (document.getElementById(containerId) && document.body.contains(document.getElementById(containerId)!)) {
-        try {
-          super.cleanupContainer(containerId);
-        } catch (error) {
-          console.error(`Error in super.cleanupContainer for ${containerId}:`, error);
-        }
-      }
     } catch (error) {
-      console.error(`Error cleaning up container ${containerId}:`, error);
+      console.error(`Error in cleanup for container ${containerId}:`, error);
+      // Always clear lock in case of error
+      this.containerRenderLocks.set(containerId, false);
     }
+    
+    // Note: we're explicitly NOT calling super.cleanupContainer() here
+    // to avoid potential DOM errors in the parent implementation
   }
   
   cleanupAllContainers(): void {
@@ -162,22 +172,37 @@ class EnhancedBlogEmbed extends BlogEmbed {
       try {
         const container = document.getElementById(id);
         if (container && document.body.contains(container)) {
-          // Safe approach - check parent node existence before each removal
+          // Safe approach - set innerHTML to empty string
           try {
-            // Clear container safely
             container.innerHTML = '';
           } catch (error) {
             console.error(`Error clearing container ${id} with innerHTML:`, error);
             
-            // Fallback approach
+            // Fallback: try to remove children individually with safety checks
             try {
-              while (container.firstChild && document.body.contains(container)) {
-                container.removeChild(container.firstChild);
+              let child = container.firstChild;
+              while (child && document.body.contains(container)) {
+                // Store the next sibling before removing the current child
+                const nextSibling = child.nextSibling;
+                try {
+                  // Check if child is still a child of container before removing
+                  if (child.parentNode === container) {
+                    container.removeChild(child);
+                  }
+                } catch (childError) {
+                  console.error(`Error removing individual child:`, childError);
+                  // Break to avoid infinite loop
+                  break;
+                }
+                // Move to next sibling
+                child = nextSibling;
               }
             } catch (fallbackError) {
-              console.error(`Fallback cleanup failed for container ${id}:`, fallbackError);
+              console.error(`Fallback child removal failed:`, fallbackError);
             }
           }
+        } else {
+          console.warn(`Container #${id} does not exist or is not in DOM, skipping cleanup`);
         }
       } catch (error) {
         console.error(`Error cleaning up container ${id}:`, error);
@@ -185,7 +210,7 @@ class EnhancedBlogEmbed extends BlogEmbed {
     });
     
     // We don't need to call super if we've already cleaned everything
-    // This prevents double cleanup attempts
+    // This prevents double cleanup attempts and potential DOM errors
     // super.cleanupAllContainers();
   }
   

@@ -15,22 +15,28 @@ const BlogPage: React.FC = () => {
     cleanup
   } = useBlog();
   
-  // Reference to track if component is mounted and prevent concurrent renders
+  // Reference to track if component is mounted
   const isMounted = useRef(true);
   const isProcessingRoute = useRef(false);
   
   // Set up mount/unmount tracking
   useEffect(() => {
+    // Set mounted flag on component mount
     isMounted.current = true;
     
     return () => {
+      // Set unmounted flag first to prevent new renders during cleanup
       isMounted.current = false;
-      // Ensure cleanup happens on unmount
-      try {
-        cleanup();
-      } catch (error) {
-        console.error("Error during cleanup on unmount:", error);
-      }
+      
+      // Add timeout to ensure all React updates are processed
+      // before attempting cleanup operations
+      setTimeout(() => {
+        try {
+          cleanup();
+        } catch (error) {
+          console.error("Error during cleanup on unmount:", error);
+        }
+      }, 0);
     };
   }, [cleanup]);
   
@@ -73,7 +79,8 @@ const BlogPage: React.FC = () => {
       }
     };
     
-    renderContent();
+    // Small timeout to ensure DOM is ready before rendering
+    setTimeout(renderContent, 10);
     
     // Cleanup function to handle component unmount during async operation
     return () => {

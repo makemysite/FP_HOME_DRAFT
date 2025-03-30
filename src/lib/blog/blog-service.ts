@@ -15,7 +15,7 @@ class BlogService {
   async renderBlogList(containerId: string): Promise<void> {
     if (!this.blogEmbed) return;
     
-    // First validate the container exists in DOM
+    // First validate the container exists in DOM with double checking
     const container = document.getElementById(containerId);
     if (!container || !document.body.contains(container)) {
       console.warn(`Container #${containerId} does not exist or is not in DOM, skipping render`);
@@ -31,7 +31,7 @@ class BlogService {
       // Add to tracking
       this.activeContainers.add(containerId);
       
-      // Perform the render operation
+      // Perform the render operation with enhanced safety
       await this.blogEmbed.renderBlogList(containerId, {
         limit: 8,
         showDescription: true,
@@ -50,7 +50,7 @@ class BlogService {
   async renderBlogPost(containerId: string, slug: string): Promise<void> {
     if (!this.blogEmbed) return;
     
-    // First validate the container exists in DOM
+    // First validate the container exists in DOM with double checking
     const container = document.getElementById(containerId);
     if (!container || !document.body.contains(container)) {
       console.warn(`Container #${containerId} does not exist or is not in DOM, skipping render`);
@@ -66,7 +66,7 @@ class BlogService {
       // Add to tracking
       this.activeContainers.add(containerId);
       
-      // Perform the render operation
+      // Perform the render operation with enhanced safety
       await this.blogEmbed.renderBlogPost(containerId, slug);
     } catch (error) {
       console.error("Error rendering blog post:", error);
@@ -76,7 +76,7 @@ class BlogService {
   }
   
   /**
-   * Safely cleans up a container's DOM content
+   * Safely cleans up a container's DOM content with additional checks
    */
   cleanupContainer(containerId: string): void {
     try {
@@ -88,8 +88,13 @@ class BlogService {
       
       // Check if container exists and is in the DOM before cleanup
       const container = document.getElementById(containerId);
-      if (!container || !document.body.contains(container)) {
-        console.warn(`Container #${containerId} does not exist or is not in DOM, skipping cleanup`);
+      if (!container) {
+        console.warn(`Container #${containerId} does not exist, skipping cleanup`);
+        return;
+      }
+      
+      if (!document.body.contains(container)) {
+        console.warn(`Container #${containerId} is not in DOM, skipping cleanup`);
         return;
       }
       
@@ -108,18 +113,34 @@ class BlogService {
   }
   
   /**
-   * Clean up all containers
+   * Clean up all containers with safer approach
    */
   cleanupAllContainers(): void {
-    // Make a copy of the set to avoid iteration issues during deletion
-    const containers = Array.from(this.activeContainers);
-    
-    // Clear our tracking set
-    this.activeContainers.clear();
-    
-    // Also tell the BlogEmbed instance to clean up if it exists
-    if (this.blogEmbed) {
-      this.blogEmbed.cleanupAllContainers();
+    try {
+      // Make a copy of the set to avoid iteration issues during deletion
+      const containers = Array.from(this.activeContainers);
+      
+      // Clear our tracking set first
+      this.activeContainers.clear();
+      
+      // Also tell the BlogEmbed instance to clean up if it exists
+      if (this.blogEmbed) {
+        // Instead of cleaning all at once, clean each individually with checks
+        containers.forEach(id => {
+          try {
+            const container = document.getElementById(id);
+            if (container && document.body.contains(container)) {
+              this.blogEmbed?.cleanupContainer(id);
+            } else {
+              console.warn(`Container #${id} does not exist or is not in DOM during cleanup`);
+            }
+          } catch (containerError) {
+            console.error(`Error cleaning up container ${id}:`, containerError);
+          }
+        });
+      }
+    } catch (error) {
+      console.error(`Error in cleanupAllContainers:`, error);
     }
   }
 }
