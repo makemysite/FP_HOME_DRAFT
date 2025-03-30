@@ -1,20 +1,26 @@
 
-import React, { useEffect, useRef } from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect, useRef, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import BlogEmbed from "@/lib/blog/blogsmith-embed";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const BlogPage: React.FC = () => {
   const blogListRef = useRef<HTMLDivElement>(null);
   const blogPostRef = useRef<HTMLDivElement>(null);
+  const location = useLocation();
+  const [loading, setLoading] = useState(true);
   
   useEffect(() => {
+    // Show loading state while we determine route and fetch data
+    setLoading(true);
+    
     // Initialize BlogEmbed
     const blogEmbed = new BlogEmbed();
     
     // Determine if we're viewing a single post or the blog list
-    const path = window.location.pathname;
+    const path = location.pathname;
     const slug = path.replace('/blog/', '');
     
     if (path === '/blog' || path === '/blog/') {
@@ -24,12 +30,14 @@ const BlogPage: React.FC = () => {
           limit: 8,
           showDescription: true,
           showImage: true
-        });
+        }).finally(() => setLoading(false));
       }
     } else if (path.startsWith('/blog/') && slug !== '') {
       // We're on a single blog post page, render that post
       if (blogPostRef.current) {
-        blogEmbed.renderBlogPost('blog-post-container', slug);
+        console.log(`Rendering blog post with slug: ${slug}`);
+        blogEmbed.renderBlogPost('blog-post-container', slug)
+          .finally(() => setLoading(false));
       }
     }
     
@@ -37,7 +45,7 @@ const BlogPage: React.FC = () => {
     return () => {
       // Clean up any event listeners or subscriptions if needed
     };
-  }, []);
+  }, [location.pathname]);
 
   return (
     <div className="bg-white min-h-screen">
@@ -63,15 +71,37 @@ const BlogPage: React.FC = () => {
           <div className="mt-12">
             {/* Blog list container - this will be populated by BlogEmbed */}
             <div id="blog-list-container" ref={blogListRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {/* Content will be rendered by BlogEmbed */}
-              <div className="col-span-full text-center py-12 text-gray-500">
-                Loading blog posts from BlogSmith...
-              </div>
+              {loading && location.pathname === '/blog' && (
+                Array(6).fill(0).map((_, i) => (
+                  <div key={i} className="flex flex-col gap-4">
+                    <Skeleton className="w-full h-[200px] rounded-lg" />
+                    <Skeleton className="w-3/4 h-6" />
+                    <Skeleton className="w-full h-24" />
+                    <Skeleton className="w-1/4 h-6" />
+                  </div>
+                ))
+              )}
             </div>
             
             {/* Blog post container - this will be populated by BlogEmbed for single posts */}
             <div id="blog-post-container" ref={blogPostRef} className="prose max-w-none">
-              {/* Content will be rendered by BlogEmbed */}
+              {loading && location.pathname !== '/blog' && (
+                <div className="space-y-6">
+                  <Skeleton className="w-full h-[400px] rounded-lg" />
+                  <Skeleton className="w-3/4 h-12" />
+                  <Skeleton className="w-1/4 h-6" />
+                  <Skeleton className="w-full h-32" />
+                  <div className="space-y-4">
+                    <Skeleton className="w-1/2 h-8" />
+                    <Skeleton className="w-full h-24" />
+                    <Skeleton className="w-full h-24" />
+                  </div>
+                  <div className="space-y-4">
+                    <Skeleton className="w-1/2 h-8" />
+                    <Skeleton className="w-full h-24" />
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -167,8 +197,105 @@ const BlogPage: React.FC = () => {
           color: #6b7280;
         }
         
-        .blog-embed-post-content {
+        .blog-embed-post-description {
           margin-top: 1.5rem;
+          line-height: 1.8;
+          font-size: 1.125rem;
+          color: #4b5563;
+          margin-bottom: 2rem;
+        }
+        
+        .blog-embed-section {
+          margin-top: 2rem;
+          margin-bottom: 2rem;
+        }
+        
+        .blog-embed-section-title {
+          font-size: 1.75rem;
+          font-weight: 600;
+          color: #170F49;
+          margin-bottom: 1rem;
+        }
+        
+        .blog-embed-section-content {
+          line-height: 1.8;
+        }
+        
+        .blog-embed-content-text {
+          margin-bottom: 1.5rem;
+        }
+        
+        .blog-embed-content-image {
+          margin: 1.5rem 0;
+        }
+        
+        .blog-embed-content-image img {
+          width: 100%;
+          border-radius: 6px;
+        }
+        
+        .blog-embed-content-image figcaption {
+          text-align: center;
+          font-size: 0.875rem;
+          color: #6b7280;
+          margin-top: 0.5rem;
+        }
+        
+        .blog-embed-content-quote {
+          font-style: italic;
+          border-left: 4px solid #E98A23;
+          padding-left: 1rem;
+          margin: 1.5rem 0;
+        }
+        
+        .blog-embed-content-list {
+          margin: 1.5rem 0;
+          padding-left: 1.5rem;
+        }
+        
+        .blog-embed-faqs {
+          margin-top: 3rem;
+          background-color: #f9fafb;
+          padding: 2rem;
+          border-radius: 10px;
+        }
+        
+        .blog-embed-faqs-title {
+          font-size: 1.75rem;
+          font-weight: 600;
+          color: #170F49;
+          margin-bottom: 1.5rem;
+        }
+        
+        .blog-embed-faq {
+          margin-bottom: 1.5rem;
+        }
+        
+        .blog-embed-faq-question {
+          font-size: 1.25rem;
+          font-weight: 600;
+          color: #111827;
+          margin-bottom: 0.75rem;
+        }
+        
+        .blog-embed-faq-answer {
+          color: #4b5563;
+        }
+        
+        .blog-embed-conclusion {
+          margin-top: 3rem;
+          padding-top: 1.5rem;
+          border-top: 1px solid #e5e7eb;
+        }
+        
+        .blog-embed-conclusion-title {
+          font-size: 1.75rem;
+          font-weight: 600;
+          color: #170F49;
+          margin-bottom: 1rem;
+        }
+        
+        .blog-embed-conclusion-content {
           line-height: 1.8;
         }
       `}</style>
