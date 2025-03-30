@@ -2,13 +2,11 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import Navbar from "@/components/landing/Navbar";
-import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
-import BlogEmbed from "@/lib/blog/blogsmith-embed";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
-import { getSlugVariations } from "@/lib/blog/helpers";
+import { getBlogPostBySlug } from "@/lib/blog/queries";
 
 // Fix the type annotation for useParams
 type BlogPostParams = {
@@ -17,6 +15,7 @@ type BlogPostParams = {
 
 const BlogPost: React.FC = () => {
   const { slug } = useParams<BlogPostParams>();
+  const [blogPost, setBlogPost] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
@@ -28,58 +27,17 @@ const BlogPost: React.FC = () => {
       return;
     }
 
-    const blogEmbed = new BlogEmbed({ debug: true }); // Enable debug mode to see logs
-    const containerId = "blog-post-content";
-    
-    // Create container div if it doesn't exist
-    let containerElement = document.getElementById(containerId);
-    if (!containerElement) {
-      containerElement = document.createElement("div");
-      containerElement.id = containerId;
-      document.querySelector(".blog-content-container")?.appendChild(containerElement);
-    }
-    
     const loadBlogPost = async () => {
       try {
         console.log(`Attempting to load blog post with slug: ${slug}`);
         
-        // Generate slug variations to try
-        const slugVariations = getSlugVariations(slug);
-        console.log("Trying slug variations:", slugVariations);
+        const post = await getBlogPostBySlug(slug);
         
-        // Try each slug variation
-        let found = false;
-        
-        for (const variation of slugVariations) {
-          // Check if the blog post exists in the database with this slug variation
-          const { data, error: fetchError } = await supabase
-            .from('blog_posts')
-            .select('*')
-            .eq('slug', variation)
-            .eq('published', true);
-            
-          if (fetchError) {
-            console.error(`Database query error for slug "${variation}":`, fetchError);
-            continue;
-          }
-          
-          if (data && data.length > 0) {
-            console.log(`Found blog post with slug variation "${variation}":`, data[0]);
-            
-            // Now render the blog post with the successful slug variation
-            await blogEmbed.renderBlogPost(containerId, variation, {
-              retryOnFailure: true,
-              retryAttempts: 2,
-              fallbackContent: "We couldn't load this blog post. Please try again later."
-            });
-            
-            found = true;
-            break;
-          }
-        }
-        
-        if (!found) {
-          console.error(`No blog post found with any slug variations of: ${slug}`);
+        if (post) {
+          console.log("Blog post loaded successfully:", post.title);
+          setBlogPost(post);
+        } else {
+          console.error(`No blog post found with slug: ${slug}`);
           setError(`Blog post not found: ${slug}`);
           toast({
             title: "Not Found",
@@ -88,7 +46,7 @@ const BlogPost: React.FC = () => {
           });
         }
       } catch (err) {
-        console.error("Error rendering blog post:", err);
+        console.error("Error loading blog post:", err);
         setError("Failed to load blog post");
         toast({
           title: "Error",
@@ -102,12 +60,62 @@ const BlogPost: React.FC = () => {
     
     loadBlogPost();
     
-    // Cleanup function
-    return () => {
-      blogEmbed.cleanupContainer(containerId);
-      blogEmbed.destroy();
-    };
   }, [slug, toast]);
+
+  const renderContent = () => {
+    if (!blogPost) return null;
+    
+    return (
+      <div className="prose max-w-none">
+        <h1 className="text-3xl font-bold mb-4">{blogPost.title}</h1>
+        {blogPost.description && (
+          <p className="text-lg text-gray-600 mb-6">{blogPost.description}</p>
+        )}
+        
+        {blogPost.heroImage && (
+          <img 
+            src={blogPost.heroImage} 
+            alt={blogPost.title} 
+            className="w-full h-auto max-h-96 object-cover rounded-lg mb-8"
+          />
+        )}
+        
+        {blogPost.sections?.map((section: any, index: number) => (
+          <div key={section.id || index} className="mb-8">
+            <h2 className="text-2xl font-semibold mb-4">{section.title}</h2>
+            {section.content?.map((content: any, contentIndex: number) => (
+              <div key={content.id || contentIndex} className="mb-4">
+                {content.type === 'text' && (
+                  <div dangerouslySetInnerHTML={{ __html: content.content.text }} />
+                )}
+                {content.type === 'image' && content.content.url && (
+                  <img 
+                    src={content.content.url} 
+                    alt={content.content.caption || ''} 
+                    className="w-full h-auto rounded-lg my-4"
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+        ))}
+        
+        {blogPost.faqs && blogPost.faqs.length > 0 && (
+          <div className="mt-12 bg-gray-50 p-6 rounded-lg">
+            <h2 className="text-2xl font-semibold mb-6">Frequently Asked Questions</h2>
+            <div className="space-y-6">
+              {blogPost.faqs.map((faq: any, index: number) => (
+                <div key={faq.id || index}>
+                  <h3 className="text-xl font-medium mb-2">{faq.question}</h3>
+                  <p className="text-gray-600">{faq.answer}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div className="bg-white min-h-screen flex flex-col">
@@ -151,9 +159,7 @@ const BlogPost: React.FC = () => {
               </Button>
             </div>
           ) : (
-            <div id="blog-post-content" className="prose max-w-none">
-              {/* Content will be populated by BlogEmbed */}
-            </div>
+            renderContent()
           )}
         </div>
       </main>
