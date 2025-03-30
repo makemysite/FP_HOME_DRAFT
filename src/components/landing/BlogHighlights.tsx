@@ -10,35 +10,35 @@ const BlogHighlights: React.FC = () => {
       image:
         "https://cdn.builder.io/api/v1/image/assets/a720917f9ee741a78621d5e6666ab10a/6df54d197fcb93eba7de2f3bec60bd7d62d5c6df?placeholderIfAbsent=true",
       title: "How to Build a Scalable Application up to 1 Million Users on AWS",
-      link: "#",
+      link: "/blog/scalable-application-aws",
     },
     {
       id: 2,
       image:
         "https://cdn.builder.io/api/v1/image/assets/a720917f9ee741a78621d5e6666ab10a/32455780da50348952934e255ef56b99a6abf598?placeholderIfAbsent=true",
-      title: "How to Build a Scalable Application up to 1 Million Users on AWS",
-      link: "#",
+      title: "5 Strategies for Reducing Your Cloud Infrastructure Costs",
+      link: "/blog/reducing-cloud-costs",
     },
     {
       id: 3,
       image:
         "https://cdn.builder.io/api/v1/image/assets/a720917f9ee741a78621d5e6666ab10a/773964830d4922e124cd00b93afc92626bc1a944?placeholderIfAbsent=true",
-      title: "How to Build a Scalable Application up to 1 Million Users on AWS",
-      link: "#",
+      title: "Best Practices for Field Service Mobile Applications",
+      link: "/blog/field-service-mobile-apps",
     },
     {
       id: 4,
       image:
         "https://cdn.builder.io/api/v1/image/assets/a720917f9ee741a78621d5e6666ab10a/eb83e093cf09f45a48cbce15f61c6acb114e3b02?placeholderIfAbsent=true",
-      title: "How to Build a Scalable Application up to 1 Million Users on AWS",
-      link: "#",
+      title: "Implementing Real-Time Analytics for Field Service Operations",
+      link: "/blog/real-time-analytics",
     },
     {
       id: 5,
       image:
         "https://cdn.builder.io/api/v1/image/assets/a720917f9ee741a78621d5e6666ab10a/6a3eae6fe5fa62d85a4ca98956ab3569d1d92b2e?placeholderIfAbsent=true",
-      title: "How to Build a Scalable Application up to 1 Million Users on AWS",
-      link: "#",
+      title: "How AI is Revolutionizing Field Service Dispatch Optimization",
+      link: "/blog/ai-dispatch-optimization",
     },
   ];
 
@@ -73,13 +73,13 @@ const BlogHighlights: React.FC = () => {
                   {post.title}
                 </h3>
               </div>
-              <a
-                href={post.link}
+              <Link
+                to={post.link}
                 className="flex items-center gap-[15px] text-[#E98A23] leading-loose mt-5 hover:text-[rgba(233,138,35,0.8)] transition-colors"
               >
                 <span className="self-stretch my-auto">Read More</span>
                 <ArrowRightIcon />
-              </a>
+              </Link>
             </article>
           ))}
         </div>
