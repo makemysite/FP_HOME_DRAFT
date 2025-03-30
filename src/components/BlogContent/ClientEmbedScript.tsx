@@ -75,7 +75,7 @@ const ClientEmbedScript: React.FC<ClientEmbedScriptProps> = ({
     };
   }, [containerId, apiKey, apiUrl, slug, mode]);
   
-  return <div id={containerId}></div>;
+  return <div id={containerId} className="blog-container"></div>;
 };
 
 export default ClientEmbedScript;
