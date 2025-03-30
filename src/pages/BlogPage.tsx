@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
@@ -11,12 +11,13 @@ const BlogPage: React.FC = () => {
   const location = useLocation();
   const [loading, setLoading] = useState(true);
   const [isMounted, setIsMounted] = useState(false);
+  const blogEmbedRef = useRef<BlogEmbed | null>(null);
   
+  // Set mounted state when component mounts
   useEffect(() => {
-    // Set mounted state to true
     setIsMounted(true);
     
-    // Clean up function to set mounted to false when component unmounts
+    // Clean up function for component unmounting
     return () => {
       setIsMounted(false);
     };
@@ -26,74 +27,103 @@ const BlogPage: React.FC = () => {
     // Only run blog initialization when component is mounted
     if (!isMounted) return;
     
-    // Show loading state while we determine route and fetch data
+    // Reset loading state for each route change
     setLoading(true);
+    
+    // Create the BlogEmbed instance only once and store it in the ref
+    if (!blogEmbedRef.current) {
+      blogEmbedRef.current = new BlogEmbed();
+    }
     
     // Determine if we're viewing a single post or the blog list
     const path = location.pathname;
     const slug = path.replace('/blog/', '');
     
-    // Initialize BlogEmbed
-    const blogEmbed = new BlogEmbed();
-    
-    try {
-      if (path === '/blog' || path === '/blog/') {
-        // We're on the main blog page, render the blog list
-        const blogListContainer = document.getElementById('blog-list-container');
-        if (blogListContainer) {
-          blogEmbed.renderBlogList('blog-list-container', {
-            limit: 8,
-            showDescription: true,
-            showImage: true
-          })
-          .then(() => {
-            if (isMounted) setLoading(false);
-          })
-          .catch(error => {
-            console.error("Error rendering blog list:", error);
-            if (isMounted) {
-              setLoading(false);
-              toast({
-                title: "Error loading blogs",
-                description: "Could not load blog posts. Please try again later.",
-                variant: "destructive",
-              });
-            }
-          });
-        }
-      } else if (path.startsWith('/blog/') && slug !== '') {
-        // We're on a single blog post page, render that post
-        const blogPostContainer = document.getElementById('blog-post-container');
-        if (blogPostContainer) {
-          console.log(`Rendering blog post with slug: ${slug}`);
-          blogEmbed.renderBlogPost('blog-post-container', slug)
+    // Small delay to ensure DOM elements exist
+    const initTimer = setTimeout(() => {
+      try {
+        if (!isMounted) return; // Safety check - don't proceed if component has unmounted
+        
+        if (path === '/blog' || path === '/blog/') {
+          // We're on the main blog page, render the blog list
+          const blogListContainer = document.getElementById('blog-list-container');
+          
+          if (blogListContainer && blogEmbedRef.current && isMounted) {
+            blogEmbedRef.current.renderBlogList('blog-list-container', {
+              limit: 8,
+              showDescription: true,
+              showImage: true
+            })
             .then(() => {
               if (isMounted) setLoading(false);
             })
             .catch(error => {
-              console.error("Error rendering blog post:", error);
+              console.error("Error rendering blog list:", error);
               if (isMounted) {
                 setLoading(false);
                 toast({
-                  title: "Error loading blog post",
-                  description: "Could not load the blog post. Please try again later.",
+                  title: "Error loading blogs",
+                  description: "Could not load blog posts. Please try again later.",
                   variant: "destructive",
                 });
               }
             });
+          }
+        } else if (path.startsWith('/blog/') && slug !== '') {
+          // We're on a single blog post page, render that post
+          const blogPostContainer = document.getElementById('blog-post-container');
+          
+          if (blogPostContainer && blogEmbedRef.current && isMounted) {
+            console.log(`Rendering blog post with slug: ${slug}`);
+            blogEmbedRef.current.renderBlogPost('blog-post-container', slug)
+              .then(() => {
+                if (isMounted) setLoading(false);
+              })
+              .catch(error => {
+                console.error("Error rendering blog post:", error);
+                if (isMounted) {
+                  setLoading(false);
+                  toast({
+                    title: "Error loading blog post",
+                    description: "Could not load the blog post. Please try again later.",
+                    variant: "destructive",
+                  });
+                }
+              });
+          }
+        }
+      } catch (error) {
+        console.error("Error in blog page:", error);
+        if (isMounted) {
+          setLoading(false);
+          toast({
+            title: "An error occurred",
+            description: "Something went wrong. Please try again later.",
+            variant: "destructive",
+          });
         }
       }
-    } catch (error) {
-      console.error("Error in blog page:", error);
-      if (isMounted) {
-        setLoading(false);
-        toast({
-          title: "An error occurred",
-          description: "Something went wrong. Please try again later.",
-          variant: "destructive",
-        });
+    }, 50); // Small delay to ensure DOM is ready
+    
+    // Clean up function for this effect
+    return () => {
+      clearTimeout(initTimer);
+      
+      // Important: Clean up DOM containers to prevent manipulation after unmount
+      try {
+        const blogListContainer = document.getElementById('blog-list-container');
+        if (blogListContainer) {
+          blogListContainer.innerHTML = '';
+        }
+        
+        const blogPostContainer = document.getElementById('blog-post-container');
+        if (blogPostContainer) {
+          blogPostContainer.innerHTML = '';
+        }
+      } catch (err) {
+        console.error("Error cleaning up blog containers:", err);
       }
-    }
+    };
     
   }, [location.pathname, isMounted]);
 

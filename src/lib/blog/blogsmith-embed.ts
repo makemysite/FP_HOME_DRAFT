@@ -29,7 +29,7 @@ export interface BlogPost {
 interface BlogPostData {
   post: BlogPost | null;
   sections: any[];
-  faqs?: any[]; // Add the faqs property to the interface
+  faqs?: any[]; // FAQs property is explicitly defined
 }
 
 class BlogEmbed {
@@ -76,11 +76,11 @@ class BlogEmbed {
       
       if (postError) {
         console.error('Error fetching blog post:', postError);
-        return { post: null, sections: [] };
+        return { post: null, sections: [], faqs: [] };
       }
 
       if (!post) {
-        return { post: null, sections: [] };
+        return { post: null, sections: [], faqs: [] };
       }
 
       // Fetch blog sections with their content
@@ -97,7 +97,7 @@ class BlogEmbed {
 
       if (sectionsError) {
         console.error('Error fetching blog sections:', sectionsError);
-        return { post, sections: [] };
+        return { post, sections: [], faqs: [] };
       }
 
       // Fetch FAQs if any
@@ -119,7 +119,7 @@ class BlogEmbed {
       };
     } catch (error) {
       console.error('Error fetching blog post:', error);
-      return { post: null, sections: [] };
+      return { post: null, sections: [], faqs: [] };
     }
   }
 
@@ -133,6 +133,21 @@ class BlogEmbed {
     return container;
   }
 
+  // Method to safely update container content
+  private safelyUpdateContainer(container: HTMLElement | null, content: string): boolean {
+    if (!container) {
+      return false;
+    }
+    
+    try {
+      container.innerHTML = content;
+      return true;
+    } catch (error) {
+      console.error('Error updating container content:', error);
+      return false;
+    }
+  }
+
   // Method to render a list of blog posts
   async renderBlogList(containerId: string, options: BlogEmbedOptions = {}): Promise<void> {
     const container = this.getContainer(containerId);
@@ -143,22 +158,23 @@ class BlogEmbed {
     const { limit = 10, showDescription = true, showImage = true } = options;
     
     // Show loading state
-    container.innerHTML = '<div class="blog-embed-loading">Loading blog posts...</div>';
+    this.safelyUpdateContainer(container, '<div class="blog-embed-loading">Loading blog posts...</div>');
     
     // Fetch posts from Supabase
     const posts = await this.fetchBlogPosts(limit);
 
     // Check if container still exists after async operation
-    if (!document.getElementById(containerId)) {
+    const updatedContainer = this.getContainer(containerId);
+    if (!updatedContainer) {
       console.warn(`Container #${containerId} no longer exists, aborting render`);
       return;
     }
 
     // Add blog-embed-list class for styling
-    container.classList.add('blog-embed-list');
+    updatedContainer.classList.add('blog-embed-list');
     
     if (posts.length === 0) {
-      container.innerHTML = '<div class="blog-embed-empty">No blog posts found</div>';
+      this.safelyUpdateContainer(updatedContainer, '<div class="blog-embed-empty">No blog posts found</div>');
       return;
     }
     
@@ -184,14 +200,15 @@ class BlogEmbed {
       `;
     }).join('');
 
-    // Check again if container still exists
-    if (!document.getElementById(containerId)) {
+    // Final check if container still exists
+    const finalContainer = this.getContainer(containerId);
+    if (!finalContainer) {
       console.warn(`Container #${containerId} no longer exists, aborting render`);
       return;
     }
 
     // Set the HTML
-    container.innerHTML = postsHtml;
+    this.safelyUpdateContainer(finalContainer, postsHtml);
 
     // Add SEO metadata
     this.addSEOMetadata('Blog Posts', 'Latest blog posts from our company');
@@ -205,24 +222,25 @@ class BlogEmbed {
     }
 
     // Show loading state
-    container.innerHTML = '<div class="blog-embed-loading">Loading blog post...</div>';
+    this.safelyUpdateContainer(container, '<div class="blog-embed-loading">Loading blog post...</div>');
     
     // Fetch post from Supabase with all related content
     const { post, sections, faqs } = await this.fetchBlogPost(slug);
     
     // Check if container still exists after async operation
-    if (!document.getElementById(containerId)) {
+    const updatedContainer = this.getContainer(containerId);
+    if (!updatedContainer) {
       console.warn(`Container #${containerId} no longer exists, aborting render`);
       return;
     }
     
     if (!post) {
-      container.innerHTML = '<div class="blog-embed-error">Blog post not found</div>';
+      this.safelyUpdateContainer(updatedContainer, '<div class="blog-embed-error">Blog post not found</div>');
       return;
     }
 
     // Add blog-embed-post class for styling
-    container.classList.add('blog-embed-post');
+    updatedContainer.classList.add('blog-embed-post');
     
     const formattedDate = new Date(post.created_at).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -345,13 +363,14 @@ class BlogEmbed {
     postHtml += `</article>`;
 
     // Final check if container still exists
-    if (!document.getElementById(containerId)) {
+    const finalContainer = this.getContainer(containerId);
+    if (!finalContainer) {
       console.warn(`Container #${containerId} no longer exists, aborting render`);
       return;
     }
 
     // Set the HTML
-    container.innerHTML = postHtml;
+    this.safelyUpdateContainer(finalContainer, postHtml);
 
     // Add SEO metadata for the specific post
     this.addSEOMetadata(post.title, post.description || '', post.hero_image || undefined);
@@ -379,11 +398,21 @@ class BlogEmbed {
 
       let script = document.querySelector('script[type="application/ld+json"]');
       if (!script) {
-        script = document.createElement('script');
-        script.setAttribute('type', 'application/ld+json');
-        document.head.appendChild(script);
+        try {
+          script = document.createElement('script');
+          script.setAttribute('type', 'application/ld+json');
+          document.head.appendChild(script);
+        } catch (error) {
+          console.error("Error creating schema script:", error);
+          return;
+        }
       }
-      script.textContent = JSON.stringify(schemaData);
+      
+      try {
+        script.textContent = JSON.stringify(schemaData);
+      } catch (error) {
+        console.error("Error setting script content:", error);
+      }
 
       // Add meta tags for SEO and social sharing
       this.setMetaTag('title', title);
@@ -403,14 +432,20 @@ class BlogEmbed {
     try {
       let meta = document.querySelector(`meta[name="${name}"], meta[property="${name}"]`);
       if (!meta) {
-        meta = document.createElement('meta');
-        if (name.startsWith('og:')) {
-          meta.setAttribute('property', name);
-        } else {
-          meta.setAttribute('name', name);
+        try {
+          meta = document.createElement('meta');
+          if (name.startsWith('og:')) {
+            meta.setAttribute('property', name);
+          } else {
+            meta.setAttribute('name', name);
+          }
+          document.head.appendChild(meta);
+        } catch (error) {
+          console.error(`Error creating meta tag ${name}:`, error);
+          return;
         }
-        document.head.appendChild(meta);
       }
+      
       meta.setAttribute('content', content);
     } catch (error) {
       console.error(`Error setting meta tag ${name}:`, error);
