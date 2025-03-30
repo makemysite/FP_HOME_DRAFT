@@ -61,8 +61,6 @@ const BlogPage: React.FC = () => {
           </div>
 
           <div className="mt-12">
-            <h2 className="text-2xl font-bold text-[#170F49] mb-8">Latest Articles</h2>
-            
             {/* Blog list container - this will be populated by BlogEmbed */}
             <div id="blog-list-container" ref={blogListRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {/* Content will be rendered by BlogEmbed */}
@@ -72,20 +70,6 @@ const BlogPage: React.FC = () => {
             <div id="blog-post-container" ref={blogPostRef} className="prose max-w-none">
               {/* Content will be rendered by BlogEmbed */}
             </div>
-          </div>
-
-          <div className="mt-16">
-            <h2 className="text-2xl font-bold text-[#170F49] mb-4">Custom Styling</h2>
-            <p className="text-gray-600 mb-4">
-              You can customize the appearance of embedded blog content by adding CSS to target these classes:
-            </p>
-            <ul className="list-disc pl-5 text-gray-600 space-y-2">
-              <li><code>.blog-embed-list</code> - Blog list container</li>
-              <li><code>.blog-embed-list-item</code> - Individual blog item</li>
-              <li><code>.blog-embed-post</code> - Blog post container</li>
-              <li><code>.blog-embed-post-title</code> - Blog post title</li>
-              <li><code>.blog-embed-post-content</code> - Blog post content</li>
-            </ul>
           </div>
         </div>
       </div>
