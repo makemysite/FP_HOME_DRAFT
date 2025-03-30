@@ -6,7 +6,7 @@ import BlogContainer from "@/components/blog/BlogContainer";
 import { useBlog } from "@/hooks/use-blog";
 import { toast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
+import { AlertTriangle } from "lucide-react";
 
 const BlogPage: React.FC = () => {
   const location = useLocation();
@@ -187,7 +187,7 @@ const BlogPage: React.FC = () => {
   const EmptyState = () => (
     <div className="w-full py-12 text-center">
       <Alert variant="destructive" className="max-w-xl mx-auto">
-        <ExclamationTriangleIcon className="h-4 w-4 mr-2" />
+        <AlertTriangle className="h-4 w-4 mr-2" />
         <AlertDescription>
           No blog content is available at the moment. This could be due to connection issues or no published posts.
         </AlertDescription>

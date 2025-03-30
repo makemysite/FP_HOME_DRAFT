@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { AlertCircle } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 
 interface BlogContainerProps {
   id: string;
@@ -45,7 +45,15 @@ const BlogContainer: React.FC<BlogContainerProps> = ({ id, loading, type }) => {
       )}
       
       {/* This div will be populated by the BlogEmbed library */}
-      {!loading && <div className="w-full min-h-[50px]"></div>}
+      {!loading && (
+        <div className="w-full min-h-[50px]">
+          {/* Custom fallback message that will be replaced by actual content */}
+          <div className="blog-embed-loading text-center p-4">
+            <AlertTriangle className="h-5 w-5 text-yellow-500 mx-auto mb-2" />
+            <p>Loading blog content...</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
