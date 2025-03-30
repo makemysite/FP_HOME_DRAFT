@@ -8,6 +8,7 @@ export function useBlog() {
   const [loading, setLoading] = useState(true);
   const [renderError, setRenderError] = useState<string | null>(null);
   const unmountedRef = useRef(false);
+  const renderingRef = useRef(false);
   const navigate = useNavigate();
 
   // Safe state setter that only updates if component is still mounted
@@ -24,20 +25,31 @@ export function useBlog() {
     return () => {
       unmountedRef.current = true;
       // Perform immediate cleanup when unmounting
-      blogService.cleanupAllContainers();
+      try {
+        blogService.cleanupAllContainers();
+      } catch (error) {
+        console.error("Error during unmount cleanup:", error);
+      }
     };
   }, []);
 
   // Render blog list function with enhanced safety
   const renderBlogList = useCallback(async () => {
-    if (unmountedRef.current) return;
+    if (unmountedRef.current || renderingRef.current) return;
     
+    renderingRef.current = true;
     safeSetState(setLoading, true);
     safeSetState(setRenderError, null);
     
     try {
-      // Clean up any existing blog post container first
+      // Verify we're still mounted before continuing
+      if (unmountedRef.current) return;
+      
+      // Clean up any existing blog post container first - only if needed
       blogService.cleanupContainer('blog-post-container');
+      
+      // Verify we're still mounted before continuing
+      if (unmountedRef.current) return;
       
       // Then render the list
       await blogService.renderBlogList('blog-list-container');
@@ -55,19 +67,28 @@ export function useBlog() {
           variant: "destructive",
         });
       }
+    } finally {
+      renderingRef.current = false;
     }
   }, [safeSetState]);
 
   // Render blog post function with enhanced safety
   const renderBlogPost = useCallback(async (slug: string) => {
-    if (unmountedRef.current) return;
+    if (unmountedRef.current || renderingRef.current) return;
     
+    renderingRef.current = true;
     safeSetState(setLoading, true);
     safeSetState(setRenderError, null);
     
     try {
-      // Clean up any existing blog list container first
+      // Verify we're still mounted before continuing
+      if (unmountedRef.current) return;
+      
+      // Clean up any existing blog list container first - only if needed
       blogService.cleanupContainer('blog-list-container');
+      
+      // Verify we're still mounted before continuing
+      if (unmountedRef.current) return;
       
       // Then render the post
       await blogService.renderBlogPost('blog-post-container', slug);
@@ -91,13 +112,19 @@ export function useBlog() {
           });
         }
       }
+    } finally {
+      renderingRef.current = false;
     }
   }, [safeSetState]);
 
   // Cleanup function with additional safety
   const cleanup = useCallback(() => {
-    blogService.cleanupContainer('blog-list-container');
-    blogService.cleanupContainer('blog-post-container');
+    try {
+      blogService.cleanupContainer('blog-list-container');
+      blogService.cleanupContainer('blog-post-container');
+    } catch (error) {
+      console.error("Error during cleanup:", error);
+    }
   }, []);
 
   // Handle 404 redirects

@@ -15,8 +15,9 @@ const BlogPage: React.FC = () => {
     cleanup
   } = useBlog();
   
-  // Reference to track if component is mounted
+  // Reference to track if component is mounted and prevent concurrent renders
   const isMounted = useRef(true);
+  const isProcessingRoute = useRef(false);
   
   // Set up mount/unmount tracking
   useEffect(() => {
@@ -24,13 +25,21 @@ const BlogPage: React.FC = () => {
     
     return () => {
       isMounted.current = false;
-      cleanup();
+      // Ensure cleanup happens on unmount
+      try {
+        cleanup();
+      } catch (error) {
+        console.error("Error during cleanup on unmount:", error);
+      }
     };
   }, [cleanup]);
   
   // Handle blog rendering based on URL with safe checks
   useEffect(() => {
-    if (!isMounted.current) return;
+    // Prevent concurrent renders and check mount status
+    if (!isMounted.current || isProcessingRoute.current) return;
+    
+    isProcessingRoute.current = true;
     
     const path = location.pathname;
     const slug = path.replace('/blog/', '').replace(/\/$/, ''); // Remove trailing slash if present
@@ -39,6 +48,9 @@ const BlogPage: React.FC = () => {
     
     const renderContent = async () => {
       try {
+        // Double-check we're still mounted before rendering
+        if (!isMounted.current) return;
+        
         if (path === '/blog' || path === '/blog/') {
           await renderBlogList();
         } else if (path.startsWith('/blog/') && slug) {
@@ -53,11 +65,20 @@ const BlogPage: React.FC = () => {
             variant: "destructive",
           });
         }
+      } finally {
+        // Reset processing flag only if we're still mounted
+        if (isMounted.current) {
+          isProcessingRoute.current = false;
+        }
       }
     };
     
     renderContent();
     
+    // Cleanup function to handle component unmount during async operation
+    return () => {
+      isProcessingRoute.current = false;
+    };
   }, [location.pathname, renderBlogList, renderBlogPost]);
 
   // Check for error from previous navigation
@@ -70,7 +91,7 @@ const BlogPage: React.FC = () => {
       });
       
       // Clear the error state to prevent showing the toast multiple times
-      history.replaceState({}, document.title);
+      window.history.replaceState({}, document.title);
     }
   }, [location]);
 

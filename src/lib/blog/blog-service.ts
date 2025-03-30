@@ -15,6 +15,13 @@ class BlogService {
   async renderBlogList(containerId: string): Promise<void> {
     if (!this.blogEmbed) return;
     
+    // First validate the container exists in DOM
+    const container = document.getElementById(containerId);
+    if (!container || !document.body.contains(container)) {
+      console.warn(`Container #${containerId} does not exist or is not in DOM, skipping render`);
+      return;
+    }
+    
     try {
       // Remove container from tracking if it was previously tracked
       if (this.isContainerActive(containerId)) {
@@ -42,6 +49,13 @@ class BlogService {
    */
   async renderBlogPost(containerId: string, slug: string): Promise<void> {
     if (!this.blogEmbed) return;
+    
+    // First validate the container exists in DOM
+    const container = document.getElementById(containerId);
+    if (!container || !document.body.contains(container)) {
+      console.warn(`Container #${containerId} does not exist or is not in DOM, skipping render`);
+      return;
+    }
     
     try {
       // Remove container from tracking if it was previously tracked
@@ -72,19 +86,14 @@ class BlogService {
       // Make sure we have a BlogEmbed instance
       if (!this.blogEmbed) return;
       
-      // Then clean up the DOM content using the enhanced class
+      // Check if container exists and is in the DOM before cleanup
       const container = document.getElementById(containerId);
-      if (container) {
-        // First check if the element is actually in the DOM
-        if (document.body.contains(container)) {
-          // Using a safer approach than innerHTML = ''
-          while (container.firstChild) {
-            container.removeChild(container.firstChild);
-          }
-        }
+      if (!container || !document.body.contains(container)) {
+        console.warn(`Container #${containerId} does not exist or is not in DOM, skipping cleanup`);
+        return;
       }
       
-      // Also tell the BlogEmbed instance to clean up
+      // Then clean up the DOM content using the enhanced class
       this.blogEmbed.cleanupContainer(containerId);
     } catch (error) {
       console.error(`Error cleaning up container ${containerId}:`, error);
@@ -108,22 +117,7 @@ class BlogService {
     // Clear our tracking set
     this.activeContainers.clear();
     
-    // Clean each container
-    containers.forEach(id => {
-      try {
-        const container = document.getElementById(id);
-        if (container && document.body.contains(container)) {
-          // Using a safer approach
-          while (container.firstChild) {
-            container.removeChild(container.firstChild);
-          }
-        }
-      } catch (error) {
-        console.error(`Error cleaning up container ${id}:`, error);
-      }
-    });
-    
-    // Also tell the BlogEmbed instance to clean up
+    // Also tell the BlogEmbed instance to clean up if it exists
     if (this.blogEmbed) {
       this.blogEmbed.cleanupAllContainers();
     }
