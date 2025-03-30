@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import BlogEmbed from "@/lib/blog/blogsmith-embed";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
+import { getSlugVariations } from "@/lib/blog/helpers";
 
 // Fix the type annotation for useParams
 type BlogPostParams = {
@@ -42,33 +43,50 @@ const BlogPost: React.FC = () => {
       try {
         console.log(`Attempting to load blog post with slug: ${slug}`);
         
-        // First check if the blog post exists in the database
-        const { data, error: fetchError } = await supabase
-          .from('blog_posts')
-          .select('*')
-          .eq('slug', slug)
-          .eq('published', true);
+        // Generate slug variations to try
+        const slugVariations = getSlugVariations(slug);
+        console.log("Trying slug variations:", slugVariations);
+        
+        // Try each slug variation
+        let found = false;
+        
+        for (const variation of slugVariations) {
+          // Check if the blog post exists in the database with this slug variation
+          const { data, error: fetchError } = await supabase
+            .from('blog_posts')
+            .select('*')
+            .eq('slug', variation)
+            .eq('published', true);
+            
+          if (fetchError) {
+            console.error(`Database query error for slug "${variation}":`, fetchError);
+            continue;
+          }
           
-        if (fetchError) {
-          console.error("Database query error:", fetchError);
-          throw new Error("Database error when checking blog post");
+          if (data && data.length > 0) {
+            console.log(`Found blog post with slug variation "${variation}":`, data[0]);
+            
+            // Now render the blog post with the successful slug variation
+            await blogEmbed.renderBlogPost(containerId, variation, {
+              retryOnFailure: true,
+              retryAttempts: 2,
+              fallbackContent: "We couldn't load this blog post. Please try again later."
+            });
+            
+            found = true;
+            break;
+          }
         }
         
-        if (!data || data.length === 0) {
-          console.error(`No blog post found with slug: ${slug}`);
+        if (!found) {
+          console.error(`No blog post found with any slug variations of: ${slug}`);
           setError(`Blog post not found: ${slug}`);
-          setLoading(false);
-          return;
+          toast({
+            title: "Not Found",
+            description: `Could not find the blog post "${slug}"`,
+            variant: "destructive"
+          });
         }
-        
-        console.log("Found blog post in database:", data[0]);
-        
-        // Now render the blog post
-        await blogEmbed.renderBlogPost(containerId, slug, {
-          retryOnFailure: true,
-          retryAttempts: 2,
-          fallbackContent: "We couldn't load this blog post. Please try again later."
-        });
       } catch (err) {
         console.error("Error rendering blog post:", err);
         setError("Failed to load blog post");
