@@ -33,6 +33,8 @@ interface BlogPostData {
 }
 
 class BlogEmbed {
+  private activeContainers: Set<string> = new Set();
+  
   constructor() {
     console.log('BlogEmbed: Initialized with Supabase integration');
   }
@@ -125,27 +127,79 @@ class BlogEmbed {
 
   // Method to safely check if a container exists
   private getContainer(containerId: string): HTMLElement | null {
-    const container = document.getElementById(containerId);
-    if (!container) {
-      console.error(`Container with ID "${containerId}" not found`);
+    try {
+      // Check if container ID is being tracked
+      if (!this.activeContainers.has(containerId)) {
+        // Add it to tracking
+        this.activeContainers.add(containerId);
+      }
+      
+      const container = document.getElementById(containerId);
+      if (!container) {
+        console.error(`Container with ID "${containerId}" not found`);
+        // Remove from tracked containers if not found
+        this.activeContainers.delete(containerId);
+        return null;
+      }
+      return container;
+    } catch (error) {
+      console.error(`Error getting container ${containerId}:`, error);
+      this.activeContainers.delete(containerId);
       return null;
     }
-    return container;
   }
 
   // Method to safely update container content
-  private safelyUpdateContainer(container: HTMLElement | null, content: string): boolean {
+  private safelyUpdateContainer(container: HTMLElement | null, content: string, containerId: string): boolean {
     if (!container) {
+      // Container not available, remove from tracking
+      this.activeContainers.delete(containerId);
       return false;
     }
     
     try {
-      container.innerHTML = content;
+      // Extra check to ensure the container is still in the DOM
+      if (!document.body.contains(container)) {
+        console.warn(`Container #${containerId} is no longer in the DOM, aborting update`);
+        this.activeContainers.delete(containerId);
+        return false;
+      }
+      
+      // Using a safer approach to set innerHTML
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = content;
+      
+      // Clear the container first
+      while (container.firstChild) {
+        container.removeChild(container.firstChild);
+      }
+      
+      // Move nodes from temp div to container
+      while (tempDiv.firstChild) {
+        container.appendChild(tempDiv.firstChild);
+      }
+      
       return true;
     } catch (error) {
-      console.error('Error updating container content:', error);
+      console.error(`Error updating container ${containerId} content:`, error);
+      this.activeContainers.delete(containerId);
       return false;
     }
+  }
+
+  // Method to safely clean up tracking for a container
+  public cleanupContainer(containerId: string): void {
+    this.activeContainers.delete(containerId);
+  }
+
+  // Method to clean up all tracked containers
+  public cleanupAllContainers(): void {
+    this.activeContainers.clear();
+  }
+
+  // Method to check if container is still being tracked
+  public isContainerActive(containerId: string): boolean {
+    return this.activeContainers.has(containerId);
   }
 
   // Method to render a list of blog posts
@@ -158,12 +212,17 @@ class BlogEmbed {
     const { limit = 10, showDescription = true, showImage = true } = options;
     
     // Show loading state
-    this.safelyUpdateContainer(container, '<div class="blog-embed-loading">Loading blog posts...</div>');
+    this.safelyUpdateContainer(container, '<div class="blog-embed-loading">Loading blog posts...</div>', containerId);
     
     // Fetch posts from Supabase
     const posts = await this.fetchBlogPosts(limit);
 
-    // Check if container still exists after async operation
+    // Check if container still exists and is being tracked
+    if (!this.isContainerActive(containerId)) {
+      console.warn(`Container #${containerId} is no longer being tracked, aborting render`);
+      return;
+    }
+    
     const updatedContainer = this.getContainer(containerId);
     if (!updatedContainer) {
       console.warn(`Container #${containerId} no longer exists, aborting render`);
@@ -174,7 +233,7 @@ class BlogEmbed {
     updatedContainer.classList.add('blog-embed-list');
     
     if (posts.length === 0) {
-      this.safelyUpdateContainer(updatedContainer, '<div class="blog-embed-empty">No blog posts found</div>');
+      this.safelyUpdateContainer(updatedContainer, '<div class="blog-embed-empty">No blog posts found</div>', containerId);
       return;
     }
     
@@ -200,7 +259,12 @@ class BlogEmbed {
       `;
     }).join('');
 
-    // Final check if container still exists
+    // Final check if container still exists and is being tracked
+    if (!this.isContainerActive(containerId)) {
+      console.warn(`Container #${containerId} is no longer being tracked, aborting render`);
+      return;
+    }
+    
     const finalContainer = this.getContainer(containerId);
     if (!finalContainer) {
       console.warn(`Container #${containerId} no longer exists, aborting render`);
@@ -208,7 +272,7 @@ class BlogEmbed {
     }
 
     // Set the HTML
-    this.safelyUpdateContainer(finalContainer, postsHtml);
+    this.safelyUpdateContainer(finalContainer, postsHtml, containerId);
 
     // Add SEO metadata
     this.addSEOMetadata('Blog Posts', 'Latest blog posts from our company');
@@ -222,12 +286,17 @@ class BlogEmbed {
     }
 
     // Show loading state
-    this.safelyUpdateContainer(container, '<div class="blog-embed-loading">Loading blog post...</div>');
+    this.safelyUpdateContainer(container, '<div class="blog-embed-loading">Loading blog post...</div>', containerId);
     
     // Fetch post from Supabase with all related content
     const { post, sections, faqs } = await this.fetchBlogPost(slug);
     
-    // Check if container still exists after async operation
+    // Check if container still exists and is being tracked
+    if (!this.isContainerActive(containerId)) {
+      console.warn(`Container #${containerId} is no longer being tracked, aborting render`);
+      return;
+    }
+    
     const updatedContainer = this.getContainer(containerId);
     if (!updatedContainer) {
       console.warn(`Container #${containerId} no longer exists, aborting render`);
@@ -235,8 +304,8 @@ class BlogEmbed {
     }
     
     if (!post) {
-      this.safelyUpdateContainer(updatedContainer, '<div class="blog-embed-error">Blog post not found</div>');
-      return;
+      this.safelyUpdateContainer(updatedContainer, '<div class="blog-embed-error">Blog post not found</div>', containerId);
+      throw new Error(`Blog post with slug "${slug}" not found`);
     }
 
     // Add blog-embed-post class for styling
@@ -362,15 +431,20 @@ class BlogEmbed {
     // Close the article tag
     postHtml += `</article>`;
 
-    // Final check if container still exists
+    // Final check if container still exists and is tracked
+    if (!this.isContainerActive(containerId)) {
+      console.warn(`Container #${containerId} is no longer being tracked, aborting render`);
+      return;
+    }
+    
     const finalContainer = this.getContainer(containerId);
     if (!finalContainer) {
       console.warn(`Container #${containerId} no longer exists, aborting render`);
       return;
     }
 
-    // Set the HTML
-    this.safelyUpdateContainer(finalContainer, postHtml);
+    // Set the HTML with safer method
+    this.safelyUpdateContainer(finalContainer, postHtml, containerId);
 
     // Add SEO metadata for the specific post
     this.addSEOMetadata(post.title, post.description || '', post.hero_image || undefined);
