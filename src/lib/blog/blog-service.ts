@@ -10,6 +10,7 @@ class BlogService {
   
   constructor() {
     try {
+      console.log("Initializing BlogService");
       this.initializeBlogEmbed();
     } catch (error) {
       console.error("Error initializing BlogService:", error);
@@ -22,6 +23,7 @@ class BlogService {
   private initializeBlogEmbed(): void {
     try {
       if (!this.isInitialized && !this.unmounting) {
+        console.log("Creating new EnhancedBlogEmbed instance");
         this.blogEmbed = new EnhancedBlogEmbed();
         this.isInitialized = true;
         console.log("BlogService: Successfully initialized EnhancedBlogEmbed");
@@ -44,6 +46,7 @@ class BlogService {
     }
     
     if (!this.blogEmbed) {
+      console.log("BlogEmbed instance not found, initializing");
       try {
         this.initializeBlogEmbed();
       } catch (error) {
@@ -58,6 +61,8 @@ class BlogService {
    * Renders a blog list in the specified container with enhanced error handling
    */
   async renderBlogList(containerId: string, options: BlogEmbedOptions = {}): Promise<void> {
+    console.log(`BlogService: Rendering blog list in container ${containerId}`);
+    
     if (this.unmounting) {
       console.warn("BlogService: Cannot render during unmounting process");
       return;
@@ -79,11 +84,13 @@ class BlogService {
     try {
       // Remove container from tracking if it was previously tracked
       if (this.isContainerActive(containerId)) {
+        console.log(`Container ${containerId} already active, cleaning up first`);
         this.cleanupContainer(containerId);
       }
       
       // Add to tracking
       this.activeContainers.add(containerId);
+      console.log(`Added container ${containerId} to active tracking`);
       
       // Set default options
       const defaultOptions = {
@@ -100,13 +107,18 @@ class BlogService {
       const mergedOptions = { ...defaultOptions, ...options };
       
       // Perform the render operation with enhanced safety
+      console.log("Calling EnhancedBlogEmbed.renderBlogList with options:", mergedOptions);
       await this.blogEmbed.renderBlogList(containerId, mergedOptions);
+      console.log(`Blog list rendering completed for container ${containerId}`);
     } catch (error) {
       console.error("Error rendering blog list:", error);
       this.activeContainers.delete(containerId);
       
       // Display fallback content on error
       this.displayFallbackContent(containerId, "Error loading blog content. Please try again later.");
+      
+      // Rethrow to allow parent error handling
+      throw error;
     }
   }
   
@@ -114,6 +126,8 @@ class BlogService {
    * Renders a single blog post in the specified container with enhanced error handling
    */
   async renderBlogPost(containerId: string, slug: string, options: BlogEmbedOptions = {}): Promise<void> {
+    console.log(`BlogService: Rendering blog post with slug "${slug}" in container ${containerId}`);
+    
     if (this.unmounting) {
       console.warn("BlogService: Cannot render during unmounting process");
       return;
@@ -135,11 +149,13 @@ class BlogService {
     try {
       // Remove container from tracking if it was previously tracked
       if (this.isContainerActive(containerId)) {
+        console.log(`Container ${containerId} already active, cleaning up first`);
         this.cleanupContainer(containerId);
       }
       
       // Add to tracking
       this.activeContainers.add(containerId);
+      console.log(`Added container ${containerId} to active tracking`);
       
       // Set default options
       const defaultOptions = {
@@ -153,7 +169,9 @@ class BlogService {
       const mergedOptions = { ...defaultOptions, ...options };
       
       // Perform the render operation with enhanced safety
+      console.log("Calling EnhancedBlogEmbed.renderBlogPost with options:", mergedOptions);
       await this.blogEmbed.renderBlogPost(containerId, slug, mergedOptions);
+      console.log(`Blog post rendering completed for slug "${slug}" in container ${containerId}`);
     } catch (error) {
       console.error("Error rendering blog post:", error);
       this.activeContainers.delete(containerId);
@@ -163,10 +181,12 @@ class BlogService {
       const isNotFound = errorMessage.includes("not found");
       
       if (isNotFound) {
+        console.log(`Blog post "${slug}" not found`);
         this.displayFallbackContent(containerId, `Blog post "${slug}" not found`);
         throw error; // Re-throw for 404 handling
       } else {
         this.displayFallbackContent(containerId, "Error loading blog post. Please try again later.");
+        throw error; // Re-throw for general error handling
       }
     }
   }
@@ -176,6 +196,7 @@ class BlogService {
    */
   private displayFallbackContent(containerId: string, message: string): void {
     try {
+      console.log(`Displaying fallback content in container ${containerId}: "${message}"`);
       if (this.unmounting) return;
       
       const container = document.getElementById(containerId);
@@ -197,6 +218,7 @@ class BlogService {
    */
   cleanupContainer(containerId: string): void {
     try {
+      console.log(`Cleaning up container ${containerId}`);
       // First remove from tracking
       this.activeContainers.delete(containerId);
       
@@ -220,6 +242,7 @@ class BlogService {
       
       // First empty container with innerHTML for safety
       try {
+        console.log(`Setting innerHTML to empty for container ${containerId}`);
         container.innerHTML = '';
       } catch (innerError) {
         console.error(`Error clearing container ${containerId} with innerHTML:`, innerError);
@@ -229,6 +252,7 @@ class BlogService {
       setTimeout(() => {
         if (!this.unmounting && this.blogEmbed) {
           try {
+            console.log(`Calling enhanced cleanup for container ${containerId}`);
             this.blogEmbed.cleanupContainer(containerId);
           } catch (cleanupError) {
             console.error(`Delayed cleanup error for container ${containerId}:`, cleanupError);
@@ -259,6 +283,7 @@ class BlogService {
    */
   cleanupAllContainers(): void {
     try {
+      console.log("Cleaning up all containers");
       // Set unmounting flag to prevent further operations
       this.unmounting = true;
       
@@ -273,6 +298,7 @@ class BlogService {
         try {
           const container = document.getElementById(id);
           if (container && document.body.contains(container)) {
+            console.log(`Setting innerHTML to empty for container ${id}`);
             container.innerHTML = '';
           }
         } catch (innerError) {
@@ -284,6 +310,7 @@ class BlogService {
       if (this.blogEmbed) {
         setTimeout(() => {
           try {
+            console.log("Calling enhanced cleanupAllContainers");
             this.blogEmbed?.cleanupAllContainers();
           } catch (cleanupError) {
             console.error("Error in delayed cleanupAllContainers:", cleanupError);
@@ -300,6 +327,7 @@ class BlogService {
    * This should be called before unmounting to prevent race conditions
    */
   prepareForUnmount(): void {
+    console.log("Preparing for unmount");
     this.unmounting = true;
   }
   
@@ -308,6 +336,7 @@ class BlogService {
    */
   reinitialize(): void {
     try {
+      console.log("Reinitializing BlogService");
       // Reset unmounting flag
       this.unmounting = false;
       

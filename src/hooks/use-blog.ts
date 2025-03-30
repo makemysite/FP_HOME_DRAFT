@@ -7,6 +7,7 @@ import blogService from '@/lib/blog/blog-service';
 export function useBlog() {
   const [loading, setLoading] = useState(true);
   const [renderError, setRenderError] = useState<string | null>(null);
+  const [dataLoaded, setDataLoaded] = useState(false);
   const unmountedRef = useRef(false);
   const renderingRef = useRef(false);
   const navigate = useNavigate();
@@ -20,9 +21,11 @@ export function useBlog() {
 
   // Sets up the unmount tracking
   useEffect(() => {
+    console.log("Blog hook mounted");
     unmountedRef.current = false;
     
     return () => {
+      console.log("Blog hook unmounting");
       // Signal to BlogService that we're unmounting
       blogService.prepareForUnmount();
       
@@ -45,21 +48,30 @@ export function useBlog() {
     };
   }, []);
 
-  // Render blog list function with enhanced safety
+  // Render blog list function with enhanced safety and debugging
   const renderBlogList = useCallback(async () => {
-    if (unmountedRef.current || renderingRef.current) return;
+    if (unmountedRef.current || renderingRef.current) {
+      console.log("Skipping blog list render - component unmounted or already rendering");
+      return;
+    }
     
+    console.log("Starting blog list render");
     renderingRef.current = true;
     safeSetState(setLoading, true);
     safeSetState(setRenderError, null);
+    safeSetState(setDataLoaded, false);
     
     try {
       // Verify we're still mounted before continuing
-      if (unmountedRef.current) return;
+      if (unmountedRef.current) {
+        console.log("Component unmounted during render, aborting");
+        return;
+      }
       
       // Clean up any existing blog post container first - only if needed
       if (document.getElementById('blog-post-container')) {
         try {
+          console.log("Cleaning up blog post container");
           blogService.cleanupContainer('blog-post-container');
         } catch (error) {
           console.error("Error cleaning up blog post container:", error);
@@ -69,11 +81,18 @@ export function useBlog() {
       // Verify we're still mounted before continuing
       if (unmountedRef.current) return;
       
-      // Then render the list
-      await blogService.renderBlogList('blog-list-container');
+      // Then render the list with debugging
+      console.log("Calling blogService.renderBlogList");
+      await blogService.renderBlogList('blog-list-container', {
+        fallbackContent: "No blog posts are currently available. Please check back later.",
+        retryOnFailure: true,
+        retryAttempts: 3
+      });
       
       if (!unmountedRef.current) {
+        console.log("Blog list render completed");
         safeSetState(setLoading, false);
+        safeSetState(setDataLoaded, true);
       }
     } catch (error) {
       console.error("Error rendering blog list:", error);
@@ -92,21 +111,30 @@ export function useBlog() {
     }
   }, [safeSetState]);
 
-  // Render blog post function with enhanced safety
+  // Render blog post function with enhanced safety and debugging
   const renderBlogPost = useCallback(async (slug: string) => {
-    if (unmountedRef.current || renderingRef.current) return;
+    if (unmountedRef.current || renderingRef.current) {
+      console.log("Skipping blog post render - component unmounted or already rendering");
+      return;
+    }
     
+    console.log(`Starting blog post render for slug: ${slug}`);
     renderingRef.current = true;
     safeSetState(setLoading, true);
     safeSetState(setRenderError, null);
+    safeSetState(setDataLoaded, false);
     
     try {
       // Verify we're still mounted before continuing
-      if (unmountedRef.current) return;
+      if (unmountedRef.current) {
+        console.log("Component unmounted during render, aborting");
+        return;
+      }
       
       // Clean up any existing blog list container first - only if needed
       if (document.getElementById('blog-list-container')) {
         try {
+          console.log("Cleaning up blog list container");
           blogService.cleanupContainer('blog-list-container');
         } catch (error) {
           console.error("Error cleaning up blog list container:", error);
@@ -116,11 +144,18 @@ export function useBlog() {
       // Verify we're still mounted before continuing
       if (unmountedRef.current) return;
       
-      // Then render the post
-      await blogService.renderBlogPost('blog-post-container', slug);
+      // Then render the post with debugging
+      console.log(`Calling blogService.renderBlogPost for slug: ${slug}`);
+      await blogService.renderBlogPost('blog-post-container', slug, {
+        fallbackContent: `The blog post "${slug}" could not be found.`,
+        retryOnFailure: true,
+        retryAttempts: 3
+      });
       
       if (!unmountedRef.current) {
+        console.log("Blog post render completed");
         safeSetState(setLoading, false);
+        safeSetState(setDataLoaded, true);
       }
     } catch (error) {
       console.error("Error rendering blog post:", error);
@@ -129,6 +164,7 @@ export function useBlog() {
         
         // Handle "not found" errors
         if (error instanceof Error && error.message && error.message.includes("not found")) {
+          console.log(`Blog post "${slug}" not found, redirecting to blog index`);
           safeSetState(setRenderError, `Blog post "${slug}" not found`);
         } else {
           toast({
@@ -148,6 +184,7 @@ export function useBlog() {
   // Cleanup function with additional safety
   const cleanup = useCallback(() => {
     try {
+      console.log("Running cleanup function");
       // Only attempt cleanup if we're not already unmounting
       if (!unmountedRef.current && !blogService.isUnmounting()) {
         // First check if containers exist before cleaning up
@@ -167,6 +204,7 @@ export function useBlog() {
   // Handle 404 redirects
   useEffect(() => {
     if (renderError && !unmountedRef.current) {
+      console.log("Redirecting due to render error:", renderError);
       navigate('/blog', { 
         replace: true,
         state: { error: renderError }
@@ -176,6 +214,7 @@ export function useBlog() {
 
   return {
     loading,
+    dataLoaded,
     renderError,
     renderBlogList,
     renderBlogPost,

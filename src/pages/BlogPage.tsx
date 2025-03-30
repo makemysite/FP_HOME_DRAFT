@@ -5,11 +5,14 @@ import BlogHeader from "@/components/blog/BlogHeader";
 import BlogContainer from "@/components/blog/BlogContainer";
 import { useBlog } from "@/hooks/use-blog";
 import { toast } from "@/hooks/use-toast";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
 
 const BlogPage: React.FC = () => {
   const location = useLocation();
   const { 
     loading, 
+    dataLoaded,
     renderBlogList, 
     renderBlogPost, 
     cleanup
@@ -19,6 +22,7 @@ const BlogPage: React.FC = () => {
   const isMounted = useRef(true);
   const isProcessingRoute = useRef(false);
   const previousPath = useRef(location.pathname);
+  const retryCount = useRef(0);
   
   // Safe way to run cleanup that prevents race conditions
   const safeCleanup = useCallback(() => {
@@ -36,10 +40,12 @@ const BlogPage: React.FC = () => {
   
   // Set up mount/unmount tracking
   useEffect(() => {
+    console.log("BlogPage mounted");
     // Set mounted flag on component mount
     isMounted.current = true;
     
     return () => {
+      console.log("BlogPage unmounting");
       // Set unmounted flag first to prevent new renders during cleanup
       isMounted.current = false;
       
@@ -62,6 +68,8 @@ const BlogPage: React.FC = () => {
     
     // If the path hasn't changed, don't reprocess
     if (previousPath.current === location.pathname) return;
+    
+    console.log(`Processing route change from ${previousPath.current} to ${location.pathname}`);
     
     // Update previous path
     previousPath.current = location.pathname;
@@ -94,6 +102,7 @@ const BlogPage: React.FC = () => {
           return;
         }
         
+        console.log(`Rendering content for path: ${path}`);
         if (path === '/blog' || path === '/blog/') {
           await renderBlogList();
         } else if (path.startsWith('/blog/') && slug) {
@@ -125,6 +134,41 @@ const BlogPage: React.FC = () => {
     };
   }, [location.pathname, renderBlogList, renderBlogPost, safeCleanup]);
 
+  // Retry logic if data doesn't load
+  useEffect(() => {
+    // If we're still loading after 5 seconds, try again (up to 3 times)
+    let timeoutId: number | undefined;
+    
+    if (loading && !dataLoaded && retryCount.current < 3) {
+      timeoutId = window.setTimeout(() => {
+        if (isMounted.current && loading && !dataLoaded) {
+          console.log(`Retrying content load, attempt ${retryCount.current + 1}`);
+          retryCount.current += 1;
+          
+          // First clean up
+          safeCleanup();
+          
+          // Then try again after a small delay
+          setTimeout(() => {
+            if (isMounted.current) {
+              const path = location.pathname;
+              if (path === '/blog' || path === '/blog/') {
+                renderBlogList();
+              } else {
+                const slug = path.replace('/blog/', '').replace(/\/$/, '');
+                if (slug) renderBlogPost(slug);
+              }
+            }
+          }, 100);
+        }
+      }, 5000);
+    }
+    
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [loading, dataLoaded, location.pathname, renderBlogList, renderBlogPost, safeCleanup]);
+
   // Check for error from previous navigation
   useEffect(() => {
     if (location.state && location.state.error && location.pathname === '/blog' && isMounted.current) {
@@ -139,6 +183,23 @@ const BlogPage: React.FC = () => {
     }
   }, [location]);
 
+  // Create the EmptyState component for when no data is found
+  const EmptyState = () => (
+    <div className="w-full py-12 text-center">
+      <Alert variant="destructive" className="max-w-xl mx-auto">
+        <ExclamationTriangleIcon className="h-4 w-4 mr-2" />
+        <AlertDescription>
+          No blog content is available at the moment. This could be due to connection issues or no published posts.
+        </AlertDescription>
+      </Alert>
+      <div className="mt-6">
+        <p className="text-gray-500">
+          Please try again later or check your connection to the blog database.
+        </p>
+      </div>
+    </div>
+  );
+
   return (
     <div className="bg-white min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -147,12 +208,18 @@ const BlogPage: React.FC = () => {
         <div className="mt-12">
           {/* Blog list container */}
           {(location.pathname === '/blog' || location.pathname === '/blog/') && (
-            <BlogContainer id="blog-list-container" loading={loading} type="list" />
+            <>
+              <BlogContainer id="blog-list-container" loading={loading} type="list" />
+              {!loading && !dataLoaded && retryCount.current >= 3 && <EmptyState />}
+            </>
           )}
           
           {/* Blog post container */}
           {location.pathname !== '/blog' && location.pathname !== '/blog/' && (
-            <BlogContainer id="blog-post-container" loading={loading} type="post" />
+            <>
+              <BlogContainer id="blog-post-container" loading={loading} type="post" />
+              {!loading && !dataLoaded && retryCount.current >= 3 && <EmptyState />}
+            </>
           )}
         </div>
       </div>

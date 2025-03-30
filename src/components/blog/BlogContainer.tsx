@@ -1,6 +1,7 @@
 
 import React from "react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { AlertCircle } from "lucide-react";
 
 interface BlogContainerProps {
   id: string;
@@ -16,7 +17,7 @@ const BlogContainer: React.FC<BlogContainerProps> = ({ id, loading, type }) => {
     >
       {loading && type === "list" && (
         Array(6).fill(0).map((_, i) => (
-          <div key={i} className="flex flex-col gap-4">
+          <div key={i} className="flex flex-col gap-4 bg-gray-50 p-4 rounded-lg">
             <Skeleton className="w-full h-[200px] rounded-lg" />
             <Skeleton className="w-3/4 h-6" />
             <Skeleton className="w-full h-24" />
@@ -42,6 +43,9 @@ const BlogContainer: React.FC<BlogContainerProps> = ({ id, loading, type }) => {
           </div>
         </div>
       )}
+      
+      {/* This div will be populated by the BlogEmbed library */}
+      {!loading && <div className="w-full min-h-[50px]"></div>}
     </div>
   );
 };
