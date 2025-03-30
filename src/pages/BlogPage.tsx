@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useCallback, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import BlogHeader from "@/components/blog/BlogHeader";
@@ -40,6 +41,8 @@ const BlogPage: React.FC = () => {
   const previousPath = useRef(location.pathname);
   const retryCount = useRef(0);
   const maxRetries = 3;
+  // Add a ref to store the timeout ID for retries
+  const retryTimeoutRef = useRef<number | undefined>(undefined);
   
   const safeCleanup = useCallback(() => {
     console.log("Running safe cleanup");
@@ -65,6 +68,13 @@ const BlogPage: React.FC = () => {
     return () => {
       console.log("BlogPage unmounting");
       isMounted.current = false;
+      
+      // Clear any pending timeouts
+      if (retryTimeoutRef.current !== undefined) {
+        clearTimeout(retryTimeoutRef.current);
+        retryTimeoutRef.current = undefined;
+      }
+      
       setTimeout(() => {
         try {
           cleanup();
@@ -138,10 +148,15 @@ const BlogPage: React.FC = () => {
   }, [location.pathname, renderBlogList, renderBlogPost, safeCleanup, dataLoaded]);
   
   useEffect(() => {
+    // Clear any existing retry timeout when this effect runs
+    if (retryTimeoutRef.current !== undefined) {
+      clearTimeout(retryTimeoutRef.current);
+      retryTimeoutRef.current = undefined;
+    }
+    
     if (loading && !dataLoaded && retryCount.current < maxRetries) {
-      let timeoutId: number | undefined;
-      
-      timeoutId = window.setTimeout(() => {
+      // Store the timeout ID in our ref
+      retryTimeoutRef.current = window.setTimeout(() => {
         if (isMounted.current && loading && !dataLoaded) {
           console.log(`Retrying content load, attempt ${retryCount.current + 1}`);
           retryCount.current += 1;
@@ -172,7 +187,11 @@ const BlogPage: React.FC = () => {
     }
     
     return () => {
-      if (timeoutId) clearTimeout(timeoutId);
+      // Clean up the timeout on effect cleanup
+      if (retryTimeoutRef.current !== undefined) {
+        clearTimeout(retryTimeoutRef.current);
+        retryTimeoutRef.current = undefined;
+      }
     };
   }, [loading, dataLoaded, location.pathname, renderBlogList, renderBlogPost, safeCleanup]);
   
