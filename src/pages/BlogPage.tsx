@@ -33,7 +33,8 @@ const BlogPage: React.FC = () => {
     dataLoaded,
     renderBlogList, 
     renderBlogPost, 
-    cleanup
+    cleanup,
+    normalizeSlug  // Use the normalize slug function from the hook
   } = useBlog();
   
   const isMounted = useRef(true);
@@ -41,7 +42,7 @@ const BlogPage: React.FC = () => {
   const previousPath = useRef(location.pathname);
   const retryCount = useRef(0);
   const maxRetries = 3;
-  // Add a ref to store the timeout ID for retries
+  // Use useRef to store the timeout ID for retries
   const retryTimeoutRef = useRef<number | undefined>(undefined);
   
   const safeCleanup = useCallback(() => {
@@ -97,10 +98,10 @@ const BlogPage: React.FC = () => {
     isProcessingRoute.current = true;
     
     const path = location.pathname;
-    // Normalize slug: remove '/blog/' prefix and trailing slash
-    let slug = path.replace('/blog/', '').replace(/\/$/, '');
+    // Use the consistent slug normalizer for the slug extraction
+    const slug = path.startsWith('/blog/') ? normalizeSlug(path) : '';
     
-    console.log(`Current path: ${path}, normalized slug: ${slug}`);
+    console.log(`Current path: ${path}, normalized slug: '${slug}'`);
     
     safeCleanup();
     
@@ -146,7 +147,7 @@ const BlogPage: React.FC = () => {
     return () => {
       isProcessingRoute.current = false;
     };
-  }, [location.pathname, renderBlogList, renderBlogPost, safeCleanup, dataLoaded]);
+  }, [location.pathname, renderBlogList, renderBlogPost, safeCleanup, dataLoaded, normalizeSlug]);
   
   useEffect(() => {
     // Clear any existing retry timeout when this effect runs
@@ -170,7 +171,8 @@ const BlogPage: React.FC = () => {
               if (path === '/blog' || path === '/blog/') {
                 renderBlogList();
               } else {
-                const slug = path.replace('/blog/', '').replace(/\/$/, '');
+                // Use consistent slug normalizer
+                const slug = normalizeSlug(path);
                 if (slug) renderBlogPost(slug);
               }
             }
@@ -194,7 +196,7 @@ const BlogPage: React.FC = () => {
         retryTimeoutRef.current = undefined;
       }
     };
-  }, [loading, dataLoaded, location.pathname, renderBlogList, renderBlogPost, safeCleanup]);
+  }, [loading, dataLoaded, location.pathname, renderBlogList, renderBlogPost, safeCleanup, normalizeSlug]);
   
   useEffect(() => {
     if (location.state && location.state.error && location.pathname === '/blog' && isMounted.current) {

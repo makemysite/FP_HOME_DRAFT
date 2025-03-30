@@ -36,6 +36,22 @@ class EnhancedBlogEmbed extends BlogEmbed {
   }
   
   /**
+   * Helper method to consistently normalize slugs across the application
+   */
+  private normalizeSlug(slug: string): string {
+    // First remove any trailing slash if present
+    let normalizedSlug = slug.endsWith('/') ? slug.slice(0, -1) : slug;
+    
+    // Then remove any leading /blog/ if present (for full path normalization)
+    normalizedSlug = normalizedSlug.startsWith('/blog/') 
+      ? normalizedSlug.replace('/blog/', '') 
+      : normalizedSlug;
+    
+    console.log(`EnhancedBlogEmbed normalized slug: "${normalizedSlug}" from original: "${slug}"`);
+    return normalizedSlug;
+  }
+  
+  /**
    * Override the base class render methods to use our enhanced container tracking
    * with additional race condition prevention
    */
@@ -117,8 +133,8 @@ class EnhancedBlogEmbed extends BlogEmbed {
   
   async renderBlogPost(containerId: string, slug: string, options: BlogEmbedOptions = {}): Promise<void> {
     // Normalize the slug to handle both with and without trailing slash
-    const normalizedSlug = slug.endsWith('/') ? slug : `${slug}/`;
-    console.log(`EnhancedBlogEmbed: Using normalized slug "${normalizedSlug}" for rendering`);
+    const normalizedSlug = this.normalizeSlug(slug);
+    console.log(`EnhancedBlogEmbed: Using normalized slug "${normalizedSlug}" for rendering (original: "${slug}")`);
     
     // Check if there's already a rendering operation in progress for this container
     if (this.containerRenderLocks.get(containerId)) {
@@ -150,10 +166,10 @@ class EnhancedBlogEmbed extends BlogEmbed {
       };
       
       try {
-        // Pass the normalized slug to the parent class method
+        // Always pass the normalized slug to the parent class method
         await super.renderBlogPost(containerId, normalizedSlug, enhancedOptions);
       } catch (error) {
-        console.error(`Error rendering blog post in container #${containerId}:`, error);
+        console.error(`Error rendering blog post in container #${containerId} for slug "${normalizedSlug}":`, error);
         this.enhancedActiveContainers.delete(containerId);
         
         // Attempt to show error message in container
@@ -167,7 +183,7 @@ class EnhancedBlogEmbed extends BlogEmbed {
             container.innerHTML = `
               <div class="blog-embed-error">
                 ${isNotFound 
-                  ? `The blog post "${slug}" could not be found.` 
+                  ? `The blog post "${normalizedSlug}" could not be found.` 
                   : 'Error loading blog post. Please try again later.'}
               </div>
             `;

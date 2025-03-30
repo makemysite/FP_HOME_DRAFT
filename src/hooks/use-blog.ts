@@ -48,6 +48,18 @@ export function useBlog() {
     };
   }, []);
 
+  // Helper function to normalize slug format consistently across the entire app
+  const normalizeSlug = useCallback((slug: string): string => {
+    // First remove any trailing slash if present
+    slug = slug.endsWith('/') ? slug.slice(0, -1) : slug;
+    
+    // Then remove any leading /blog/ if present (for full path normalization)
+    slug = slug.startsWith('/blog/') ? slug.replace('/blog/', '') : slug;
+    
+    console.log(`Normalized slug: "${slug}"`);
+    return slug;
+  }, []);
+
   // Render blog list function with enhanced safety and debugging
   const renderBlogList = useCallback(async () => {
     if (unmountedRef.current || renderingRef.current) {
@@ -118,8 +130,8 @@ export function useBlog() {
       return;
     }
     
-    // Normalize the slug - remove trailing slash if present
-    const normalizedSlug = slug.endsWith('/') ? slug.slice(0, -1) : slug;
+    // Normalize the slug using the consistent normalizer
+    const normalizedSlug = normalizeSlug(slug);
     
     console.log(`Starting blog post render for slug: ${normalizedSlug}`);
     renderingRef.current = true;
@@ -182,7 +194,7 @@ export function useBlog() {
         renderingRef.current = false;
       }
     }
-  }, [safeSetState]);
+  }, [safeSetState, normalizeSlug]);
 
   // Cleanup function with additional safety
   const cleanup = useCallback(() => {
@@ -223,6 +235,7 @@ export function useBlog() {
     renderBlogPost,
     cleanup,
     safeSetState,
-    unmountedRef
+    unmountedRef,
+    normalizeSlug  // Export the normalize function for use in other components
   };
 }

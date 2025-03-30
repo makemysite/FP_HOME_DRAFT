@@ -1,4 +1,3 @@
-
 import EnhancedBlogEmbed from "./blogsmith-embed-enhanced";
 import { BlogEmbedOptions } from "./blogsmith-embed";
 
@@ -117,6 +116,20 @@ class BlogService {
   }
   
   /**
+   * Helper function to normalize slug format consistently across the entire app
+   */
+  private normalizeSlug(slug: string): string {
+    // First remove any trailing slash if present
+    slug = slug.endsWith('/') ? slug.slice(0, -1) : slug;
+    
+    // Then remove any leading /blog/ if present (for full path normalization)
+    slug = slug.startsWith('/blog/') ? slug.replace('/blog/', '') : slug;
+    
+    console.log(`BlogService normalized slug: "${slug}"`);
+    return slug;
+  }
+  
+  /**
    * Renders a blog list in the specified container with enhanced error handling
    */
   async renderBlogList(containerId: string, options: BlogEmbedOptions = {}): Promise<void> {
@@ -207,8 +220,8 @@ class BlogService {
    * Renders a single blog post in the specified container with enhanced error handling
    */
   async renderBlogPost(containerId: string, slug: string, options: BlogEmbedOptions = {}): Promise<void> {
-    // Normalize the slug - handle both with and without trailing slash
-    const normalizedSlug = slug.endsWith('/') ? slug : `${slug}/`;
+    // Normalize the slug consistently
+    const normalizedSlug = this.normalizeSlug(slug);
     
     console.log(`BlogService: Rendering blog post with normalized slug "${normalizedSlug}" in container ${containerId}`);
     
@@ -246,7 +259,7 @@ class BlogService {
         retryOnFailure: true,
         retryAttempts: 3,
         retryDelay: 1000,
-        fallbackContent: `We couldn't find the blog post "${slug}".`
+        fallbackContent: `We couldn't find the blog post "${normalizedSlug}".`
       };
       
       // Merge with user options
@@ -268,18 +281,18 @@ class BlogService {
       }
       
       // Perform the render operation with enhanced safety
-      console.log("Calling EnhancedBlogEmbed.renderBlogPost with options:", mergedOptions);
+      console.log(`Calling EnhancedBlogEmbed.renderBlogPost for slug "${normalizedSlug}" with options:`, mergedOptions);
       try {
         // Pass the normalized slug to the embed component
         await this.blogEmbed.renderBlogPost(containerId, normalizedSlug, mergedOptions);
         console.log(`Blog post rendering completed for slug "${normalizedSlug}" in container ${containerId}`);
       } catch (renderError) {
-        console.error("Error in EnhancedBlogEmbed.renderBlogPost:", renderError);
+        console.error(`Error in EnhancedBlogEmbed.renderBlogPost for slug "${normalizedSlug}":`, renderError);
         // We'll handle this in the outer catch block
         throw renderError;
       }
     } catch (error) {
-      console.error("Error rendering blog post:", error);
+      console.error(`Error rendering blog post for slug "${normalizedSlug}":`, error);
       this.activeContainers.delete(containerId);
       
       // Check if error is a "not found" error
@@ -287,8 +300,8 @@ class BlogService {
       const isNotFound = errorMessage.includes("not found");
       
       if (isNotFound) {
-        console.log(`Blog post "${slug}" not found`);
-        this.displayFallbackContent(containerId, `Blog post "${slug}" not found`);
+        console.log(`Blog post "${normalizedSlug}" not found`);
+        this.displayFallbackContent(containerId, `Blog post "${normalizedSlug}" not found`);
         throw error; // Re-throw for 404 handling
       } else {
         this.displayFallbackContent(containerId, "Error loading blog post. Please try again later.");
