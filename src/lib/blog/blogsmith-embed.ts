@@ -25,6 +25,13 @@ export interface BlogPost {
   conclusion: string | null;
 }
 
+// Define the return type for fetchBlogPost
+interface BlogPostData {
+  post: BlogPost | null;
+  sections: any[];
+  faqs?: any[]; // Add the faqs property to the interface
+}
+
 class BlogEmbed {
   constructor() {
     console.log('BlogEmbed: Initialized with Supabase integration');
@@ -55,7 +62,7 @@ class BlogEmbed {
   }
 
   // Method to fetch a single blog post by slug with all related content
-  private async fetchBlogPost(slug: string): Promise<{post: BlogPost | null, sections: any[]}> {
+  private async fetchBlogPost(slug: string): Promise<BlogPostData> {
     try {
       console.log(`BlogEmbed: Fetching blog post with slug "${slug}" from Supabase`);
       
