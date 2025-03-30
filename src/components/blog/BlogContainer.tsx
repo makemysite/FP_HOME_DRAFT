@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AlertTriangle } from "lucide-react";
@@ -23,34 +22,20 @@ const BlogContainer: React.FC<BlogContainerProps> = ({ id, loading, type, error 
       console.log(`BlogContainer ${id} unmounting`);
       unmountingRef.current = true;
       
-      // Use immediate state flag to prevent any further DOM operations
-      // This helps prevent React "object cannot be found" errors
-      
-      // Safe cleanup before unmount to prevent DOM errors
-      if (containerRef.current) {
-        try {
-          // First check if container still exists in DOM
-          const element = document.getElementById(id);
-          if (!element || !document.body.contains(element)) {
-            console.log(`Container #${id} already removed from DOM, skipping cleanup`);
-            return;
-          }
+      // Use a safer technique for DOM node removal during unmounting
+      // Instead of trying to manipulate the container directly, we'll create a placeholder
+      // that React can safely remove without "object cannot be found" errors
+      try {
+        const container = document.getElementById(id);
+        if (container && document.body.contains(container)) {
+          // Using innerHTML = '' is safer than removing children directly
+          container.innerHTML = '';
           
-          // Use empty text node replacement technique to safely clean up
-          // This approach is less likely to conflict with React's own DOM cleanup
-          const emptyNode = document.createTextNode("");
-          if (containerRef.current.parentNode) {
-            try {
-              // Replace with empty text node instead of removing
-              containerRef.current.parentNode.replaceChild(emptyNode, containerRef.current);
-              console.log(`Safely replaced container ${id} with empty node`);
-            } catch (err) {
-              console.error(`Error during safe replacement for ${id}:`, err);
-            }
-          }
-        } catch (err) {
-          console.error(`Error during ${id} cleanup:`, err);
+          // Add a data attribute to indicate this container is being unmounted
+          container.setAttribute('data-unmounting', 'true');
         }
+      } catch (err) {
+        console.error(`Error during safe unmount for ${id}:`, err);
       }
     };
   }, [id]);
@@ -93,10 +78,8 @@ const BlogContainer: React.FC<BlogContainerProps> = ({ id, loading, type, error 
         </div>
       )}
       
-      {/* This div will be populated by the BlogEmbed library */}
       {!loading && !error && (
         <div className="w-full min-h-[200px]">
-          {/* Loading message that will be replaced by the blog embed library */}
           <div className="blog-embed-loading text-center p-8">
             <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-yellow-500 mb-3"></div>
             <p className="text-gray-600">Loading blog content...</p>
@@ -104,7 +87,6 @@ const BlogContainer: React.FC<BlogContainerProps> = ({ id, loading, type, error 
         </div>
       )}
       
-      {/* Error state */}
       {error && (
         <div className="w-full min-h-[200px] flex items-center justify-center">
           <div className="text-center p-8 max-w-md">

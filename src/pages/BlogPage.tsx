@@ -47,35 +47,44 @@ const BlogPage: React.FC = () => {
   const retryTimeoutRef = useRef<number | undefined>(undefined);
   // Track active container to avoid double rendering
   const activeContainerRef = useRef<string | null>(null);
+  // Add a ref to track if cleanup is in progress
+  const cleanupInProgressRef = useRef(false);
   
   const safeCleanup = useCallback(() => {
     console.log("Running safe cleanup");
-    if (!isMounted.current) return;
+    if (!isMounted.current || cleanupInProgressRef.current) return;
+    
+    // Set cleanup in progress flag
+    cleanupInProgressRef.current = true;
     
     // Clear any active container reference
     activeContainerRef.current = null;
     
-    // Use a short delay for the cleanup to avoid race conditions
-    const timeoutId = setTimeout(() => {
-      try {
-        if (isMounted.current) {
-          console.log("Executing deferred cleanup");
-          cleanup();
+    // Wait for a brief moment before cleanup to avoid race conditions
+    // Return a Promise to allow for chaining and sequencing operations
+    return new Promise<void>((resolve) => {
+      setTimeout(() => {
+        try {
+          if (isMounted.current) {
+            console.log("Executing deferred cleanup");
+            cleanup();
+          }
+          cleanupInProgressRef.current = false;
+          resolve();
+        } catch (error) {
+          console.error("Error during deferred cleanup:", error);
+          cleanupInProgressRef.current = false;
+          resolve();
         }
-      } catch (error) {
-        console.error("Error during deferred cleanup:", error);
-      }
-    }, 100);
-    
-    return () => {
-      clearTimeout(timeoutId);
-    };
+      }, 150); // Increased delay for safer cleanup timing
+    });
   }, [cleanup]);
   
   useEffect(() => {
     console.log("BlogPage mounted");
     setContentError(false);
     isMounted.current = true;
+    cleanupInProgressRef.current = false;
     
     return () => {
       console.log("BlogPage unmounting");
@@ -106,15 +115,10 @@ const BlogPage: React.FC = () => {
     
     console.log(`Current path: ${path}, normalized slug: '${slug}'`);
     
-    // Run cleanup first with promise to ensure it's complete
-    const cleanupPromise = new Promise<void>((resolve) => {
-      safeCleanup();
-      // Give a small delay to ensure cleanup is complete
-      setTimeout(resolve, 50);
-    });
-    
-    cleanupPromise.then(() => {
-      const renderContent = async () => {
+    // Run cleanup first and ensure it's completed before rendering new content
+    safeCleanup().then(() => {
+      // Wait a bit longer after cleanup before rendering
+      setTimeout(async () => {
         try {
           if (!isMounted.current) {
             isProcessingRoute.current = false;
@@ -149,9 +153,7 @@ const BlogPage: React.FC = () => {
             isProcessingRoute.current = false;
           }
         }
-      };
-      
-      setTimeout(renderContent, 50);
+      }, 100);
     });
     
     return () => {

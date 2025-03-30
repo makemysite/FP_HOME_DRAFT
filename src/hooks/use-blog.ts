@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
@@ -19,12 +18,11 @@ export function useBlog() {
     }
   }, []);
 
-  // Sets up the unmount tracking
+  // Sets up the unmount tracking with enhanced safety
   useEffect(() => {
     console.log("Blog hook mounted");
     unmountedRef.current = false;
     
-    // Simplified cleanup function with proper nesting
     return () => {
       console.log("Blog hook unmounting");
       
@@ -45,7 +43,7 @@ export function useBlog() {
         } catch (error) {
           console.error("Error during delayed unmount cleanup:", error);
         }
-      }, 150); // Increased delay to ensure React finishes its own cleanup
+      }, 200); // Increased delay to ensure React finishes its own cleanup
       
       // No additional return needed here - this is already the cleanup function
     };
