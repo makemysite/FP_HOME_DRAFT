@@ -1,0 +1,73 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blog Integration Example</title>
+  <style>
+    /* Your website styles here */
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      line-height: 1.5;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      color: #333;
+    }
+    
+    header {
+      padding-bottom: 20px;
+      margin-bottom: 30px;
+    }
+    
+    footer {
+      margin-top: 50px;
+      padding-top: 20px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Our Blog</h1>
+  </header>
+
+  <main>
+    <!-- Blog container - This is where the blog content will be loaded -->
+    <div id="blog-container"></div>
+  </main>
+  
+  <footer>
+    <p>&copy; 2023 Your Company. All rights reserved.</p>
+  </footer>
+
+  <!-- Include the blog embed script -->
+  <script src="/blog-embed.js"></script>
+  <script>
+    // Initialize the blog embed client
+    window.BlogEmbed.configure({
+      // Replace with your actual Supabase API URL and API key
+      apiUrl: 'https://emdldcecqgrdgronpcoc.supabase.co/rest/v1',
+      apiKey: 'YOUR_API_KEY_HERE',
+      containerId: 'blog-container'
+    });
+    
+    // Determine whether to load blog listing or single post
+    const currentPath = window.location.pathname;
+    
+    if (currentPath.match(/\/blog\/([^\/]+)/)) {
+      // Extract the slug from the URL
+      const slug = currentPath.split('/').pop();
+      console.log('Loading single post with slug:', slug);
+      
+      // Load the specific blog post
+      window.BlogEmbed.loadPost(slug);
+    } else if (currentPath === '/blog' || currentPath === '/blog/') {
+      console.log('Loading blog listing page');
+      // Load all blog posts for the blog listing page
+      window.BlogEmbed.loadPosts();
+    }
+  </script>
+</body>
+</html>
