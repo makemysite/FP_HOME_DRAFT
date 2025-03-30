@@ -1,12 +1,11 @@
-
-import BlogEmbed from "./blogsmith-embed";
+import EnhancedBlogEmbed from "./blogsmith-embed-enhanced";
 
 class BlogService {
-  private blogEmbed: BlogEmbed | null = null;
+  private blogEmbed: EnhancedBlogEmbed | null = null;
   private activeContainers: Set<string> = new Set();
   
   constructor() {
-    this.blogEmbed = new BlogEmbed();
+    this.blogEmbed = new EnhancedBlogEmbed();
   }
   
   /**
