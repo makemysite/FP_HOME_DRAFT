@@ -7,9 +7,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/components/ui/use-toast";
 import BlogEmbed from "@/lib/blog/blogsmith-embed";
 
-interface BlogPostParams {
+// Fix the type annotation for useParams
+type BlogPostParams = {
   slug: string;
-}
+};
 
 const BlogPost: React.FC = () => {
   const { slug } = useParams<BlogPostParams>();
