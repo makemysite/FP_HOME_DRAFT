@@ -1,3 +1,4 @@
+import { format } from 'date-fns';
 
 /**
  * Normalizes a slug by removing leading/trailing slashes and handling edge cases
@@ -38,4 +39,13 @@ export function getSlugVariations(slug: string): string[] {
   
   // Remove duplicates
   return [...new Set(variations)];
+}
+
+/**
+ * Format a date string into a human-readable format
+ * @param dateString ISO date string to format
+ * @returns Formatted date string
+ */
+export function formatDate(dateString: string): string {
+  return format(new Date(dateString), 'MMMM d, yyyy');
 }
