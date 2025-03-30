@@ -31,6 +31,8 @@
     link.rel = 'stylesheet';
     link.href = `${config.baseRoute}/blog-styles.css`;
     document.head.appendChild(link);
+    
+    console.log(`Loading styles from: ${config.baseRoute}/blog-styles.css`);
   }
 
   // Load React and ReactDOM if not already loaded
@@ -73,6 +75,8 @@
   // Fetch a blog post by slug
   async function fetchBlogPost(slug) {
     try {
+      console.log(`Fetching blog post with slug: ${slug} from ${config.apiUrl}`);
+      
       // Use the Supabase endpoint
       const response = await fetch(`${config.apiUrl}/blog_posts?slug=eq.${slug}`, {
         headers: {
@@ -85,7 +89,41 @@
       }
       
       const blogPosts = await response.json();
-      const blogPost = blogPosts[0]; // Get the first result
+      let blogPost = blogPosts[0]; // Get the first result
+      
+      if (!blogPost && slug.endsWith('/')) {
+        // Try without trailing slash
+        const altSlug = slug.slice(0, -1);
+        console.log(`Trying alternative slug without trailing slash: ${altSlug}`);
+        
+        const altResponse = await fetch(`${config.apiUrl}/blog_posts?slug=eq.${altSlug}`, {
+          headers: {
+            'apikey': config.apiKey
+          }
+        });
+        
+        if (altResponse.ok) {
+          const altBlogPosts = await altResponse.json();
+          blogPost = altBlogPosts[0];
+        }
+      }
+      
+      if (!blogPost && !slug.endsWith('/')) {
+        // Try with trailing slash
+        const altSlug = `${slug}/`;
+        console.log(`Trying alternative slug with trailing slash: ${altSlug}`);
+        
+        const altResponse = await fetch(`${config.apiUrl}/blog_posts?slug=eq.${altSlug}`, {
+          headers: {
+            'apikey': config.apiKey
+          }
+        });
+        
+        if (altResponse.ok) {
+          const altBlogPosts = await altResponse.json();
+          blogPost = altBlogPosts[0];
+        }
+      }
       
       if (blogPost) {
         // Fetch related sections
@@ -104,6 +142,8 @@
         const sections = await sectionsResponse.json();
         const faqs = await faqsResponse.json();
         
+        console.log(`Found ${sections.length} sections and ${faqs.length} FAQs for blog post`);
+        
         // Fetch content for each section
         for (let section of sections) {
           const contentResponse = await fetch(`${config.apiUrl}/section_content?section_id=eq.${section.id}&order=position`, {
@@ -113,6 +153,7 @@
           });
           
           const content = await contentResponse.json();
+          console.log(`Section "${section.title}" has ${content.length} content items`);
           
           // Transform the content to match our expected format
           section.content = content.map((item) => {
@@ -120,15 +161,15 @@
               return {
                 type: 'text',
                 id: item.id,
-                text: item.content.text
+                text: item.content?.text || ''
               };
             } else if (item.type === 'image') {
               return {
                 type: 'image',
                 id: item.id,
-                src: item.content.src,
-                alt: item.content.alt,
-                caption: item.content.caption
+                src: item.content?.src || item.content?.url || '',
+                alt: item.content?.alt || '',
+                caption: item.content?.caption || ''
               };
             }
             return null;
@@ -251,11 +292,14 @@
           { className: 'space-y-4' },
           faqs.map((faq) => React.createElement(
             'div',
-            { key: faq.id, className: 'border border-gray-200 rounded-lg overflow-hidden' },
+            { 
+              key: faq.id, 
+              className: `border border-gray-200 rounded-lg overflow-hidden blog-embed-faq ${openFAQ === faq.id ? 'active' : ''}` 
+            },
             React.createElement(
               'button',
               {
-                className: `w-full text-left p-4 font-medium flex justify-between items-center ${
+                className: `w-full text-left p-4 font-medium flex justify-between items-center blog-embed-faq-question ${
                   openFAQ === faq.id ? "bg-blue-50" : "bg-white"
                 }`,
                 onClick: () => toggleFAQ(faq.id)
@@ -281,7 +325,7 @@
             React.createElement(
               'div',
               {
-                className: `overflow-hidden transition-all duration-300 ${
+                className: `blog-embed-faq-answer overflow-hidden transition-all duration-300 ${
                   openFAQ === faq.id
                     ? "max-h-96 opacity-100"
                     : "max-h-0 opacity-0"
@@ -338,12 +382,14 @@
 
       if (sections.length === 0) return null;
 
+      console.log("Rendering table of contents with sections:", sections.map(s => s.title));
+
       return React.createElement(
         'div',
-        { className: 'bg-gray-50 p-4 rounded-lg mb-8' },
+        { className: 'blog-embed-toc bg-gray-50 p-4 rounded-lg mb-8' },
         React.createElement(
           'div',
-          { className: 'flex items-center mb-2 text-gray-700 font-medium' },
+          { className: 'blog-embed-toc-title flex items-center mb-2 text-gray-700 font-medium' },
           React.createElement(
             'svg',
             {
@@ -401,17 +447,18 @@
           return React.createElement(
             'div',
             { className: 'prose max-w-none' },
-            React.createElement(ReactMarkdown, null, content.text)
+            React.createElement(ReactMarkdown, null, content.text || "")
           );
         } else if (content.type === "image") {
+          console.log("Rendering image:", content);
           return React.createElement(
             'figure',
-            { className: 'my-6' },
+            { className: 'blog-embed-content-image my-6' },
             React.createElement(
               'img',
               {
                 src: content.src,
-                alt: content.alt,
+                alt: content.alt || "",
                 className: 'mx-auto rounded-md max-w-full'
               }
             ),
@@ -464,21 +511,21 @@
         ),
 
         // Table of Contents
-        post.sections.length > 0 && React.createElement(ClientTableOfContents, { sections: post.sections }),
+        post.sections && post.sections.length > 0 && React.createElement(ClientTableOfContents, { sections: post.sections }),
 
         // Main Content
         React.createElement(
           'div',
           { className: 'blog-content-wrapper' },
           // Sections
-          post.sections.map((section) => React.createElement(
+          post.sections && post.sections.map((section) => React.createElement(
             'section',
             { key: section.id, id: section.id, className: 'mb-10' },
             React.createElement('h2', { className: 'text-2xl font-bold mb-4' }, section.title),
             React.createElement(
               'div',
               { className: 'blog-content' },
-              section.content.map((content) => React.createElement(
+              section.content && section.content.map((content) => React.createElement(
                 'div',
                 { key: content.id },
                 renderContent(content)
@@ -499,7 +546,7 @@
           ),
           
           // FAQs
-          post.faqs.length > 0 && React.createElement(ClientFAQAccordion, { faqs: post.faqs })
+          post.faqs && post.faqs.length > 0 && React.createElement(ClientFAQAccordion, { faqs: post.faqs })
         )
       );
     };

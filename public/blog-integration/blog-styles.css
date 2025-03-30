@@ -34,6 +34,117 @@
 
 /* ... keep existing code (additional CSS styles from the blog-styles.css) */
 
+/* Table of Contents */
+.blog-embed-toc {
+  background-color: var(--bg-light);
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  border: 1px solid var(--border-color);
+}
+
+.blog-embed-toc-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+}
+
+.blog-embed-toc-title svg {
+  margin-right: 0.5rem;
+}
+
+.blog-embed-toc ul {
+  list-style: none;
+  padding-left: 1rem;
+  margin-bottom: 0;
+}
+
+.blog-embed-toc li {
+  padding: 0.25rem 0;
+}
+
+.blog-embed-toc a {
+  color: var(--primary-color);
+  text-decoration: none;
+  transition: color 0.2s;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.blog-embed-toc a:hover {
+  text-decoration: underline;
+}
+
+.blog-embed-toc a.active {
+  font-weight: 600;
+}
+
+/* Images in blog content */
+.blog-embed-content-image {
+  margin: 1.5rem 0;
+}
+
+.blog-embed-content-image img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.375rem;
+  display: block;
+  margin: 0 auto;
+}
+
+.blog-embed-content-image figcaption {
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin-top: 0.5rem;
+}
+
+/* FAQ styling */
+.blog-embed-faq {
+  margin-bottom: 1.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: 0.375rem;
+  overflow: hidden;
+}
+
+.blog-embed-faq-question {
+  font-size: 1.125rem;
+  font-weight: 600;
+  padding: 1rem;
+  background-color: var(--bg-light);
+  margin: 0;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.blog-embed-faq-question::after {
+  content: "+";
+  font-size: 1.5rem;
+  transition: transform 0.3s;
+}
+
+.blog-embed-faq.active .blog-embed-faq-question::after {
+  transform: rotate(45deg);
+}
+
+.blog-embed-faq-answer {
+  padding: 0 1rem;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s, padding 0.3s;
+}
+
+.blog-embed-faq.active .blog-embed-faq-answer {
+  padding: 1rem;
+  max-height: 500px;
+}
+
 /* Tailwind-inspired utility classes */
 .container { width: 100%; padding-right: 1rem; padding-left: 1rem; margin-right: auto; margin-left: auto; }
 @media (min-width: 640px) { .container { max-width: 640px; } }
