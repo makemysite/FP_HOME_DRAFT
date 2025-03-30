@@ -1,193 +1,37 @@
-
-import React, { useEffect, useState, useRef, useCallback } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
-import BlogEmbed from "@/lib/blog/blogsmith-embed";
-import { Skeleton } from "@/components/ui/skeleton";
+import React, { useEffect } from "react";
+import { useLocation } from "react-router-dom";
+import BlogHeader from "@/components/blog/BlogHeader";
+import BlogContainer from "@/components/blog/BlogContainer";
+import { useBlog } from "@/hooks/use-blog";
 import { toast } from "@/hooks/use-toast";
 
 const BlogPage: React.FC = () => {
   const location = useLocation();
-  const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
-  const [isMounted, setIsMounted] = useState(false);
-  const [renderError, setRenderError] = useState<string | null>(null);
-  const blogEmbedRef = useRef<BlogEmbed | null>(null);
-  const unmountedRef = useRef(false);
-  const initTimerRef = useRef<number | null>(null);
+  const { 
+    loading, 
+    renderBlogList, 
+    renderBlogPost, 
+    cleanup
+  } = useBlog();
   
-  // Safe state setter that only updates if component is still mounted
-  const safeSetState = useCallback(<T,>(setter: React.Dispatch<React.SetStateAction<T>>, value: T) => {
-    if (!unmountedRef.current) {
-      setter(value);
-    }
-  }, []);
-  
-  // Set mounted state when component mounts
+  // Handle blog rendering based on URL
   useEffect(() => {
-    unmountedRef.current = false;
-    safeSetState(setIsMounted, true);
-    
-    // Clean up function for component unmounting
-    return () => {
-      unmountedRef.current = true;
-      safeSetState(setIsMounted, false);
-      
-      // Clear any pending timers
-      if (initTimerRef.current !== null) {
-        clearTimeout(initTimerRef.current);
-        initTimerRef.current = null;
-      }
-      
-      // Safely clean up DOM containers
-      try {
-        const containers = ['blog-list-container', 'blog-post-container'];
-        containers.forEach(id => {
-          const container = document.getElementById(id);
-          if (container) {
-            // Instead of innerHTML manipulation which can cause issues,
-            // we'll use a more React-friendly approach
-            while (container.firstChild) {
-              container.removeChild(container.firstChild);
-            }
-          }
-        });
-      } catch (err) {
-        console.error("Error safely cleaning up blog containers:", err);
-      }
-    };
-  }, [safeSetState]);
-  
-  // Handle 404 errors for blog posts
-  useEffect(() => {
-    if (renderError && location.pathname !== '/blog' && location.pathname !== '/blog/') {
-      navigate('/blog', { 
-        replace: true,
-        state: { error: renderError }
-      });
-    }
-  }, [renderError, location.pathname, navigate]);
-  
-  useEffect(() => {
-    // Only run blog initialization when component is mounted
-    if (!isMounted || unmountedRef.current) return;
-    
-    // Reset loading state for each route change
-    safeSetState(setLoading, true);
-    safeSetState(setRenderError, null);
-    
-    // Clean up previous timer if it exists
-    if (initTimerRef.current !== null) {
-      clearTimeout(initTimerRef.current);
-      initTimerRef.current = null;
-    }
-    
-    // Create the BlogEmbed instance only once and store it in the ref
-    if (!blogEmbedRef.current) {
-      blogEmbedRef.current = new BlogEmbed();
-    }
-    
-    // Determine if we're viewing a single post or the blog list
     const path = location.pathname;
-    const slug = path.replace('/blog/', '');
+    const slug = path.replace('/blog/', '').replace(/\/$/, ''); // Remove trailing slash if present
     
-    // Small delay to ensure DOM elements exist
-    initTimerRef.current = window.setTimeout(() => {
-      // Check again if component is still mounted
-      if (unmountedRef.current) return;
-      
-      try {
-        if (path === '/blog' || path === '/blog/') {
-          // We're on the main blog page, render the blog list
-          const blogListContainer = document.getElementById('blog-list-container');
-          
-          if (blogListContainer && blogEmbedRef.current && !unmountedRef.current) {
-            // Clean the container first
-            while (blogListContainer.firstChild) {
-              blogListContainer.removeChild(blogListContainer.firstChild);
-            }
-            
-            blogEmbedRef.current.renderBlogList('blog-list-container', {
-              limit: 8,
-              showDescription: true,
-              showImage: true
-            })
-            .then(() => {
-              if (!unmountedRef.current) safeSetState(setLoading, false);
-            })
-            .catch(error => {
-              console.error("Error rendering blog list:", error);
-              if (!unmountedRef.current) {
-                safeSetState(setLoading, false);
-                toast({
-                  title: "Error loading blogs",
-                  description: "Could not load blog posts. Please try again later.",
-                  variant: "destructive",
-                });
-              }
-            });
-          } else if (!unmountedRef.current) {
-            safeSetState(setLoading, false);
-          }
-        } else if (path.startsWith('/blog/') && slug !== '') {
-          // We're on a single blog post page, render that post
-          const blogPostContainer = document.getElementById('blog-post-container');
-          
-          if (blogPostContainer && blogEmbedRef.current && !unmountedRef.current) {
-            // Clean the container first to prevent stale DOM references
-            while (blogPostContainer.firstChild) {
-              blogPostContainer.removeChild(blogPostContainer.firstChild);
-            }
-            
-            console.log(`Rendering blog post with slug: ${slug}`);
-            blogEmbedRef.current.renderBlogPost('blog-post-container', slug)
-              .then(() => {
-                if (!unmountedRef.current) safeSetState(setLoading, false);
-              })
-              .catch(error => {
-                console.error("Error rendering blog post:", error);
-                if (!unmountedRef.current) {
-                  safeSetState(setLoading, false);
-                  
-                  // Check if it's a "not found" error and handle accordingly
-                  if (error.message && error.message.includes("not found")) {
-                    safeSetState(setRenderError, `Blog post "${slug}" not found`);
-                  } else {
-                    toast({
-                      title: "Error loading blog post",
-                      description: "Could not load the blog post. Please try again later.",
-                      variant: "destructive",
-                    });
-                  }
-                }
-              });
-          } else if (!unmountedRef.current) {
-            safeSetState(setLoading, false);
-          }
-        }
-      } catch (error) {
-        console.error("Error in blog page:", error);
-        if (!unmountedRef.current) {
-          safeSetState(setLoading, false);
-          toast({
-            title: "An error occurred",
-            description: "Something went wrong. Please try again later.",
-            variant: "destructive",
-          });
-        }
-      }
-    }, 50); // Small delay to ensure DOM is ready
+    console.log(`Current path: ${path}, slug: ${slug}`);
     
-    // Clean up function for this effect
+    if (path === '/blog' || path === '/blog/') {
+      renderBlogList();
+    } else if (path.startsWith('/blog/') && slug) {
+      renderBlogPost(slug);
+    }
+    
     return () => {
-      if (initTimerRef.current !== null) {
-        clearTimeout(initTimerRef.current);
-        initTimerRef.current = null;
-      }
+      // Clean up when component unmounts or route changes
+      cleanup();
     };
-    
-  }, [location.pathname, isMounted, safeSetState]);
+  }, [location.pathname, renderBlogList, renderBlogPost, cleanup]);
 
   // Check for error from previous navigation
   useEffect(() => {
@@ -199,67 +43,25 @@ const BlogPage: React.FC = () => {
       });
       
       // Clear the error state to prevent showing the toast multiple times
-      navigate('/blog', { replace: true, state: {} });
+      history.replaceState({}, document.title);
     }
-  }, [location, navigate]);
+  }, [location]);
 
   return (
     <div className="bg-white min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="flex items-center mb-8">
-          <Link to="/">
-            <Button variant="ghost" size="sm" className="gap-2">
-              <ArrowLeft className="h-4 w-4" />
-              Back to Home
-            </Button>
-          </Link>
-        </div>
-        
-        <div className="space-y-6">
-          <div className="text-center">
-            <h1 className="text-4xl font-bold text-[#170F49] mb-6">Our Blog</h1>
-            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              Stay up to date with the latest trends, tips, and insights in field service management
-              and cloud-based solutions.
-            </p>
-          </div>
+        <BlogHeader />
 
-          <div className="mt-12">
-            {/* Blog list container - this will be populated by BlogEmbed */}
-            <div id="blog-list-container" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {loading && location.pathname === '/blog' && (
-                Array(6).fill(0).map((_, i) => (
-                  <div key={i} className="flex flex-col gap-4">
-                    <Skeleton className="w-full h-[200px] rounded-lg" />
-                    <Skeleton className="w-3/4 h-6" />
-                    <Skeleton className="w-full h-24" />
-                    <Skeleton className="w-1/4 h-6" />
-                  </div>
-                ))
-              )}
-            </div>
-            
-            {/* Blog post container - this will be populated by BlogEmbed for single posts */}
-            <div id="blog-post-container" className="prose max-w-none">
-              {loading && location.pathname !== '/blog' && (
-                <div className="space-y-6">
-                  <Skeleton className="w-full h-[400px] rounded-lg" />
-                  <Skeleton className="w-3/4 h-12" />
-                  <Skeleton className="w-1/4 h-6" />
-                  <Skeleton className="w-full h-32" />
-                  <div className="space-y-4">
-                    <Skeleton className="w-1/2 h-8" />
-                    <Skeleton className="w-full h-24" />
-                    <Skeleton className="w-full h-24" />
-                  </div>
-                  <div className="space-y-4">
-                    <Skeleton className="w-1/2 h-8" />
-                    <Skeleton className="w-full h-24" />
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
+        <div className="mt-12">
+          {/* Blog list container */}
+          {(location.pathname === '/blog' || location.pathname === '/blog/') && (
+            <BlogContainer id="blog-list-container" loading={loading} type="list" />
+          )}
+          
+          {/* Blog post container */}
+          {location.pathname !== '/blog' && location.pathname !== '/blog/' && (
+            <BlogContainer id="blog-post-container" loading={loading} type="post" />
+          )}
         </div>
       </div>
       
