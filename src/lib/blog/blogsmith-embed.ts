@@ -1,4 +1,3 @@
-
 /**
  * BlogEmbed - A client library for embedding BlogSmith content
  */
@@ -12,12 +11,16 @@ export interface BlogEmbedOptions {
   retryOnFailure?: boolean;
   retryAttempts?: number;
   retryDelay?: number;
+  safeRendering?: boolean;
+  useRequestAnimationFrame?: boolean;
 }
 
 export interface BlogEmbedConfig {
   debug?: boolean;
   domCheckInterval?: number;
   errorHandler?: (error: Error) => void;
+  domMutationObserver?: boolean;
+  safeElementLookup?: boolean;
 }
 
 export interface BlogPost {
@@ -52,6 +55,8 @@ class BlogEmbed {
       debug: false,
       domCheckInterval: 0,
       errorHandler: undefined,
+      domMutationObserver: false,
+      safeElementLookup: false,
       ...config
     };
     
@@ -464,7 +469,9 @@ class BlogEmbed {
       fallbackContent = 'No blog posts found',
       retryOnFailure = false,
       retryAttempts = 1,
-      retryDelay = 1000
+      retryDelay = 1000,
+      safeRendering = false,
+      useRequestAnimationFrame = false
     } = options;
     
     // Show loading state
@@ -553,7 +560,9 @@ class BlogEmbed {
       fallbackContent = 'Blog post not found',
       retryOnFailure = false,
       retryAttempts = 1,
-      retryDelay = 1000
+      retryDelay = 1000,
+      safeRendering = false,
+      useRequestAnimationFrame = false
     } = options;
 
     // Show loading state

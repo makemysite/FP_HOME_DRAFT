@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
@@ -100,9 +99,7 @@ export function useBlog() {
       await blogService.renderBlogList('blog-list-container', {
         fallbackContent: "No blog posts are currently available. Please check back later.",
         retryOnFailure: true,
-        retryAttempts: 3,
-        safeRendering: true,
-        useRequestAnimationFrame: true
+        retryAttempts: 3
       });
       
       if (!unmountedRef.current) {
@@ -168,9 +165,7 @@ export function useBlog() {
       await blogService.renderBlogPost('blog-post-container', normalizedSlug, {
         fallbackContent: `The blog post "${normalizedSlug}" could not be found.`,
         retryOnFailure: true,
-        retryAttempts: 3,
-        safeRendering: true,
-        useRequestAnimationFrame: true
+        retryAttempts: 3
       });
       
       if (!unmountedRef.current) {

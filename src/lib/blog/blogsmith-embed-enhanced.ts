@@ -1,5 +1,5 @@
 
-import BlogEmbed, { BlogEmbedOptions } from './blogsmith-embed';
+import BlogEmbed, { BlogEmbedOptions, BlogEmbedConfig } from './blogsmith-embed';
 
 /**
  * Enhanced version of BlogEmbed with additional safety features
