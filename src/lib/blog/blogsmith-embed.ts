@@ -2,6 +2,8 @@
 /**
  * BlogEmbed - A client library for embedding BlogSmith content
  */
+import { supabase } from '@/integrations/supabase/client';
+
 export interface BlogEmbedOptions {
   limit?: number;
   showDescription?: boolean;
@@ -9,33 +11,42 @@ export interface BlogEmbedOptions {
 }
 
 export interface BlogPost {
-  id: number;
+  id: string;
   slug: string;
   title: string;
   description: string;
-  image: string;
-  date: string;
-  author: string;
+  hero_image: string;
+  created_at: string;
+  updated_at: string;
+  user_id: string;
+  category: string;
+  label: string;
+  published: boolean;
 }
 
 class BlogEmbed {
-  private apiEndpoint: string = 'https://api.blogsmith.example.com'; // This would be replaced with the actual BlogSmith API endpoint
-
   constructor() {
-    console.log('BlogEmbed: Subscribed to real-time updates');
+    console.log('BlogEmbed: Initialized with Supabase integration');
   }
 
-  // Method to fetch blog posts from the API
+  // Method to fetch blog posts from Supabase
   private async fetchBlogPosts(limit: number = 10): Promise<BlogPost[]> {
     try {
-      // In a real implementation, this would make an API request to BlogSmith
-      // For now, we'll return an empty array since we don't have the actual API
-      console.log(`BlogEmbed: Fetching ${limit} blog posts from API`);
+      console.log(`BlogEmbed: Fetching ${limit} blog posts from Supabase`);
       
-      // Simulating API delay
-      await new Promise(resolve => setTimeout(resolve, 500));
+      const { data, error } = await supabase
+        .from('blog_posts')
+        .select('*')
+        .eq('published', true)
+        .order('created_at', { ascending: false })
+        .limit(limit);
       
-      return [];
+      if (error) {
+        console.error('Error fetching blog posts:', error);
+        return [];
+      }
+      
+      return data || [];
     } catch (error) {
       console.error('Error fetching blog posts:', error);
       return [];
@@ -45,14 +56,21 @@ class BlogEmbed {
   // Method to fetch a single blog post by slug
   private async fetchBlogPost(slug: string): Promise<BlogPost | null> {
     try {
-      // In a real implementation, this would make an API request to BlogSmith
-      // For now, we'll return null since we don't have the actual API
-      console.log(`BlogEmbed: Fetching blog post with slug "${slug}" from API`);
+      console.log(`BlogEmbed: Fetching blog post with slug "${slug}" from Supabase`);
       
-      // Simulating API delay
-      await new Promise(resolve => setTimeout(resolve, 500));
+      const { data, error } = await supabase
+        .from('blog_posts')
+        .select('*')
+        .eq('slug', slug)
+        .eq('published', true)
+        .single();
       
-      return null;
+      if (error) {
+        console.error('Error fetching blog post:', error);
+        return null;
+      }
+      
+      return data || null;
     } catch (error) {
       console.error('Error fetching blog post:', error);
       return null;
@@ -72,7 +90,7 @@ class BlogEmbed {
     // Show loading state
     container.innerHTML = '<div class="blog-embed-loading">Loading blog posts...</div>';
     
-    // Fetch posts from API
+    // Fetch posts from Supabase
     const posts = await this.fetchBlogPosts(limit);
 
     // Add blog-embed-list class for styling
@@ -85,14 +103,20 @@ class BlogEmbed {
     
     // Generate HTML for blog list
     const postsHtml = posts.map(post => {
+      const formattedDate = new Date(post.created_at).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+
       return `
         <article class="blog-embed-list-item">
-          ${showImage ? `<img src="${post.image}" alt="${post.title}" class="blog-embed-image" />` : ''}
+          ${showImage && post.hero_image ? `<img src="${post.hero_image}" alt="${post.title}" class="blog-embed-image" />` : ''}
           <h3 class="blog-embed-title">${post.title}</h3>
-          ${showDescription ? `<p class="blog-embed-description">${post.description}</p>` : ''}
+          ${showDescription && post.description ? `<p class="blog-embed-description">${post.description}</p>` : ''}
           <div class="blog-embed-meta">
-            <span class="blog-embed-date">${post.date}</span>
-            <span class="blog-embed-author">by ${post.author}</span>
+            <span class="blog-embed-date">${formattedDate}</span>
+            <span class="blog-embed-category">${post.category || 'Uncategorized'}</span>
           </div>
           <a href="/blog/${post.slug}" class="blog-embed-read-more">Read More</a>
         </article>
@@ -117,7 +141,7 @@ class BlogEmbed {
     // Show loading state
     container.innerHTML = '<div class="blog-embed-loading">Loading blog post...</div>';
     
-    // Fetch post from API
+    // Fetch post from Supabase
     const post = await this.fetchBlogPost(slug);
     
     if (!post) {
@@ -128,17 +152,23 @@ class BlogEmbed {
     // Add blog-embed-post class for styling
     container.classList.add('blog-embed-post');
     
+    const formattedDate = new Date(post.created_at).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+
     // Generate HTML for the blog post
     const postHtml = `
       <article>
-        <img src="${post.image}" alt="${post.title}" class="blog-embed-post-image" />
+        ${post.hero_image ? `<img src="${post.hero_image}" alt="${post.title}" class="blog-embed-post-image" />` : ''}
         <h1 class="blog-embed-post-title">${post.title}</h1>
         <div class="blog-embed-post-meta">
-          <span class="blog-embed-post-date">${post.date}</span>
-          <span class="blog-embed-post-author">by ${post.author}</span>
+          <span class="blog-embed-post-date">${formattedDate}</span>
+          <span class="blog-embed-post-category">${post.category || 'Uncategorized'}</span>
         </div>
         <div class="blog-embed-post-content">
-          ${post.description}
+          ${post.description || ''}
         </div>
       </article>
     `;
@@ -147,7 +177,7 @@ class BlogEmbed {
     container.innerHTML = postHtml;
 
     // Add SEO metadata for the specific post
-    this.addSEOMetadata(post.title, post.description, post.image);
+    this.addSEOMetadata(post.title, post.description || '', post.hero_image || undefined);
   }
 
   // Add SEO metadata to the page
@@ -204,3 +234,4 @@ class BlogEmbed {
 }
 
 export default BlogEmbed;
+
