@@ -8,6 +8,16 @@ export interface BlogEmbedOptions {
   limit?: number;
   showDescription?: boolean;
   showImage?: boolean;
+  fallbackContent?: string;
+  retryOnFailure?: boolean;
+  retryAttempts?: number;
+  retryDelay?: number;
+}
+
+export interface BlogEmbedConfig {
+  debug?: boolean;
+  domCheckInterval?: number;
+  errorHandler?: (error: Error) => void;
 }
 
 export interface BlogPost {
@@ -34,98 +44,224 @@ interface BlogPostData {
 
 class BlogEmbed {
   private activeContainers: Set<string> = new Set();
+  private config: BlogEmbedConfig;
+  private domCheckIntervalId: number | null = null;
   
-  constructor() {
-    console.log('BlogEmbed: Initialized with Supabase integration');
+  constructor(config: BlogEmbedConfig = {}) {
+    this.config = {
+      debug: false,
+      domCheckInterval: 0,
+      errorHandler: undefined,
+      ...config
+    };
+    
+    this.log('BlogEmbed: Initialized with Supabase integration');
+    
+    // Start DOM check interval if configured
+    if (this.config.domCheckInterval && this.config.domCheckInterval > 0) {
+      this.startDomChecks();
+    }
   }
-
-  // Method to fetch blog posts from Supabase
-  private async fetchBlogPosts(limit: number = 10): Promise<BlogPost[]> {
-    try {
-      console.log(`BlogEmbed: Fetching ${limit} blog posts from Supabase`);
-      
-      const { data, error } = await supabase
-        .from('blog_posts')
-        .select('*')
-        .eq('published', true)
-        .order('created_at', { ascending: false })
-        .limit(limit);
-      
-      if (error) {
-        console.error('Error fetching blog posts:', error);
-        return [];
+  
+  private log(...args: any[]): void {
+    if (this.config.debug) {
+      console.log(...args);
+    }
+  }
+  
+  private handleError(error: Error, context?: string): void {
+    const contextualError = context ? new Error(`${context}: ${error.message}`) : error;
+    
+    // Call custom error handler if provided
+    if (typeof this.config.errorHandler === 'function') {
+      try {
+        this.config.errorHandler(contextualError);
+      } catch (handlerError) {
+        console.error('Error in custom error handler:', handlerError);
       }
-      
-      return data || [];
-    } catch (error) {
-      console.error('Error fetching blog posts:', error);
-      return [];
+    }
+    
+    // Always log the error
+    console.error(context || 'BlogEmbed Error:', error);
+  }
+  
+  private startDomChecks(): void {
+    // Clear any existing interval first
+    if (this.domCheckIntervalId !== null) {
+      window.clearInterval(this.domCheckIntervalId);
+    }
+    
+    // Set up new interval
+    this.domCheckIntervalId = window.setInterval(() => {
+      try {
+        // Check all active containers to ensure they still exist in the DOM
+        const containersToRemove: string[] = [];
+        
+        this.activeContainers.forEach(containerId => {
+          const container = document.getElementById(containerId);
+          if (!container || !document.body.contains(container)) {
+            this.log(`DOM check: Container #${containerId} no longer in DOM, removing from tracking`);
+            containersToRemove.push(containerId);
+          }
+        });
+        
+        // Remove any containers that no longer exist
+        containersToRemove.forEach(id => {
+          this.activeContainers.delete(id);
+        });
+      } catch (error) {
+        console.error('Error in DOM check interval:', error);
+      }
+    }, this.config.domCheckInterval);
+  }
+  
+  private stopDomChecks(): void {
+    if (this.domCheckIntervalId !== null) {
+      window.clearInterval(this.domCheckIntervalId);
+      this.domCheckIntervalId = null;
     }
   }
 
-  // Method to fetch a single blog post by slug with all related content
-  private async fetchBlogPost(slug: string): Promise<BlogPostData> {
-    try {
-      console.log(`BlogEmbed: Fetching blog post with slug "${slug}" from Supabase`);
-      
-      // Fetch the main blog post
-      const { data: post, error: postError } = await supabase
-        .from('blog_posts')
-        .select('*')
-        .eq('slug', slug)
-        .eq('published', true)
-        .single();
-      
-      if (postError) {
-        console.error('Error fetching blog post:', postError);
-        return { post: null, sections: [], faqs: [] };
+  // Method to fetch blog posts from Supabase with retry capability
+  private async fetchBlogPosts(limit: number = 10, retryOptions?: { attempts: number, delay: number }): Promise<BlogPost[]> {
+    const maxAttempts = retryOptions?.attempts || 1;
+    const delayMs = retryOptions?.delay || 1000;
+    
+    let currentAttempt = 0;
+    let lastError: any = null;
+    
+    while (currentAttempt < maxAttempts) {
+      try {
+        currentAttempt++;
+        this.log(`BlogEmbed: Fetching ${limit} blog posts from Supabase (attempt ${currentAttempt}/${maxAttempts})`);
+        
+        const { data, error } = await supabase
+          .from('blog_posts')
+          .select('*')
+          .eq('published', true)
+          .order('created_at', { ascending: false })
+          .limit(limit);
+        
+        if (error) {
+          lastError = error;
+          this.log(`Error fetching blog posts (attempt ${currentAttempt}/${maxAttempts}):`, error);
+          
+          // If we have attempts left, wait before retrying
+          if (currentAttempt < maxAttempts) {
+            await new Promise(resolve => setTimeout(resolve, delayMs));
+            continue;
+          }
+          
+          throw error;
+        }
+        
+        return data || [];
+      } catch (error) {
+        lastError = error;
+        this.log(`Error fetching blog posts (attempt ${currentAttempt}/${maxAttempts}):`, error);
+        
+        // If we have attempts left, wait before retrying
+        if (currentAttempt < maxAttempts) {
+          await new Promise(resolve => setTimeout(resolve, delayMs));
+          continue;
+        }
       }
-
-      if (!post) {
-        return { post: null, sections: [], faqs: [] };
-      }
-
-      // Fetch blog sections with their content
-      const { data: sections, error: sectionsError } = await supabase
-        .from('blog_sections')
-        .select(`
-          id, 
-          title, 
-          position,
-          section_content(id, type, content, position)
-        `)
-        .eq('blog_post_id', post.id)
-        .order('position', { ascending: true });
-
-      if (sectionsError) {
-        console.error('Error fetching blog sections:', sectionsError);
-        return { post, sections: [], faqs: [] };
-      }
-
-      // Fetch FAQs if any
-      const { data: faqs, error: faqsError } = await supabase
-        .from('blog_faqs')
-        .select('*')
-        .eq('blog_post_id', post.id)
-        .order('position', { ascending: true });
-
-      if (faqsError) {
-        console.error('Error fetching blog FAQs:', faqsError);
-      }
-
-      // Add FAQs to the result
-      return { 
-        post, 
-        sections: sections || [],
-        faqs: faqs || []
-      };
-    } catch (error) {
-      console.error('Error fetching blog post:', error);
-      return { post: null, sections: [], faqs: [] };
     }
+    
+    // If we get here, all attempts failed
+    this.handleError(new Error(lastError?.message || 'Failed to fetch blog posts after multiple attempts'), 'FetchBlogPosts');
+    return [];
   }
 
-  // Method to safely check if a container exists
+  // Method to fetch a single blog post by slug with all related content and retry capability
+  private async fetchBlogPost(slug: string, retryOptions?: { attempts: number, delay: number }): Promise<BlogPostData> {
+    const maxAttempts = retryOptions?.attempts || 1;
+    const delayMs = retryOptions?.delay || 1000;
+    
+    let currentAttempt = 0;
+    let lastError: any = null;
+    
+    while (currentAttempt < maxAttempts) {
+      try {
+        currentAttempt++;
+        this.log(`BlogEmbed: Fetching blog post with slug "${slug}" from Supabase (attempt ${currentAttempt}/${maxAttempts})`);
+        
+        // Fetch the main blog post
+        const { data: post, error: postError } = await supabase
+          .from('blog_posts')
+          .select('*')
+          .eq('slug', slug)
+          .eq('published', true)
+          .single();
+        
+        if (postError) {
+          lastError = postError;
+          this.log(`Error fetching blog post (attempt ${currentAttempt}/${maxAttempts}):`, postError);
+          
+          // If we have attempts left, wait before retrying
+          if (currentAttempt < maxAttempts) {
+            await new Promise(resolve => setTimeout(resolve, delayMs));
+            continue;
+          }
+          
+          throw postError;
+        }
+
+        if (!post) {
+          return { post: null, sections: [], faqs: [] };
+        }
+
+        // Fetch blog sections with their content
+        const { data: sections, error: sectionsError } = await supabase
+          .from('blog_sections')
+          .select(`
+            id, 
+            title, 
+            position,
+            section_content(id, type, content, position)
+          `)
+          .eq('blog_post_id', post.id)
+          .order('position', { ascending: true });
+
+        if (sectionsError) {
+          this.log('Error fetching blog sections:', sectionsError);
+        }
+
+        // Fetch FAQs if any
+        const { data: faqs, error: faqsError } = await supabase
+          .from('blog_faqs')
+          .select('*')
+          .eq('blog_post_id', post.id)
+          .order('position', { ascending: true });
+
+        if (faqsError) {
+          this.log('Error fetching blog FAQs:', faqsError);
+        }
+
+        // Add FAQs to the result
+        return { 
+          post, 
+          sections: sections || [],
+          faqs: faqs || []
+        };
+      } catch (error) {
+        lastError = error;
+        this.log(`Error fetching blog post (attempt ${currentAttempt}/${maxAttempts}):`, error);
+        
+        // If we have attempts left, wait before retrying
+        if (currentAttempt < maxAttempts) {
+          await new Promise(resolve => setTimeout(resolve, delayMs));
+          continue;
+        }
+      }
+    }
+    
+    // If we get here, all attempts failed
+    this.handleError(new Error(lastError?.message || 'Failed to fetch blog post after multiple attempts'), 'FetchBlogPost');
+    return { post: null, sections: [], faqs: [] };
+  }
+
+  // Method to safely check if a container exists with added error handling
   private getContainer(containerId: string): HTMLElement | null {
     try {
       // Check if container ID is being tracked
@@ -136,20 +272,29 @@ class BlogEmbed {
       
       const container = document.getElementById(containerId);
       if (!container) {
-        console.error(`Container with ID "${containerId}" not found`);
+        this.log(`Container with ID "${containerId}" not found`);
         // Remove from tracked containers if not found
         this.activeContainers.delete(containerId);
         return null;
       }
+      
+      // Extra check to ensure container is in the DOM
+      if (!document.body.contains(container)) {
+        this.log(`Container with ID "${containerId}" is not in the DOM`);
+        // Remove from tracked containers if not in DOM
+        this.activeContainers.delete(containerId);
+        return null;
+      }
+      
       return container;
     } catch (error) {
-      console.error(`Error getting container ${containerId}:`, error);
+      this.handleError(error as Error, `Error getting container ${containerId}`);
       this.activeContainers.delete(containerId);
       return null;
     }
   }
 
-  // Method to safely update container content
+  // Method to safely update container content with improved error handling
   private safelyUpdateContainer(container: HTMLElement | null, content: string, containerId: string): boolean {
     if (!container) {
       // Container not available, remove from tracking
@@ -160,41 +305,143 @@ class BlogEmbed {
     try {
       // Extra check to ensure the container is still in the DOM
       if (!document.body.contains(container)) {
-        console.warn(`Container #${containerId} is no longer in the DOM, aborting update`);
+        this.log(`Container #${containerId} is no longer in the DOM, aborting update`);
         this.activeContainers.delete(containerId);
         return false;
       }
       
       // Using a safer approach to set innerHTML
-      const tempDiv = document.createElement('div');
-      tempDiv.innerHTML = content;
-      
-      // Clear the container first
-      while (container.firstChild) {
-        container.removeChild(container.firstChild);
+      try {
+        // First method: Use innerHTML directly with defensive check
+        container.innerHTML = content;
+        return true;
+      } catch (innerHTMLError) {
+        this.log(`Error using innerHTML directly, trying alternate approach:`, innerHTMLError);
+        
+        // Second method: Create a document fragment
+        const fragment = document.createDocumentFragment();
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = content;
+        
+        // Clear the container first safely
+        while (container.firstChild) {
+          try {
+            container.removeChild(container.firstChild);
+          } catch (removeError) {
+            this.log(`Error removing child:`, removeError);
+            // Break to avoid infinite loop
+            break;
+          }
+        }
+        
+        // Move nodes from temp div to fragment
+        while (tempDiv.firstChild) {
+          fragment.appendChild(tempDiv.firstChild);
+        }
+        
+        // Append fragment to container
+        container.appendChild(fragment);
+        
+        return true;
       }
-      
-      // Move nodes from temp div to container
-      while (tempDiv.firstChild) {
-        container.appendChild(tempDiv.firstChild);
-      }
-      
-      return true;
     } catch (error) {
-      console.error(`Error updating container ${containerId} content:`, error);
+      this.handleError(error as Error, `Error updating container ${containerId} content`);
       this.activeContainers.delete(containerId);
       return false;
     }
   }
 
-  // Method to safely clean up tracking for a container
+  // Method to safely clean up tracking for a container with improved error handling
   public cleanupContainer(containerId: string): void {
-    this.activeContainers.delete(containerId);
+    try {
+      // Remove from tracked containers first
+      this.activeContainers.delete(containerId);
+      
+      const container = document.getElementById(containerId);
+      if (!container) {
+        this.log(`Container #${containerId} not found, skipping cleanup`);
+        return;
+      }
+      
+      if (!document.body.contains(container)) {
+        this.log(`Container #${containerId} is not in DOM, skipping cleanup`);
+        return;
+      }
+      
+      // Clear the container's content safely
+      try {
+        // First approach: Set innerHTML to empty string
+        container.innerHTML = '';
+      } catch (error) {
+        this.log(`Error clearing container with innerHTML, trying alternate approach:`, error);
+        
+        // Fallback approach: Remove children one by one
+        while (container.firstChild) {
+          try {
+            if (container.firstChild.parentNode === container) {
+              container.removeChild(container.firstChild);
+            } else {
+              // If parentNode doesn't match, just break out to avoid errors
+              break;
+            }
+          } catch (removeError) {
+            this.log(`Error removing child:`, removeError);
+            // Break to avoid infinite loop
+            break;
+          }
+        }
+      }
+    } catch (error) {
+      this.handleError(error as Error, `Error cleaning up container ${containerId}`);
+    }
   }
 
-  // Method to clean up all tracked containers
+  // Method to clean up all tracked containers with enhanced error handling
   public cleanupAllContainers(): void {
-    this.activeContainers.clear();
+    try {
+      // Make a copy of the set to avoid iteration issues during deletion
+      const containers = Array.from(this.activeContainers);
+      
+      // Clear our tracking set first
+      this.activeContainers.clear();
+      
+      // Clean each container individually
+      containers.forEach(id => {
+        try {
+          const container = document.getElementById(id);
+          if (container && document.body.contains(container)) {
+            try {
+              // Attempt to clear innerHTML first
+              container.innerHTML = '';
+            } catch (clearError) {
+              this.log(`Error clearing container ${id} with innerHTML:`, clearError);
+              
+              // Fallback: remove children one by one
+              try {
+                while (container.firstChild) {
+                  if (container.firstChild.parentNode === container) {
+                    container.removeChild(container.firstChild);
+                  } else {
+                    break;
+                  }
+                }
+              } catch (removeError) {
+                this.log(`Error removing children from container ${id}:`, removeError);
+              }
+            }
+          } else {
+            this.log(`Container #${id} does not exist or is not in DOM during cleanup`);
+          }
+        } catch (containerError) {
+          this.handleError(containerError as Error, `Error cleaning up container ${id}`);
+        }
+      });
+      
+      // Stop DOM checks when cleaning up all containers
+      this.stopDomChecks();
+    } catch (error) {
+      this.handleError(error as Error, 'Error in cleanupAllContainers');
+    }
   }
 
   // Method to check if container is still being tracked
@@ -202,30 +449,42 @@ class BlogEmbed {
     return this.activeContainers.has(containerId);
   }
 
-  // Method to render a list of blog posts
+  // Method to render a list of blog posts with enhanced error handling and fallback content
   async renderBlogList(containerId: string, options: BlogEmbedOptions = {}): Promise<void> {
     const container = this.getContainer(containerId);
     if (!container) {
-      throw new Error(`Container with ID "${containerId}" not found`);
+      this.handleError(new Error(`Container with ID "${containerId}" not found`), 'RenderBlogList');
+      return;
     }
 
-    const { limit = 10, showDescription = true, showImage = true } = options;
+    const { 
+      limit = 10, 
+      showDescription = true, 
+      showImage = true,
+      fallbackContent = 'No blog posts found',
+      retryOnFailure = false,
+      retryAttempts = 1,
+      retryDelay = 1000
+    } = options;
     
     // Show loading state
     this.safelyUpdateContainer(container, '<div class="blog-embed-loading">Loading blog posts...</div>', containerId);
     
-    // Fetch posts from Supabase
-    const posts = await this.fetchBlogPosts(limit);
+    // Fetch posts from Supabase with retry capability if requested
+    const posts = await this.fetchBlogPosts(
+      limit,
+      retryOnFailure ? { attempts: retryAttempts, delay: retryDelay } : undefined
+    );
 
     // Check if container still exists and is being tracked
     if (!this.isContainerActive(containerId)) {
-      console.warn(`Container #${containerId} is no longer being tracked, aborting render`);
+      this.log(`Container #${containerId} is no longer being tracked, aborting render`);
       return;
     }
     
     const updatedContainer = this.getContainer(containerId);
     if (!updatedContainer) {
-      console.warn(`Container #${containerId} no longer exists, aborting render`);
+      this.log(`Container #${containerId} no longer exists, aborting render`);
       return;
     }
 
@@ -233,7 +492,11 @@ class BlogEmbed {
     updatedContainer.classList.add('blog-embed-list');
     
     if (posts.length === 0) {
-      this.safelyUpdateContainer(updatedContainer, '<div class="blog-embed-empty">No blog posts found</div>', containerId);
+      this.safelyUpdateContainer(
+        updatedContainer, 
+        `<div class="blog-embed-empty">${fallbackContent}</div>`, 
+        containerId
+      );
       return;
     }
     
@@ -261,13 +524,13 @@ class BlogEmbed {
 
     // Final check if container still exists and is being tracked
     if (!this.isContainerActive(containerId)) {
-      console.warn(`Container #${containerId} is no longer being tracked, aborting render`);
+      this.log(`Container #${containerId} is no longer being tracked, aborting render`);
       return;
     }
     
     const finalContainer = this.getContainer(containerId);
     if (!finalContainer) {
-      console.warn(`Container #${containerId} no longer exists, aborting render`);
+      this.log(`Container #${containerId} no longer exists, aborting render`);
       return;
     }
 
@@ -278,33 +541,48 @@ class BlogEmbed {
     this.addSEOMetadata('Blog Posts', 'Latest blog posts from our company');
   }
 
-  // Method to render a single blog post
-  async renderBlogPost(containerId: string, slug: string): Promise<void> {
+  // Method to render a single blog post with enhanced error handling and fallback content
+  async renderBlogPost(containerId: string, slug: string, options: BlogEmbedOptions = {}): Promise<void> {
     const container = this.getContainer(containerId);
     if (!container) {
-      throw new Error(`Container with ID "${containerId}" not found`);
+      this.handleError(new Error(`Container with ID "${containerId}" not found`), 'RenderBlogPost');
+      return;
     }
+
+    const {
+      fallbackContent = 'Blog post not found',
+      retryOnFailure = false,
+      retryAttempts = 1,
+      retryDelay = 1000
+    } = options;
 
     // Show loading state
     this.safelyUpdateContainer(container, '<div class="blog-embed-loading">Loading blog post...</div>', containerId);
     
-    // Fetch post from Supabase with all related content
-    const { post, sections, faqs } = await this.fetchBlogPost(slug);
+    // Fetch post from Supabase with all related content and retry capability if requested
+    const { post, sections, faqs } = await this.fetchBlogPost(
+      slug,
+      retryOnFailure ? { attempts: retryAttempts, delay: retryDelay } : undefined
+    );
     
     // Check if container still exists and is being tracked
     if (!this.isContainerActive(containerId)) {
-      console.warn(`Container #${containerId} is no longer being tracked, aborting render`);
+      this.log(`Container #${containerId} is no longer being tracked, aborting render`);
       return;
     }
     
     const updatedContainer = this.getContainer(containerId);
     if (!updatedContainer) {
-      console.warn(`Container #${containerId} no longer exists, aborting render`);
+      this.log(`Container #${containerId} no longer exists, aborting render`);
       return;
     }
     
     if (!post) {
-      this.safelyUpdateContainer(updatedContainer, '<div class="blog-embed-error">Blog post not found</div>', containerId);
+      this.safelyUpdateContainer(
+        updatedContainer, 
+        `<div class="blog-embed-error">${fallbackContent}</div>`, 
+        containerId
+      );
       throw new Error(`Blog post with slug "${slug}" not found`);
     }
 
@@ -379,7 +657,7 @@ class BlogEmbed {
               break;
             default:
               // Handle unknown content type
-              console.warn(`Unknown content type: ${content.type}`);
+              this.log(`Unknown content type: ${content.type}`);
               if (typeof content.content === 'string') {
                 postHtml += `<div>${content.content}</div>`;
               } else if (content.content && typeof content.content === 'object') {
@@ -433,13 +711,13 @@ class BlogEmbed {
 
     // Final check if container still exists and is tracked
     if (!this.isContainerActive(containerId)) {
-      console.warn(`Container #${containerId} is no longer being tracked, aborting render`);
+      this.log(`Container #${containerId} is no longer being tracked, aborting render`);
       return;
     }
     
     const finalContainer = this.getContainer(containerId);
     if (!finalContainer) {
-      console.warn(`Container #${containerId} no longer exists, aborting render`);
+      this.log(`Container #${containerId} no longer exists, aborting render`);
       return;
     }
 
@@ -477,7 +755,7 @@ class BlogEmbed {
           script.setAttribute('type', 'application/ld+json');
           document.head.appendChild(script);
         } catch (error) {
-          console.error("Error creating schema script:", error);
+          this.log("Error creating schema script:", error);
           return;
         }
       }
@@ -485,7 +763,7 @@ class BlogEmbed {
       try {
         script.textContent = JSON.stringify(schemaData);
       } catch (error) {
-        console.error("Error setting script content:", error);
+        this.log("Error setting script content:", error);
       }
 
       // Add meta tags for SEO and social sharing
@@ -497,7 +775,7 @@ class BlogEmbed {
         this.setMetaTag('og:image', image);
       }
     } catch (error) {
-      console.error("Error setting SEO metadata:", error);
+      this.handleError(error as Error, "Error setting SEO metadata");
     }
   }
 
@@ -515,14 +793,29 @@ class BlogEmbed {
           }
           document.head.appendChild(meta);
         } catch (error) {
-          console.error(`Error creating meta tag ${name}:`, error);
+          this.log(`Error creating meta tag ${name}:`, error);
           return;
         }
       }
       
       meta.setAttribute('content', content);
     } catch (error) {
-      console.error(`Error setting meta tag ${name}:`, error);
+      this.log(`Error setting meta tag ${name}:`, error);
+    }
+  }
+  
+  // Clean up resources when instance is no longer needed
+  public destroy(): void {
+    try {
+      // Clean up all containers
+      this.cleanupAllContainers();
+      
+      // Stop DOM checks
+      this.stopDomChecks();
+      
+      this.log('BlogEmbed instance destroyed');
+    } catch (error) {
+      this.handleError(error as Error, 'Error destroying BlogEmbed instance');
     }
   }
 }

@@ -1,5 +1,5 @@
 
-import BlogEmbed from './blogsmith-embed';
+import BlogEmbed, { BlogEmbedOptions } from './blogsmith-embed';
 
 /**
  * Enhanced version of BlogEmbed with additional safety features
@@ -10,11 +10,23 @@ class EnhancedBlogEmbed extends BlogEmbed {
   private enhancedActiveContainers: Set<string> = new Set();
   private containerRenderLocks: Map<string, boolean> = new Map();
   
+  constructor() {
+    // Initialize the base class with enhanced configuration
+    super({
+      debug: true,
+      domCheckInterval: 500, // Check DOM every 500ms
+      errorHandler: (error) => {
+        console.error('BlogEmbed Enhanced Error:', error);
+        // We'll handle errors at this level so they don't bubble up and crash the app
+      }
+    });
+  }
+  
   /**
    * Override the base class render methods to use our enhanced container tracking
    * with additional race condition prevention
    */
-  async renderBlogList(containerId: string, options: any = {}): Promise<void> {
+  async renderBlogList(containerId: string, options: BlogEmbedOptions = {}): Promise<void> {
     // Check if there's already a rendering operation in progress for this container
     if (this.containerRenderLocks.get(containerId)) {
       console.warn(`Container #${containerId} is already being rendered, skipping this request`);
@@ -29,13 +41,23 @@ class EnhancedBlogEmbed extends BlogEmbed {
       const containerExists = document.getElementById(containerId);
       if (!containerExists) {
         console.warn(`Container #${containerId} does not exist, skipping render`);
+        this.containerRenderLocks.set(containerId, false);
         return;
       }
       
       this.enhancedActiveContainers.add(containerId);
       
+      // Add enhanced options for better error handling and resilience
+      const enhancedOptions = {
+        ...options,
+        retryOnFailure: true,
+        retryAttempts: 3,
+        retryDelay: 1000,
+        fallbackContent: options.fallbackContent || 'No blog posts available at the moment. Please try again later.'
+      };
+      
       try {
-        await super.renderBlogList(containerId, options);
+        await super.renderBlogList(containerId, enhancedOptions);
       } catch (error) {
         console.error(`Error rendering blog list in container #${containerId}:`, error);
         this.enhancedActiveContainers.delete(containerId);
@@ -48,7 +70,6 @@ class EnhancedBlogEmbed extends BlogEmbed {
         } catch (displayError) {
           console.error(`Failed to display error message:`, displayError);
         }
-        throw error;
       }
     } finally {
       // Always release the render lock
@@ -56,7 +77,7 @@ class EnhancedBlogEmbed extends BlogEmbed {
     }
   }
   
-  async renderBlogPost(containerId: string, slug: string): Promise<void> {
+  async renderBlogPost(containerId: string, slug: string, options: BlogEmbedOptions = {}): Promise<void> {
     // Check if there's already a rendering operation in progress for this container
     if (this.containerRenderLocks.get(containerId)) {
       console.warn(`Container #${containerId} is already being rendered, skipping this request`);
@@ -71,25 +92,49 @@ class EnhancedBlogEmbed extends BlogEmbed {
       const containerExists = document.getElementById(containerId);
       if (!containerExists) {
         console.warn(`Container #${containerId} does not exist, skipping render`);
+        this.containerRenderLocks.set(containerId, false);
         return;
       }
       
       this.enhancedActiveContainers.add(containerId);
       
+      // Add enhanced options for better error handling and resilience
+      const enhancedOptions = {
+        ...options,
+        retryOnFailure: true,
+        retryAttempts: 3,
+        retryDelay: 1000,
+        fallbackContent: options.fallbackContent || `We couldn't find the blog post you're looking for.`
+      };
+      
       try {
-        await super.renderBlogPost(containerId, slug);
+        await super.renderBlogPost(containerId, slug, enhancedOptions);
       } catch (error) {
         console.error(`Error rendering blog post in container #${containerId}:`, error);
         this.enhancedActiveContainers.delete(containerId);
+        
         // Attempt to show error message in container
         try {
           const container = document.getElementById(containerId);
           if (container && document.body.contains(container)) {
-            container.innerHTML = `<div class="blog-embed-error">Error loading blog post. Please try again later.</div>`;
+            // Check if error indicates post not found
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            const isNotFound = errorMessage.includes('not found');
+            
+            container.innerHTML = `
+              <div class="blog-embed-error">
+                ${isNotFound 
+                  ? `The blog post "${slug}" could not be found.` 
+                  : 'Error loading blog post. Please try again later.'}
+              </div>
+            `;
           }
         } catch (displayError) {
           console.error(`Failed to display error message:`, displayError);
         }
+        
+        // Re-throw the error so the caller can handle it appropriately
+        // This is important for navigation in case of 404s
         throw error;
       }
     } finally {
@@ -147,14 +192,21 @@ class EnhancedBlogEmbed extends BlogEmbed {
       
       // Remove render lock in any case
       this.containerRenderLocks.set(containerId, false);
+      
+      // Also call the parent implementation for proper tracking there
+      super.cleanupContainer(containerId);
     } catch (error) {
       console.error(`Error in cleanup for container ${containerId}:`, error);
       // Always clear lock in case of error
       this.containerRenderLocks.set(containerId, false);
+      
+      // Still try to call parent cleanup
+      try {
+        super.cleanupContainer(containerId);
+      } catch (parentError) {
+        console.error(`Error in parent cleanup for container ${containerId}:`, parentError);
+      }
     }
-    
-    // Note: we're explicitly NOT calling super.cleanupContainer() here
-    // to avoid potential DOM errors in the parent implementation
   }
   
   cleanupAllContainers(): void {
@@ -209,9 +261,12 @@ class EnhancedBlogEmbed extends BlogEmbed {
       }
     });
     
-    // We don't need to call super if we've already cleaned everything
-    // This prevents double cleanup attempts and potential DOM errors
-    // super.cleanupAllContainers();
+    // Also call parent cleanup for proper cleanup there
+    try {
+      super.cleanupAllContainers();
+    } catch (parentError) {
+      console.error('Error in parent cleanupAllContainers:', parentError);
+    }
   }
   
   /**
@@ -226,6 +281,32 @@ class EnhancedBlogEmbed extends BlogEmbed {
    */
   isContainerLocked(containerId: string): boolean {
     return !!this.containerRenderLocks.get(containerId);
+  }
+  
+  /**
+   * Enhanced destroy method to ensure all resources are properly cleaned up
+   */
+  destroy(): void {
+    try {
+      // Clean up all containers first
+      this.cleanupAllContainers();
+      
+      // Clear all locks
+      this.containerRenderLocks.clear();
+      this.enhancedActiveContainers.clear();
+      
+      // Call parent destroy
+      super.destroy();
+    } catch (error) {
+      console.error('Error destroying EnhancedBlogEmbed instance:', error);
+      
+      // Still try to call parent destroy
+      try {
+        super.destroy();
+      } catch (parentError) {
+        console.error('Error in parent destroy:', parentError);
+      }
+    }
   }
 }
 

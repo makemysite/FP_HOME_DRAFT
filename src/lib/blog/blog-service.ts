@@ -1,19 +1,62 @@
 
 import EnhancedBlogEmbed from "./blogsmith-embed-enhanced";
+import { BlogEmbedOptions } from "./blogsmith-embed";
 
 class BlogService {
   private blogEmbed: EnhancedBlogEmbed | null = null;
   private activeContainers: Set<string> = new Set();
+  private isInitialized: boolean = false;
   
   constructor() {
-    this.blogEmbed = new EnhancedBlogEmbed();
+    try {
+      this.initializeBlogEmbed();
+    } catch (error) {
+      console.error("Error initializing BlogService:", error);
+    }
   }
   
   /**
-   * Renders a blog list in the specified container
+   * Safely initializes the blog embed instance with additional error handling
    */
-  async renderBlogList(containerId: string): Promise<void> {
-    if (!this.blogEmbed) return;
+  private initializeBlogEmbed(): void {
+    try {
+      if (!this.isInitialized) {
+        this.blogEmbed = new EnhancedBlogEmbed();
+        this.isInitialized = true;
+        console.log("BlogService: Successfully initialized EnhancedBlogEmbed");
+      }
+    } catch (error) {
+      console.error("Error creating EnhancedBlogEmbed instance:", error);
+      this.isInitialized = false;
+      this.blogEmbed = null;
+      // We won't rethrow the error here to prevent app crashes
+    }
+  }
+  
+  /**
+   * Ensures the blog embed instance exists, initializing it if needed
+   */
+  private ensureBlogEmbed(): boolean {
+    if (!this.blogEmbed) {
+      try {
+        this.initializeBlogEmbed();
+      } catch (error) {
+        console.error("Failed to initialize BlogEmbed:", error);
+        return false;
+      }
+    }
+    return !!this.blogEmbed;
+  }
+  
+  /**
+   * Renders a blog list in the specified container with enhanced error handling
+   */
+  async renderBlogList(containerId: string, options: BlogEmbedOptions = {}): Promise<void> {
+    if (!this.ensureBlogEmbed() || !this.blogEmbed) {
+      console.error("BlogEmbed not available, cannot render blog list");
+      this.displayFallbackContent(containerId, "Unable to load blog content. Please try again later.");
+      return;
+    }
     
     // First validate the container exists in DOM with double checking
     const container = document.getElementById(containerId);
@@ -31,24 +74,40 @@ class BlogService {
       // Add to tracking
       this.activeContainers.add(containerId);
       
-      // Perform the render operation with enhanced safety
-      await this.blogEmbed.renderBlogList(containerId, {
+      // Set default options
+      const defaultOptions = {
         limit: 8,
         showDescription: true,
-        showImage: true
-      });
+        showImage: true,
+        retryOnFailure: true,
+        retryAttempts: 3,
+        retryDelay: 1000,
+        fallbackContent: "No blog posts available at the moment. Please try again later."
+      };
+      
+      // Merge with user options
+      const mergedOptions = { ...defaultOptions, ...options };
+      
+      // Perform the render operation with enhanced safety
+      await this.blogEmbed.renderBlogList(containerId, mergedOptions);
     } catch (error) {
       console.error("Error rendering blog list:", error);
       this.activeContainers.delete(containerId);
-      throw error;
+      
+      // Display fallback content on error
+      this.displayFallbackContent(containerId, "Error loading blog content. Please try again later.");
     }
   }
   
   /**
-   * Renders a single blog post in the specified container
+   * Renders a single blog post in the specified container with enhanced error handling
    */
-  async renderBlogPost(containerId: string, slug: string): Promise<void> {
-    if (!this.blogEmbed) return;
+  async renderBlogPost(containerId: string, slug: string, options: BlogEmbedOptions = {}): Promise<void> {
+    if (!this.ensureBlogEmbed() || !this.blogEmbed) {
+      console.error("BlogEmbed not available, cannot render blog post");
+      this.displayFallbackContent(containerId, "Unable to load blog content. Please try again later.");
+      return;
+    }
     
     // First validate the container exists in DOM with double checking
     const container = document.getElementById(containerId);
@@ -66,12 +125,51 @@ class BlogService {
       // Add to tracking
       this.activeContainers.add(containerId);
       
+      // Set default options
+      const defaultOptions = {
+        retryOnFailure: true,
+        retryAttempts: 3,
+        retryDelay: 1000,
+        fallbackContent: `We couldn't find the blog post "${slug}".`
+      };
+      
+      // Merge with user options
+      const mergedOptions = { ...defaultOptions, ...options };
+      
       // Perform the render operation with enhanced safety
-      await this.blogEmbed.renderBlogPost(containerId, slug);
+      await this.blogEmbed.renderBlogPost(containerId, slug, mergedOptions);
     } catch (error) {
       console.error("Error rendering blog post:", error);
       this.activeContainers.delete(containerId);
-      throw error;
+      
+      // Check if error is a "not found" error
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const isNotFound = errorMessage.includes("not found");
+      
+      if (isNotFound) {
+        this.displayFallbackContent(containerId, `Blog post "${slug}" not found`);
+        throw error; // Re-throw for 404 handling
+      } else {
+        this.displayFallbackContent(containerId, "Error loading blog post. Please try again later.");
+      }
+    }
+  }
+  
+  /**
+   * Displays fallback content in a container when errors occur
+   */
+  private displayFallbackContent(containerId: string, message: string): void {
+    try {
+      const container = document.getElementById(containerId);
+      if (container && document.body.contains(container)) {
+        container.innerHTML = `
+          <div class="blog-embed-error">
+            <p>${message}</p>
+          </div>
+        `;
+      }
+    } catch (error) {
+      console.error(`Error displaying fallback content in container ${containerId}:`, error);
     }
   }
   
@@ -84,7 +182,10 @@ class BlogService {
       this.activeContainers.delete(containerId);
       
       // Make sure we have a BlogEmbed instance
-      if (!this.blogEmbed) return;
+      if (!this.blogEmbed) {
+        console.warn("No BlogEmbed instance available for cleanup");
+        return;
+      }
       
       // Check if container exists and is in the DOM before cleanup
       const container = document.getElementById(containerId);
@@ -141,6 +242,34 @@ class BlogService {
       }
     } catch (error) {
       console.error(`Error in cleanupAllContainers:`, error);
+    }
+  }
+  
+  /**
+   * Reinitialize the service if needed
+   */
+  reinitialize(): void {
+    try {
+      // Clean up existing resources
+      this.cleanupAllContainers();
+      
+      if (this.blogEmbed) {
+        try {
+          this.blogEmbed.destroy();
+        } catch (error) {
+          console.error("Error destroying existing BlogEmbed instance:", error);
+        }
+      }
+      
+      // Reset state
+      this.blogEmbed = null;
+      this.isInitialized = false;
+      this.activeContainers.clear();
+      
+      // Create a new instance
+      this.initializeBlogEmbed();
+    } catch (error) {
+      console.error("Error reinitializing BlogService:", error);
     }
   }
 }
