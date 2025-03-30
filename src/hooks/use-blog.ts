@@ -41,7 +41,7 @@ export function useBlog() {
           } catch (error) {
             console.error("Error during delayed unmount cleanup:", error);
           }
-        }, 50);
+        }, 100); // Increased to 100ms for better stability
       } catch (error) {
         console.error("Error during unmount cleanup:", error);
       }
@@ -50,14 +50,16 @@ export function useBlog() {
 
   // Helper function to normalize slug format consistently across the entire app
   const normalizeSlug = useCallback((slug: string): string => {
+    if (!slug) return '';
+    
     // First remove any trailing slash if present
-    slug = slug.endsWith('/') ? slug.slice(0, -1) : slug;
+    let normalizedSlug = slug.endsWith('/') ? slug.slice(0, -1) : slug;
     
     // Then remove any leading /blog/ if present (for full path normalization)
-    slug = slug.startsWith('/blog/') ? slug.replace('/blog/', '') : slug;
+    normalizedSlug = normalizedSlug.startsWith('/blog/') ? normalizedSlug.replace('/blog/', '') : normalizedSlug;
     
-    console.log(`Normalized slug: "${slug}"`);
-    return slug;
+    console.log(`Normalized slug: "${normalizedSlug}" from original "${slug}"`);
+    return normalizedSlug;
   }, []);
 
   // Render blog list function with enhanced safety and debugging
@@ -98,7 +100,9 @@ export function useBlog() {
       await blogService.renderBlogList('blog-list-container', {
         fallbackContent: "No blog posts are currently available. Please check back later.",
         retryOnFailure: true,
-        retryAttempts: 3
+        retryAttempts: 3,
+        safeRendering: true,
+        useRequestAnimationFrame: true
       });
       
       if (!unmountedRef.current) {
@@ -133,7 +137,7 @@ export function useBlog() {
     // Normalize the slug using the consistent normalizer
     const normalizedSlug = normalizeSlug(slug);
     
-    console.log(`Starting blog post render for slug: ${normalizedSlug}`);
+    console.log(`Starting blog post render for slug: "${normalizedSlug}"`);
     renderingRef.current = true;
     safeSetState(setLoading, true);
     safeSetState(setRenderError, null);
@@ -160,11 +164,13 @@ export function useBlog() {
       if (unmountedRef.current) return;
       
       // Then render the post with debugging
-      console.log(`Calling blogService.renderBlogPost for slug: ${normalizedSlug}`);
+      console.log(`Calling blogService.renderBlogPost for slug: "${normalizedSlug}"`);
       await blogService.renderBlogPost('blog-post-container', normalizedSlug, {
         fallbackContent: `The blog post "${normalizedSlug}" could not be found.`,
         retryOnFailure: true,
-        retryAttempts: 3
+        retryAttempts: 3,
+        safeRendering: true,
+        useRequestAnimationFrame: true
       });
       
       if (!unmountedRef.current) {

@@ -25,9 +25,18 @@ const BlogContainer: React.FC<BlogContainerProps> = ({ id, loading, type, error 
         // Clear inner HTML to prevent React from trying to manipulate nodes
         // that might be removed by other scripts
         try {
+          // First check if the element exists and is still in the DOM
           const element = document.getElementById(id);
-          if (element && element.contains(containerRef.current)) {
-            containerRef.current.innerHTML = '';
+          if (element && document.body.contains(element) && element.contains(containerRef.current)) {
+            requestAnimationFrame(() => {
+              try {
+                if (containerRef.current) {
+                  containerRef.current.innerHTML = '';
+                }
+              } catch (err) {
+                console.error(`Error clearing ${id} in RAF:`, err);
+              }
+            });
           }
         } catch (err) {
           console.error(`Error during ${id} cleanup:`, err);

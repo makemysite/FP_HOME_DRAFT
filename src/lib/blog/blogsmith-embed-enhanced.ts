@@ -1,3 +1,4 @@
+
 import BlogEmbed, { BlogEmbedOptions } from './blogsmith-embed';
 
 /**
@@ -9,12 +10,16 @@ class EnhancedBlogEmbed extends BlogEmbed {
   private enhancedActiveContainers: Set<string> = new Set();
   private containerRenderLocks: Map<string, boolean> = new Map();
   private pendingNodeOperations: Map<string, NodeJS.Timeout> = new Map();
+  private mutationObservers: Map<string, MutationObserver> = new Map();
+  private rafCallbacks: Map<string, number> = new Map();
   
   constructor() {
     // Initialize the base class with enhanced configuration
     super({
       debug: true,
-      domCheckInterval: 500, // Check DOM every 500ms
+      domCheckInterval: 1000, // Increased to 1000ms for better stability
+      domMutationObserver: true, // Enable mutation observer
+      safeElementLookup: true, // Safer element access
       errorHandler: (error) => {
         console.error('BlogEmbed Enhanced Error:', error);
         // We'll handle errors at this level so they don't bubble up and crash the app
@@ -24,11 +29,19 @@ class EnhancedBlogEmbed extends BlogEmbed {
   
   /**
    * Safely check if a DOM element exists and is in the document
+   * with additional safeguards
    */
   private doesElementExist(containerId: string): boolean {
     try {
+      // Use requestAnimationFrame to ensure DOM is in a stable state
       const element = document.getElementById(containerId);
-      return !!element && document.body.contains(element);
+      const result = !!element && document.body.contains(element);
+      
+      if (!result) {
+        console.log(`Element check: #${containerId} ${result ? 'exists' : 'does not exist'} in DOM`);
+      }
+      
+      return result;
     } catch (error) {
       console.error(`Error checking if ${containerId} exists:`, error);
       return false;
@@ -39,6 +52,8 @@ class EnhancedBlogEmbed extends BlogEmbed {
    * Helper method to consistently normalize slugs across the application
    */
   private normalizeSlug(slug: string): string {
+    if (!slug) return '';
+    
     // First remove any trailing slash if present
     let normalizedSlug = slug.endsWith('/') ? slug.slice(0, -1) : slug;
     
@@ -49,6 +64,90 @@ class EnhancedBlogEmbed extends BlogEmbed {
     
     console.log(`EnhancedBlogEmbed normalized slug: "${normalizedSlug}" from original: "${slug}"`);
     return normalizedSlug;
+  }
+  
+  /**
+   * Setup mutation observer for a container to detect DOM changes
+   */
+  private setupMutationObserver(containerId: string): void {
+    // Clean up any existing observer first
+    this.cleanupMutationObserver(containerId);
+    
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    
+    // Create a new observer to watch for changes
+    const observer = new MutationObserver((mutationsList) => {
+      for (const mutation of mutationsList) {
+        if (mutation.type === 'childList' && mutation.removedNodes.length > 0) {
+          console.log(`MutationObserver: Detected node removal in #${containerId}`);
+          
+          // Check if our container is still valid
+          if (!document.body.contains(container)) {
+            console.log(`MutationObserver: Container #${containerId} was removed from DOM`);
+            this.cleanupMutationObserver(containerId);
+            this.enhancedActiveContainers.delete(containerId);
+            break;
+          }
+        }
+      }
+    });
+    
+    // Start observing with appropriate configuration
+    observer.observe(document.body, { 
+      childList: true, 
+      subtree: true 
+    });
+    
+    // Store the observer for later cleanup
+    this.mutationObservers.set(containerId, observer);
+    console.log(`MutationObserver: Setup for #${containerId}`);
+  }
+  
+  /**
+   * Clean up mutation observer for a container
+   */
+  private cleanupMutationObserver(containerId: string): void {
+    if (this.mutationObservers.has(containerId)) {
+      try {
+        const observer = this.mutationObservers.get(containerId);
+        if (observer) {
+          observer.disconnect();
+          console.log(`MutationObserver: Disconnected for #${containerId}`);
+        }
+        this.mutationObservers.delete(containerId);
+      } catch (error) {
+        console.error(`Error cleaning up mutation observer for ${containerId}:`, error);
+      }
+    }
+  }
+  
+  /**
+   * Use requestAnimationFrame for safer DOM updates
+   */
+  private safelyUpdateWithRAF(containerId: string, updateFn: () => void): void {
+    // Clean up any existing RAF callback
+    if (this.rafCallbacks.has(containerId)) {
+      cancelAnimationFrame(this.rafCallbacks.get(containerId)!);
+      this.rafCallbacks.delete(containerId);
+    }
+    
+    // Schedule the update during the next animation frame
+    const rafId = requestAnimationFrame(() => {
+      try {
+        if (this.doesElementExist(containerId)) {
+          updateFn();
+        } else {
+          console.log(`RAF: Container #${containerId} no longer exists, update canceled`);
+        }
+        this.rafCallbacks.delete(containerId);
+      } catch (error) {
+        console.error(`RAF: Error during update for #${containerId}:`, error);
+        this.rafCallbacks.delete(containerId);
+      }
+    });
+    
+    this.rafCallbacks.set(containerId, rafId);
   }
   
   /**
@@ -71,6 +170,9 @@ class EnhancedBlogEmbed extends BlogEmbed {
     // Set render lock for this container
     this.containerRenderLocks.set(containerId, true);
     
+    // Setup mutation observer for this container
+    this.setupMutationObserver(containerId);
+    
     try {
       this.enhancedActiveContainers.add(containerId);
       
@@ -80,6 +182,8 @@ class EnhancedBlogEmbed extends BlogEmbed {
         retryOnFailure: true,
         retryAttempts: 3,
         retryDelay: 1000,
+        safeRendering: true,
+        useRequestAnimationFrame: true,
         fallbackContent: options.fallbackContent || 'No blog posts available at the moment. Please try again later.'
       };
       
@@ -87,12 +191,17 @@ class EnhancedBlogEmbed extends BlogEmbed {
         // Update the loading UI before the actual operation starts
         const container = document.getElementById(containerId);
         if (container && document.body.contains(container)) {
-          container.innerHTML = `
-            <div class="blog-embed-loading text-center p-8">
-              <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-500 mb-3"></div>
-              <p>Loading blog posts...</p>
-            </div>
-          `;
+          this.safelyUpdateWithRAF(containerId, () => {
+            const el = document.getElementById(containerId);
+            if (el) {
+              el.innerHTML = `
+                <div class="blog-embed-loading text-center p-8">
+                  <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-500 mb-3"></div>
+                  <p>Loading blog posts...</p>
+                </div>
+              `;
+            }
+          });
         }
         
         // Wait a moment for the loading UI to render
@@ -102,6 +211,7 @@ class EnhancedBlogEmbed extends BlogEmbed {
         if (!this.doesElementExist(containerId)) {
           console.warn(`Container #${containerId} no longer exists, aborting render`);
           this.containerRenderLocks.set(containerId, false);
+          this.cleanupMutationObserver(containerId);
           return;
         }
         
@@ -113,10 +223,12 @@ class EnhancedBlogEmbed extends BlogEmbed {
         // Attempt to show error message in container
         try {
           if (this.doesElementExist(containerId)) {
-            const container = document.getElementById(containerId);
-            if (container) {
-              container.innerHTML = `<div class="blog-embed-error">Error loading blog posts. Please try again later.</div>`;
-            }
+            this.safelyUpdateWithRAF(containerId, () => {
+              const container = document.getElementById(containerId);
+              if (container) {
+                container.innerHTML = `<div class="blog-embed-error">Error loading blog posts. Please try again later.</div>`;
+              }
+            });
           }
         } catch (displayError) {
           console.error(`Failed to display error message:`, displayError);
@@ -145,12 +257,15 @@ class EnhancedBlogEmbed extends BlogEmbed {
     // Set render lock for this container
     this.containerRenderLocks.set(containerId, true);
     
+    // Setup mutation observer for this container
+    this.setupMutationObserver(containerId);
+    
     try {
       // First check if container exists to avoid race conditions
-      const containerExists = document.getElementById(containerId);
-      if (!containerExists) {
+      if (!this.doesElementExist(containerId)) {
         console.warn(`Container #${containerId} does not exist, skipping render`);
         this.containerRenderLocks.set(containerId, false);
+        this.cleanupMutationObserver(containerId);
         return;
       }
       
@@ -162,8 +277,34 @@ class EnhancedBlogEmbed extends BlogEmbed {
         retryOnFailure: true,
         retryAttempts: 3,
         retryDelay: 1000,
+        safeRendering: true,
+        useRequestAnimationFrame: true,
         fallbackContent: options.fallbackContent || `We couldn't find the blog post you're looking for.`
       };
+      
+      // Update the loading UI with RAF
+      this.safelyUpdateWithRAF(containerId, () => {
+        const container = document.getElementById(containerId);
+        if (container) {
+          container.innerHTML = `
+            <div class="blog-embed-loading text-center p-8">
+              <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-500 mb-3"></div>
+              <p>Loading blog post "${normalizedSlug}"...</p>
+            </div>
+          `;
+        }
+      });
+      
+      // Wait a moment for the loading UI to render
+      await new Promise(resolve => setTimeout(resolve, 50));
+      
+      // Check again if the container still exists
+      if (!this.doesElementExist(containerId)) {
+        console.warn(`Container #${containerId} no longer exists, aborting render`);
+        this.containerRenderLocks.set(containerId, false);
+        this.cleanupMutationObserver(containerId);
+        return;
+      }
       
       try {
         // Always pass the normalized slug to the parent class method
@@ -174,19 +315,23 @@ class EnhancedBlogEmbed extends BlogEmbed {
         
         // Attempt to show error message in container
         try {
-          const container = document.getElementById(containerId);
-          if (container && document.body.contains(container)) {
-            // Check if error indicates post not found
-            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-            const isNotFound = errorMessage.includes('not found');
-            
-            container.innerHTML = `
-              <div class="blog-embed-error">
-                ${isNotFound 
-                  ? `The blog post "${normalizedSlug}" could not be found.` 
-                  : 'Error loading blog post. Please try again later.'}
-              </div>
-            `;
+          if (this.doesElementExist(containerId)) {
+            this.safelyUpdateWithRAF(containerId, () => {
+              const container = document.getElementById(containerId);
+              if (container) {
+                // Check if error indicates post not found
+                const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+                const isNotFound = errorMessage.includes('not found');
+                
+                container.innerHTML = `
+                  <div class="blog-embed-error">
+                    ${isNotFound 
+                      ? `The blog post "${normalizedSlug}" could not be found.` 
+                      : 'Error loading blog post. Please try again later.'}
+                  </div>
+                `;
+              }
+            });
           }
         } catch (displayError) {
           console.error(`Failed to display error message:`, displayError);
@@ -206,6 +351,13 @@ class EnhancedBlogEmbed extends BlogEmbed {
    * Clear any pending node operations for a container
    */
   private clearPendingOperations(containerId: string): void {
+    // Clear RAF callbacks
+    if (this.rafCallbacks.has(containerId)) {
+      cancelAnimationFrame(this.rafCallbacks.get(containerId)!);
+      this.rafCallbacks.delete(containerId);
+    }
+    
+    // Clear timeouts
     if (this.pendingNodeOperations.has(containerId)) {
       const timeoutId = this.pendingNodeOperations.get(containerId);
       if (timeoutId) {
@@ -213,6 +365,9 @@ class EnhancedBlogEmbed extends BlogEmbed {
       }
       this.pendingNodeOperations.delete(containerId);
     }
+    
+    // Clean up mutation observer
+    this.cleanupMutationObserver(containerId);
   }
   
   /**
@@ -234,17 +389,27 @@ class EnhancedBlogEmbed extends BlogEmbed {
         return;
       }
       
-      // Use a safer approach - set innerHTML to empty string instead of DOM node removal
-      try {
+      // Use a safer approach with requestAnimationFrame
+      this.safelyUpdateWithRAF(containerId, () => {
         const container = document.getElementById(containerId);
         if (container) {
           // Make a "safe" copy of children to avoid live collection issues
-          const safeHtml = container.innerHTML;
-          container.innerHTML = '';
+          try {
+            container.innerHTML = '';
+          } catch (innerError) {
+            console.error(`Error clearing container ${containerId} with innerHTML:`, innerError);
+            
+            // Fallback: remove children one by one if innerHTML fails
+            try {
+              while (container.firstChild) {
+                container.removeChild(container.firstChild);
+              }
+            } catch (removeError) {
+              console.error(`Error removing children from ${containerId}:`, removeError);
+            }
+          }
         }
-      } catch (error) {
-        console.error(`Error clearing container ${containerId} with innerHTML:`, error);
-      }
+      });
       
       // Call parent implementation in a deferred way to let React finish its current work
       const timeoutId = setTimeout(() => {
@@ -257,7 +422,7 @@ class EnhancedBlogEmbed extends BlogEmbed {
         } catch (error) {
           console.error(`Error in deferred parent cleanup for container ${containerId}:`, error);
         }
-      }, 0);
+      }, 100); // Increased delay for better stability
       
       this.pendingNodeOperations.set(containerId, timeoutId);
     } catch (error) {
@@ -277,23 +442,33 @@ class EnhancedBlogEmbed extends BlogEmbed {
     // Reset all render locks
     this.containerRenderLocks.clear();
     
-    // Clear all pending operations
-    containers.forEach(id => this.clearPendingOperations(id));
-    this.pendingNodeOperations.clear();
-    
-    // Clean each container with enhanced safety
+    // Clean up all containers with enhanced safety
     containers.forEach(id => {
+      // Clear pending operations for each container
+      this.clearPendingOperations(id);
+      
       try {
         if (this.doesElementExist(id)) {
-          const container = document.getElementById(id);
-          if (container) {
-            // Safe approach - set innerHTML to empty string
-            try {
-              container.innerHTML = '';
-            } catch (error) {
-              console.error(`Error clearing container ${id} with innerHTML:`, error);
+          this.safelyUpdateWithRAF(id, () => {
+            const container = document.getElementById(id);
+            if (container) {
+              // Safe approach - set innerHTML to empty string
+              try {
+                container.innerHTML = '';
+              } catch (error) {
+                console.error(`Error clearing container ${id} with innerHTML:`, error);
+                
+                // Fallback approach if innerHTML fails
+                try {
+                  while (container.firstChild) {
+                    container.removeChild(container.firstChild);
+                  }
+                } catch (removeError) {
+                  console.error(`Error removing children from ${id}:`, removeError);
+                }
+              }
             }
-          }
+          });
         } else {
           console.warn(`Container #${id} does not exist or is not in DOM, skipping cleanup`);
         }
@@ -302,6 +477,24 @@ class EnhancedBlogEmbed extends BlogEmbed {
       }
     });
     
+    // Cancel all RAF callbacks
+    this.rafCallbacks.forEach((rafId) => {
+      cancelAnimationFrame(rafId);
+    });
+    this.rafCallbacks.clear();
+    
+    // Clear all pending operations
+    this.pendingNodeOperations.forEach((timeoutId) => {
+      clearTimeout(timeoutId);
+    });
+    this.pendingNodeOperations.clear();
+    
+    // Clean up all mutation observers
+    this.mutationObservers.forEach((observer) => {
+      observer.disconnect();
+    });
+    this.mutationObservers.clear();
+    
     // Also call parent cleanup in a deferred way
     setTimeout(() => {
       try {
@@ -309,7 +502,7 @@ class EnhancedBlogEmbed extends BlogEmbed {
       } catch (parentError) {
         console.error('Error in parent cleanupAllContainers:', parentError);
       }
-    }, 0);
+    }, 100); // Increased delay for better stability
   }
   
   /**
@@ -331,11 +524,23 @@ class EnhancedBlogEmbed extends BlogEmbed {
    */
   destroy(): void {
     try {
+      // Cancel all RAF callbacks
+      this.rafCallbacks.forEach((rafId) => {
+        cancelAnimationFrame(rafId);
+      });
+      this.rafCallbacks.clear();
+      
       // Clear all pending operations
       Array.from(this.pendingNodeOperations.keys()).forEach(id => {
         this.clearPendingOperations(id);
       });
       this.pendingNodeOperations.clear();
+      
+      // Clean up all mutation observers
+      this.mutationObservers.forEach((observer) => {
+        observer.disconnect();
+      });
+      this.mutationObservers.clear();
       
       // Clean up all containers first
       this.cleanupAllContainers();
@@ -351,10 +556,37 @@ class EnhancedBlogEmbed extends BlogEmbed {
         } catch (error) {
           console.error('Error in deferred parent destroy:', error);
         }
-      }, 0);
+      }, 100);
     } catch (error) {
       console.error('Error destroying EnhancedBlogEmbed instance:', error);
     }
+  }
+  
+  /**
+   * Method to prepare for component unmounting
+   * This helps prevent errors during React component unmount
+   */
+  prepareForUnmount(): void {
+    console.log('EnhancedBlogEmbed: Preparing for unmount');
+    
+    // Cancel all RAF callbacks immediately
+    this.rafCallbacks.forEach((rafId) => {
+      cancelAnimationFrame(rafId);
+    });
+    this.rafCallbacks.clear();
+    
+    // Disconnect all mutation observers
+    this.mutationObservers.forEach((observer) => {
+      observer.disconnect();
+    });
+    this.mutationObservers.clear();
+  }
+  
+  /**
+   * Check if the library is in unmounting state
+   */
+  isUnmounting(): boolean {
+    return this.rafCallbacks.size === 0 && this.mutationObservers.size === 0;
   }
 }
 
