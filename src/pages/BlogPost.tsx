@@ -109,6 +109,10 @@ const BlogPost: React.FC = () => {
           )}
         </div>
       </main>
+      
+      {/* Add the blog post custom styles */}
+      <link rel="stylesheet" href="/blog-integration/blog-styles.css" />
+      <link rel="stylesheet" href="/blogsmith-custom.css" />
     </div>
   );
 };

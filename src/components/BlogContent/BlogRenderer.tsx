@@ -50,7 +50,7 @@ const BlogRenderer = ({ post }: BlogRendererProps) => {
     if (content.type === "text") {
       // Use ReactMarkdown to render Markdown content
       return (
-        <div className="prose max-w-none dark:prose-invert">
+        <div className="prose max-w-none dark:prose-invert blog-post-content">
           <ReactMarkdown>{content.text || ""}</ReactMarkdown>
         </div>
       );
@@ -104,7 +104,7 @@ const BlogRenderer = ({ post }: BlogRendererProps) => {
     return (
       <section className="mb-10">
         <h2 className="text-2xl font-bold mb-4">Conclusion</h2>
-        <div className="blog-content prose max-w-none dark:prose-invert">
+        <div className="blog-content prose max-w-none dark:prose-invert blog-post-content">
           <ReactMarkdown>{post.conclusion}</ReactMarkdown>
         </div>
       </section>
