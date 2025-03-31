@@ -105,6 +105,9 @@
   position: absolute;
   left: 0.5em;
   color: #000;
+  font-size: 1.5em; /* Make bullets larger */
+  line-height: 1; /* Adjust line height for vertical alignment */
+  top: -0.05em; /* Fine-tune vertical positioning */
 }
 
 /* Make sure no other elements add bullets */
@@ -122,8 +125,8 @@
 }
 
 .blog-content ol > li::marker {
-  color: var(--primary-color);
-  font-weight: 500;
+  color: #000; /* Change the color to black */
+  font-weight: 600; /* Make numbers slightly bolder */
 }
 
 /* Improved spacing between paragraphs and elements */
@@ -204,6 +207,11 @@
   padding-left: 1.75em;
 }
 
+.prose ol > li::marker {
+  color: #000; /* Change ordered list numbers to black */
+  font-weight: 600; /* Make slightly bolder */
+}
+
 /* Match the custom bullet styling from above */
 .prose ul > li {
   position: relative;
@@ -216,6 +224,9 @@
   position: absolute;
   left: 0.5em;
   color: #000;
+  font-size: 1.5em; /* Make bullets larger */
+  line-height: 1; /* Adjust line height for vertical alignment */
+  top: -0.05em; /* Fine-tune vertical positioning */
 }
 
 .prose ul > li::marker {

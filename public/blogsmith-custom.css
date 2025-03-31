@@ -53,11 +53,12 @@
 .blog-post-content ol {
   padding-left: 1.5em;
   margin-bottom: 1.25em;
+  counter-reset: item;
 }
 
 .blog-post-content ul li {
   position: relative;
-  padding-left: 1em;
+  padding-left: 1.5em;
   margin-bottom: 0.5em;
 }
 
@@ -66,10 +67,22 @@
   position: absolute;
   left: 0;
   color: #000;
+  font-size: 1.5em; /* Make bullets larger */
+  line-height: 1; /* Adjust line height for vertical alignment */
+  top: -0.05em; /* Fine-tune vertical positioning */
 }
 
-.blog-post-content li {
+.blog-post-content ol li {
+  position: relative;
+  counter-increment: item;
+  padding-left: 0.5em;
   margin-bottom: 0.5em;
+  color: #000; /* Ensure text is black */
+}
+
+.blog-post-content ol li::marker {
+  color: #000; /* Make ordered list numbers black */
+  font-weight: 600; /* Make numbers slightly bolder */
 }
 
 .blog-post-content img {
