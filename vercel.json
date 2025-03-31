@@ -1,0 +1,18 @@
+
+{
+  "version": 2,
+  "routes": [
+    {
+      "src": "/blog/(.*)",
+      "dest": "/index.html"
+    },
+    {
+      "src": "/blog-integration/(.*)",
+      "dest": "/blog-integration/index.html"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/$1"
+    }
+  ]
+}
