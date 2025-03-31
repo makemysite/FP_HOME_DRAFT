@@ -1,8 +1,8 @@
-
 .blog-post-content ul {
   margin-left: 0;
   padding-left: 0;
   margin-bottom: 1.25em;
+  margin-top: 1rem;
 }
 
 .blog-post-content ul li {
@@ -11,6 +11,7 @@
   margin-bottom: 0.5em;
   display: flex;
   align-items: flex-start;
+  margin-top: 0.5rem;
 }
 
 .blog-post-content ul li::before {
@@ -30,6 +31,7 @@
   list-style-type: none;
   margin-bottom: 1.25em;
   counter-reset: item;
+  margin-top: 1rem;
 }
 
 .blog-post-content ol li {
@@ -38,6 +40,7 @@
   margin-bottom: 0.5em;
   display: flex;
   align-items: flex-start;
+  margin-top: 0.5rem;
 }
 
 .blog-post-content ol li::before {

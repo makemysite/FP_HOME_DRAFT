@@ -1,14 +1,15 @@
-
 .blog-content ul, .blog-content ol {
   padding-left: 0;
   margin-left: 0;
   margin-bottom: 1.5rem;
+  margin-top: 1rem;
 }
 
 .blog-content ul li {
   padding-left: 0;
   margin-left: 0;
   margin-bottom: 0.75rem;
+  margin-top: 0.5rem;
   display: flex;
   align-items: flex-start;
 }
@@ -33,6 +34,7 @@
   padding-left: 0;
   margin-left: 0;
   margin-bottom: 0.75rem;
+  margin-top: 0.5rem;
   display: flex;
   align-items: flex-start;
 }
