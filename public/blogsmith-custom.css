@@ -15,12 +15,13 @@
 
 .blog-post-content ul li::before {
   content: "•";
-  margin-right: 0.75em;
+  margin-right: 0.5em;
   font-size: 1.25em;
   line-height: 1;
   display: inline-block;
-  min-width: 1.5em;
-  text-align: center;
+  min-width: 1em;
+  text-align: left;
+  flex-shrink: 0;
 }
 
 .blog-post-content ol {
@@ -42,9 +43,10 @@
 .blog-post-content ol li::before {
   content: counter(item) ". ";
   counter-increment: item;
-  margin-right: 0.75em;
+  margin-right: 0.5em;
   font-weight: 600;
   display: inline-block;
-  min-width: 1.5em;
-  text-align: right;
+  min-width: 1em;
+  text-align: left;
+  flex-shrink: 0;
 }

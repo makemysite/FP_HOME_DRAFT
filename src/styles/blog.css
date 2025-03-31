@@ -9,12 +9,12 @@
 
 .blog-embed-content-list li::before {
   content: "•";
-  margin-right: 0.75em;
+  margin-right: 0.5em;
   font-size: 1.25em;
   line-height: 1;
   display: inline-block;
-  min-width: 1.5em;
-  text-align: center;
+  min-width: 1em;
+  text-align: left;
 }
 
 .blog-embed-post ol > li::marker {
