@@ -162,13 +162,24 @@
   font-style: normal;
 }
 
+/* Fixed list styling for blog-embed-content-list */
 .blog-embed-content-list {
+  list-style: none;
+  padding-left: 1em;
   margin: 1.5rem 0;
-  padding-left: 1.5rem;
 }
 
 .blog-embed-content-list li {
+  position: relative;
   margin-bottom: 0.75rem;
+  padding-left: 1em;
+}
+
+.blog-embed-content-list li::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  color: #000;
 }
 
 .blog-embed-faqs {

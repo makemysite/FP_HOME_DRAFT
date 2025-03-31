@@ -1,3 +1,4 @@
+
 /* Blog Styles */
 :root {
   --primary-color: #3b82f6;
@@ -79,32 +80,41 @@
   margin: 1.5rem 0;
 }
 
-/* Enhanced list styling for better visibility */
+/* Complete reset of list styling to fix double bullets */
 .blog-content ul,
 .blog-content ol {
   margin: 1.5rem 0;
-  padding-left: 1rem; /* Reduced padding */
-}
-
-.blog-content ul li {
-  list-style-type: disc;
-  margin-bottom: 0.75rem;
   padding-left: 0;
+  list-style-position: inside;
+}
+
+/* Completely disable default bullets */
+.blog-content ul {
+  list-style: none;
+}
+
+/* Add single custom bullets */
+.blog-content ul > li {
+  padding-left: 1.5em;
   position: relative;
+  margin-bottom: 0.75rem;
 }
 
-/* Completely remove any pseudo-elements */
-.blog-content ul > li::before,
-.prose ul > li::before {
-  all: unset; /* Reset all properties */
-  display: none !important; /* Ensure it's not displayed */
+.blog-content ul > li::before {
+  content: "•";
+  position: absolute;
+  left: 0.5em;
+  color: #000;
 }
 
-/* Ensure only one marker appears */
-.blog-content ul > li::marker {
-  color: #000; /* Black color for visibility */
+/* Make sure no other elements add bullets */
+.blog-content ul > li::marker,
+.prose ul > li::marker {
+  content: "";
+  color: transparent;
 }
 
+/* Normal styling for ordered lists */
 .blog-content ol li {
   list-style-type: decimal;
   margin-bottom: 0.75rem;
@@ -162,7 +172,7 @@
   font-size: 0.875em;
 }
 
-/* Prose styles for markdown content */
+/* Prose styles for markdown content - completely disable default prose list styling */
 .prose {
   max-width: 65ch;
   color: var(--text-color);
@@ -179,19 +189,38 @@
   font-weight: 600;
 }
 
+/* Reset prose list styles */
+.prose ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+.prose ol {
+  list-style-position: inside;
+}
+
 .prose ol > li {
   position: relative;
   padding-left: 1.75em;
 }
 
+/* Match the custom bullet styling from above */
 .prose ul > li {
   position: relative;
-  padding-left: 1.75em;
+  padding-left: 1.5em;
+  margin-bottom: 0.75rem;
 }
 
-/* Remove the before pseudo-element in prose styling too */
 .prose ul > li::before {
-  display: none;
+  content: "•";
+  position: absolute;
+  left: 0.5em;
+  color: #000;
+}
+
+.prose ul > li::marker {
+  content: "";
+  color: transparent;
 }
 
 .prose blockquote {
