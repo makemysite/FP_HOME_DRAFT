@@ -2,29 +2,38 @@
 .blog-content ul, .blog-content ol {
   padding-left: 0;
   margin-left: 0;
+  margin-bottom: 1.5rem;
 }
 
 .blog-content ul li {
   padding-left: 0;
   margin-left: 0;
+  margin-bottom: 0.75rem;
+  display: flex;
 }
 
 .blog-content ul li::before {
   content: "•";
-  margin-right: 0.5em;
-  position: relative;
-  left: 0;
+  margin-right: 0.75em;
+  font-size: 1.25em;
+  line-height: 0.8;
 }
 
 .blog-content ol {
   list-style-type: none;
+  counter-reset: item;
 }
 
 .blog-content ol li {
   padding-left: 0;
   margin-left: 0;
+  margin-bottom: 0.75rem;
+  display: flex;
 }
 
 .blog-content ol li::before {
-  margin-right: 0.5em;
+  content: counter(item) ". ";
+  counter-increment: item;
+  margin-right: 0.75em;
+  font-weight: 600;
 }

@@ -2,12 +2,13 @@
 .blog-embed-content-list li {
   margin-left: 0;
   padding-left: 0;
+  display: flex;
 }
 
 .blog-embed-content-list li::before {
-  margin-right: 0.5em;
-  position: relative;
-  left: 0;
+  margin-right: 0.75em;
+  font-size: 1.25em;
+  line-height: 0.8;
 }
 
 .blog-embed-post ol > li::marker {
