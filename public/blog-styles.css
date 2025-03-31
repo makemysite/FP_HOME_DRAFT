@@ -1,42 +1,30 @@
 
-/* Update list styles for blog content */
 .blog-content ul, .blog-content ol {
-  padding-left: 1.75em;
-  margin-bottom: 1.5rem;
+  padding-left: 0;
+  margin-left: 0;
 }
 
 .blog-content ul li {
-  position: relative;
-  padding-left: 1.5em;
-  margin-bottom: 0.75rem;
+  padding-left: 0;
+  margin-left: 0;
 }
 
 .blog-content ul li::before {
   content: "•";
-  position: absolute;
+  margin-right: 0.5em;
+  position: relative;
   left: 0;
-  color: #000;
-  font-size: 1.5em;
-  line-height: 1;
-  top: -0.1em;
 }
 
 .blog-content ol {
   list-style-type: none;
-  counter-reset: item;
 }
 
 .blog-content ol li {
-  position: relative;
-  counter-increment: item;
-  padding-left: 1.5em;
-  margin-bottom: 0.75rem;
+  padding-left: 0;
+  margin-left: 0;
 }
 
 .blog-content ol li::before {
-  content: counter(item) ". ";
-  position: absolute;
-  left: 0;
-  color: #000;
-  font-weight: 600;
+  margin-right: 0.5em;
 }

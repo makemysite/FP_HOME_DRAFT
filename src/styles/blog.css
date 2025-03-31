@@ -1,21 +1,15 @@
 
 .blog-embed-content-list li {
-  position: relative;
-  margin-bottom: 0.75rem;
-  padding-left: 1.5em;
+  margin-left: 0;
+  padding-left: 0;
 }
 
 .blog-embed-content-list li::before {
-  content: "•";
-  position: absolute;
+  margin-right: 0.5em;
+  position: relative;
   left: 0;
-  color: #000;
-  font-size: 2em; /* Increased bullet size */
-  line-height: 1;
-  top: -0.1em; /* Adjusted positioning */
 }
 
 .blog-embed-post ol > li::marker {
-  color: #000;
-  font-weight: 600;
+  display: none;
 }
