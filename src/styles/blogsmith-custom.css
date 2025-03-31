@@ -1,3 +1,4 @@
+
 .blog-post-content ul {
   margin-left: 0;
   padding-left: 0;
@@ -9,7 +10,7 @@
   display: flex;
   align-items: flex-start;
   margin-bottom: 0.5rem;
-  margin-top: 0.5rem; /* Add margin above each list item */
+  margin-top: 1rem; /* Increased margin above each list item */
 }
 
 .blog-post-content ul li::before {
@@ -36,7 +37,7 @@
   display: flex;
   align-items: flex-start;
   margin-bottom: 0.5rem;
-  margin-top: 0.5rem; /* Add margin above each list item */
+  margin-top: 1rem; /* Increased margin above each list item */
 }
 
 .blog-post-content ol li::before {
