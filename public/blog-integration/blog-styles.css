@@ -1,3 +1,4 @@
+
 /* Blog Styles */
 :root {
   --primary-color: #3b82f6;
@@ -86,11 +87,17 @@
   padding-left: 1.5rem;
 }
 
+/* Fix for double bullet points */
 .blog-content ul li {
   list-style-type: disc;
   margin-bottom: 0.75rem;
   padding-left: 0;
   position: relative;
+}
+
+/* Remove the pseudo-element that was creating the second bullet */
+.blog-content ul > li::before {
+  display: none;
 }
 
 .blog-content ul > li::marker {
@@ -181,15 +188,9 @@
   padding-left: 1.75em;
 }
 
+/* Remove the before pseudo-element in prose styling too */
 .prose ul > li::before {
-  content: "";
-  position: absolute;
-  background-color: var(--text-muted);
-  border-radius: 50%;
-  width: 0.375em;
-  height: 0.375em;
-  top: calc(0.875em - 0.1875em);
-  left: 0.25em;
+  display: none;
 }
 
 .prose blockquote {
