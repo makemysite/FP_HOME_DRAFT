@@ -11,6 +11,10 @@
       "dest": "/blog-integration/index.html"
     },
     {
+      "src": "/blog",
+      "dest": "/index.html"
+    },
+    {
       "src": "/(.*)",
       "dest": "/$1"
     }
