@@ -1,30 +1,42 @@
 
-.blog-content ul > li::before {
+/* Update list styles for blog content */
+.blog-content ul, .blog-content ol {
+  padding-left: 1.75em;
+  margin-bottom: 1.5rem;
+}
+
+.blog-content ul li {
+  position: relative;
+  padding-left: 1.5em;
+  margin-bottom: 0.75rem;
+}
+
+.blog-content ul li::before {
   content: "•";
   position: absolute;
-  left: 0.5em;
+  left: 0;
   color: #000;
-  font-size: 1.5em; /* Increased bullet size */
+  font-size: 1.5em;
   line-height: 1;
-  top: -0.05em; /* Fine-tuned positioning */
+  top: -0.1em;
 }
 
-.blog-content ol > li::marker {
-  color: #000; 
-  font-weight: 600;
+.blog-content ol {
+  list-style-type: none;
+  counter-reset: item;
 }
 
-.prose ul > li::before {
-  content: "•";
+.blog-content ol li {
+  position: relative;
+  counter-increment: item;
+  padding-left: 1.5em;
+  margin-bottom: 0.75rem;
+}
+
+.blog-content ol li::before {
+  content: counter(item) ". ";
   position: absolute;
-  left: 0.5em;
-  color: #000;
-  font-size: 1.5em; /* Increased bullet size */
-  line-height: 1;
-  top: -0.05em; /* Fine-tuned positioning */
-}
-
-.prose ol > li::marker {
+  left: 0;
   color: #000;
   font-weight: 600;
 }
