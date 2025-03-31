@@ -8,13 +8,18 @@
   margin-left: 0;
   padding-left: 0;
   display: flex;
+  align-items: flex-start;
+  margin-bottom: 0.5rem;
 }
 
 .blog-post-content ul li::before {
   content: "•";
   margin-right: 0.75em;
   font-size: 1.25em;
-  line-height: 0.8;
+  line-height: 1;
+  display: inline-block;
+  min-width: 1.5em;
+  text-align: center;
 }
 
 .blog-post-content ol {
@@ -28,6 +33,8 @@
   margin-left: 0;
   padding-left: 0;
   display: flex;
+  align-items: flex-start;
+  margin-bottom: 0.5rem;
 }
 
 .blog-post-content ol li::before {
@@ -35,4 +42,7 @@
   counter-increment: item;
   margin-right: 0.75em;
   font-weight: 600;
+  display: inline-block;
+  min-width: 1.5em;
+  text-align: right;
 }
