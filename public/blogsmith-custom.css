@@ -11,7 +11,6 @@
   margin-bottom: 0.5em;
   display: flex;
   align-items: flex-start;
-  gap: 0.5em; /* Add space between bullet and text */
 }
 
 .blog-post-content ul li::before {
@@ -39,7 +38,6 @@
   margin-bottom: 0.5em;
   display: flex;
   align-items: flex-start;
-  gap: 0.5em; /* Add space between number and text */
 }
 
 .blog-post-content ol li::before {
