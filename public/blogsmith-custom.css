@@ -1,50 +1,5 @@
-/* BlogSmith custom styles for rendering blog content */
-.blog-post-content h1,
-.blog-post-content h2,
-.blog-post-content h3,
-.blog-post-content h4,
-.blog-post-content h5,
-.blog-post-content h6 {
-  font-weight: 600;
-  color: #170F49;
-  margin-top: 1.5em;
-  margin-bottom: 0.5em;
-}
 
-.blog-post-content h1 {
-  font-size: 2.25rem;
-}
-
-.blog-post-content h2 {
-  font-size: 1.875rem;
-}
-
-.blog-post-content h3 {
-  font-size: 1.5rem;
-}
-
-.blog-post-content h4 {
-  font-size: 1.25rem;
-}
-
-.blog-post-content h5,
-.blog-post-content h6 {
-  font-size: 1rem;
-}
-
-.blog-post-content p {
-  margin-bottom: 1.25em;
-  line-height: 1.7;
-}
-
-.blog-post-content a {
-  color: #E98A23;
-  text-decoration: underline;
-}
-
-/* Fixed list styling with custom bullets */
-.blog-post-content ul,
-.blog-post-content ol {
+.blog-post-content ul {
   margin-left: 2em;
   margin-bottom: 1.25em;
 }
@@ -60,14 +15,16 @@
   position: absolute;
   left: 0;
   color: #000;
-  font-size: 2em;
+  font-size: 1.5em; /* Increased bullet size */
   line-height: 1;
-  top: -0.1em;
+  top: -0.05em; /* Fine-tuned positioning */
 }
 
 .blog-post-content ol {
   list-style-type: none;
   counter-reset: item;
+  margin-left: 2em;
+  margin-bottom: 1.25em;
 }
 
 .blog-post-content ol li {
@@ -81,52 +38,6 @@
   content: counter(item) ". ";
   position: absolute;
   left: 0;
-  color: #000;
+  color: #000; /* Changed from blue to black */
   font-weight: 600;
-}
-
-.blog-post-content img {
-  max-width: 100%;
-  height: auto;
-  border-radius: 0.5rem;
-  margin: 1.5em 0;
-}
-
-.blog-post-content blockquote {
-  border-left: 4px solid #E98A23;
-  padding-left: 1.5em;
-  margin: 1.5em 0;
-  font-style: italic;
-  color: #170F49;
-}
-
-.blog-post-content code {
-  background-color: #f3f4f6;
-  padding: 0.2em 0.4em;
-  border-radius: 0.25em;
-  font-family: monospace;
-  font-size: 0.9em;
-}
-
-.blog-post-content table {
-  border-collapse: collapse;
-  width: 100%;
-  margin-bottom: 1.5em;
-}
-
-.blog-post-content table th,
-.blog-post-content table td {
-  border: 1px solid #e5e7eb;
-  padding: 0.5em 1em;
-}
-
-.blog-post-content table th {
-  background-color: #f3f4f6;
-  font-weight: 600;
-}
-
-.blog-post-content hr {
-  border: 0;
-  border-top: 1px solid #e5e7eb;
-  margin: 2em 0;
 }
