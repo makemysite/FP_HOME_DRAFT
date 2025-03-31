@@ -5,11 +5,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Blog Integration Example</title>
-  <meta name="description" content="Blog Integration Example page">
-  <meta property="og:title" content="Blog Integration">
-  <meta property="og:description" content="Example of integrating the blog functionality into any website">
+  <meta name="description" content="Blog post">
+  <meta property="og:title" content="Blog">
+  <meta property="og:description" content="Blog post">
   <meta property="og:type" content="website">
   <meta property="og:image" content="">
+  <link rel="stylesheet" href="/blog-integration/blog-styles.css">
   <style>
     body {
       font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
@@ -65,7 +66,7 @@
 </head>
 <body>
   <header>
-    <div class="logo">Blog Integration Demo</div>
+    <div class="logo">Your Company</div>
     <nav>
       <ul>
         <li><a href="/">Home</a></li>
@@ -77,9 +78,6 @@
   </header>
 
   <main>
-    <h1>Blog Integration Demo</h1>
-    <p>This is an example page demonstrating how to integrate the blog functionality into any website.</p>
-    
     <!-- Blog container - This is where the blog content will be loaded -->
     <div id="blog-container"></div>
   </main>
@@ -89,18 +87,57 @@
   </footer>
 
   <!-- Include the blog embed script -->
-  <script src="BlogEmbed.js"></script>
+  <script src="/blog-integration/BlogEmbed.js"></script>
   <script>
     // Initialize the blog embed client
     window.BlogEmbed.configure({
+      // Replace with your actual Supabase API URL and API key
       apiUrl: 'https://emdldcecqgrdgronpcoc.supabase.co/rest/v1',
       apiKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVtZGxkY2VjcWdyZGdyb25wY29jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDMxNDQ5OTcsImV4cCI6MjA1ODcyMDk5N30.7f6V0MkrBtBSmao3boXqlEwy7IyB_lxAKtQtb-3M2NE',
       containerId: 'blog-container',
       baseRoute: '/blog-integration'
     });
     
-    // Load an example blog post
-    window.BlogEmbed.loadPost('electrical-license-reciprocity-florida');
+    // Function to extract slug from the URL path
+    function getSlugFromPath() {
+      const path = window.location.pathname;
+      
+      // Improved URL parsing for various path formats
+      if (path.includes('/blog/')) {
+        // Extract the slug from the URL using a more robust approach
+        const pathSegments = path.split('/');
+        for (let i = 0; i < pathSegments.length; i++) {
+          if (pathSegments[i] === 'blog' && i + 1 < pathSegments.length) {
+            // Get the slug and remove any trailing slash
+            return pathSegments[i + 1].replace(/\/$/, '');
+          }
+        }
+      }
+      
+      return null;
+    }
+    
+    // Get slug from URL
+    const slug = getSlugFromPath();
+    
+    if (slug) {
+      console.log('Loading single post with slug:', slug);
+      // Load the specific blog post
+      window.BlogEmbed.loadPost(slug);
+    } else {
+      console.log('No slug found in URL path:', window.location.pathname);
+    }
+    
+    // Handle direct navigation with History API
+    window.addEventListener('popstate', function(event) {
+      const newSlug = getSlugFromPath();
+      if (newSlug) {
+        console.log('Navigation event detected, loading post with slug:', newSlug);
+        window.BlogEmbed.loadPost(newSlug);
+      } else {
+        console.log('Navigation event detected, but no slug found in path');
+      }
+    });
   </script>
 </body>
 </html>
