@@ -1,6 +1,7 @@
 
 import React from "react";
 import { Link } from "react-router-dom";
+import { Facebook, Twitter, Linkedin, Youtube, Phone, Mail } from "lucide-react";
 
 const Footer: React.FC = () => {
   // Define your footer links here
@@ -8,21 +9,51 @@ const Footer: React.FC = () => {
     { name: "Mobile App", path: "/features/mobile-app" },
     { name: "Scheduling & Dispatching", path: "/features/scheduling-dispatching" },
     { name: "Work Orders", path: "/features/work-orders" },
-    // ... add more features as needed
+    { name: "Tools and Integrations", path: "/features/tools-integrations" },
+    { name: "Invoice and Payments", path: "/features/invoice-payments" },
+    { name: "Timecard & GPS Tracking", path: "/features/timecard-gps" },
+    { name: "Equipment Tracking", path: "/features/equipment-tracking" },
+    { name: "Reports and Dashboard", path: "/features/reports-dashboard" },
+    { name: "Customer Support", path: "/features/customer-support" },
+    { name: "Estimates", path: "/features/estimates" },
+    { name: "Manage Customers", path: "/features/manage-customers" },
+    { name: "Google Review Management", path: "/features/google-review" },
+    { name: "Job Costing Features", path: "/features/job-costing" },
   ];
 
   const industries = [
     { name: "HVAC Industries", path: "/industries/hvac" },
     { name: "Fire Service Industries", path: "/industries/fire-service" },
     { name: "Alarm System", path: "/industries/alarm-system" },
-    // ... add more industries as needed
+    { name: "Plumbing Business", path: "/industries/plumbing" },
+    { name: "Locksmith Industries", path: "/industries/locksmith" },
+    { name: "Electrical Industries", path: "/industries/electrical" },
+    { name: "Property Management", path: "/industries/property-management" },
+    { name: "Garage Door Business Software", path: "/industries/garage-door" },
+    { name: "Construction Software", path: "/industries/construction" },
+    { name: "Chimney Sweep", path: "/industries/chimney-sweep" },
+    { name: "Pressure Wash", path: "/industries/pressure-wash" },
+    { name: "Arborist", path: "/industries/arborist" },
+    { name: "Drywall Service", path: "/industries/drywall" },
+    { name: "Carpet Cleaning", path: "/industries/carpet-cleaning" },
+    { name: "Handyman Service", path: "/industries/handyman" },
+    { name: "Pool service", path: "/industries/pool-service" },
+    { name: "Traffic Control", path: "/industries/traffic-control" },
+    { name: "Fencing Service", path: "/industries/fencing" },
+    { name: "Painting Business", path: "/industries/painting" },
+    { name: "Roofing Business", path: "/industries/roofing" },
+    { name: "Window Cleaning", path: "/industries/window-cleaning" },
+    { name: "Landscape Business", path: "/industries/landscape" },
   ];
 
   const quickLinks = [
     { name: "Blog", path: "/blog" },
     { name: "Contact", path: "/contact" },
     { name: "Pricing", path: "/pricing" },
-    // ... add more links as needed
+    { name: "Community", path: "/community" },
+    { name: "Free Tools", path: "/free-tools" },
+    { name: "Product Updates", path: "/product-updates" },
+    { name: "Cookie Policy", path: "/cookie-policy" },
   ];
 
   // Split industries into two columns
@@ -38,11 +69,11 @@ const Footer: React.FC = () => {
             <h2 className="text-2xl font-bold text-black">Field Promax</h2>
             <div className="flex flex-col gap-4">
               <div className="flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                <Phone size={24} />
                 <span>(123) 456-7890</span>
               </div>
               <div className="flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></svg>
+                <Mail size={24} />
                 <span>contact@fieldpromax.com</span>
               </div>
             </div>
@@ -50,16 +81,24 @@ const Footer: React.FC = () => {
             <div className="flex gap-4 mt-4">
               {/* Social media icons */}
               <a href="https://facebook.com" aria-label="Facebook" className="hover:text-[rgba(233,138,35,1)] transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
+                <Facebook size={20} />
               </a>
-              {/* Add more social media icons as needed */}
+              <a href="https://twitter.com" aria-label="Twitter" className="hover:text-[rgba(233,138,35,1)] transition-colors">
+                <Twitter size={20} />
+              </a>
+              <a href="https://linkedin.com" aria-label="LinkedIn" className="hover:text-[rgba(233,138,35,1)] transition-colors">
+                <Linkedin size={20} />
+              </a>
+              <a href="https://youtube.com" aria-label="YouTube" className="hover:text-[rgba(233,138,35,1)] transition-colors">
+                <Youtube size={20} />
+              </a>
             </div>
             
             <div className="flex flex-col sm:flex-row gap-4 mt-2">
               <a 
                 href="https://apps.apple.com" 
                 aria-label="Download on App Store" 
-                className="inline-block h-10 w-[140px]"
+                className="inline-block h-10 w-[135px]"
               >
                 <img 
                   src="https://developer.apple.com/app-store/marketing/guidelines/images/badge-download-on-the-app-store.svg" 
@@ -70,7 +109,7 @@ const Footer: React.FC = () => {
               <a 
                 href="https://play.google.com" 
                 aria-label="Get it on Google Play" 
-                className="inline-block h-10 w-[140px]"
+                className="inline-block h-10 w-[135px]"
               >
                 <img 
                   src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" 
