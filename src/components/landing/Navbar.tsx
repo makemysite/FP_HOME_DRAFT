@@ -1,44 +1,48 @@
+
 import React from "react";
+import { Link } from "react-router-dom";
 
 const Navbar: React.FC = () => {
   return (
     <nav className="flex items-center gap-[40px_100px] text-center flex-wrap max-md:max-w-full">
-      <img
-        src="https://cdn.builder.io/api/v1/image/assets/a720917f9ee741a78621d5e6666ab10a/f5c25da502e1d373adabf184e60dd9d28eead17e?placeholderIfAbsent=true"
-        alt="Field Promax Logo"
-        className="aspect-[1.73] object-contain w-[152px] self-stretch shrink-0 my-auto"
-      />
+      <Link to="/">
+        <img
+          src="https://cdn.builder.io/api/v1/image/assets/a720917f9ee741a78621d5e6666ab10a/f5c25da502e1d373adabf184e60dd9d28eead17e?placeholderIfAbsent=true"
+          alt="Field Promax Logo"
+          className="aspect-[1.73] object-contain w-[152px] self-stretch shrink-0 my-auto"
+        />
+      </Link>
       <div className="self-stretch flex min-w-60 items-center gap-[40px_65px] text-base text-[rgba(7,15,24,1)] font-normal whitespace-nowrap flex-wrap my-auto max-md:max-w-full">
-        <a
-          href="#"
+        <Link
+          to="/"
           className="text-[rgba(18,20,22,1)] self-stretch my-auto hover:text-[rgba(233,138,35,1)] transition-colors"
         >
           Home
-        </a>
-        <a
-          href="#features"
-          className="text-[rgba(233,138,35,1)] font-semibold self-stretch my-auto hover:text-[rgba(233,138,35,0.8)] transition-colors"
+        </Link>
+        <Link
+          to="/features"
+          className="self-stretch my-auto hover:text-[rgba(233,138,35,1)] transition-colors"
         >
           Features
-        </a>
-        <a
-          href="#pricing"
+        </Link>
+        <Link
+          to="/pricing"
           className="self-stretch my-auto hover:text-[rgba(233,138,35,1)] transition-colors"
         >
           Pricing
-        </a>
-        <a
-          href="#industries"
+        </Link>
+        <Link
+          to="/industries"
           className="self-stretch my-auto hover:text-[rgba(233,138,35,1)] transition-colors"
         >
           Industries
-        </a>
-        <a
-          href="#blogs"
+        </Link>
+        <Link
+          to="/blog"
           className="self-stretch my-auto hover:text-[rgba(233,138,35,1)] transition-colors"
         >
           Blogs
-        </a>
+        </Link>
       </div>
       <div className="self-stretch flex min-w-60 items-center gap-8 text-lg my-auto">
         <div className="self-stretch text-[rgba(7,15,24,1)] font-normal w-[150px] my-auto rounded-[56px]">
