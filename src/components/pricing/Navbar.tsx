@@ -8,8 +8,8 @@ const Navbar: React.FC = () => {
       <Link to="/">
         <img
           src="https://cdn.builder.io/api/v1/image/assets/a720917f9ee741a78621d5e6666ab10a/f5c25da502e1d373adabf184e60dd9d28eead17e?placeholderIfAbsent=true"
-          alt="Field Promax Logo"
           className="aspect-[1.73] object-contain w-[152px] self-stretch shrink-0 my-auto"
+          alt="Company Logo"
         />
       </Link>
       <div className="self-stretch flex min-w-60 items-center gap-[40px_65px] text-base text-black font-normal whitespace-nowrap flex-wrap my-auto max-md:max-w-full">
