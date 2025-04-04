@@ -1,9 +1,9 @@
 
 import React from "react";
-import PricingPage from "@/components/pricing/PricingPage";
+import Pricing from "@/components/pricing/Pricing";
 
-const Pricing = () => {
-  return <PricingPage />;
+const PricingPage: React.FC = () => {
+  return <Pricing />;
 };
 
-export default Pricing;
+export default PricingPage;
