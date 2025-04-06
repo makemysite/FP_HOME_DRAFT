@@ -1,4 +1,6 @@
 
+"use client";
+
 import React, { createContext, useState, useContext, ReactNode } from 'react';
 
 type BillingPeriod = 'monthly' | 'annually';
