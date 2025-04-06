@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Inter } from 'next/font/google';
 import "@/styles/globals.css";
+import { Metadata } from "next";
 
 // Initialize the Inter font
 const inter = Inter({ subsets: ['latin'] });
@@ -20,9 +21,36 @@ const queryClient = new QueryClient({
   },
 });
 
-export const metadata = {
-  title: 'Field Promax',
+export const metadata: Metadata = {
+  title: {
+    template: '%s | Field Promax',
+    default: 'Field Promax - Field Service Management Software',
+  },
   description: 'Field service management software for service businesses',
+  keywords: 'field service management, FSM software, service business software',
+  authors: [{ name: 'Field Promax Team' }],
+  creator: 'Field Promax',
+  publisher: 'Field Promax',
+  robots: {
+    index: true,
+    follow: true,
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    siteName: 'Field Promax',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    creator: '@fieldpromax',
+    site: '@fieldpromax',
+  },
+  alternates: {
+    canonical: 'https://fieldpromax.com',
+  },
+  verification: {
+    google: 'verification_token',
+  },
 }
 
 export default function RootLayout({

@@ -1,20 +1,12 @@
 
-"use client";
-
-import { usePathname } from "next/navigation";
-import { useEffect } from "react";
 import Link from "next/link";
 
+export const metadata = {
+  title: "Page Not Found | Field Promax",
+  description: "The page you're looking for doesn't exist.",
+};
+
 export default function NotFound() {
-  const pathname = usePathname();
-
-  useEffect(() => {
-    console.error(
-      "404 Error: User attempted to access non-existent route:",
-      pathname
-    );
-  }, [pathname]);
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="text-center">
