@@ -1,7 +1,7 @@
 
 # Blog Integration Package
 
-This package allows you to easily integrate the blog functionality from your existing Lovable project into another website.
+
 
 ## Installation
 
