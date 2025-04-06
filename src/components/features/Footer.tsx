@@ -1,3 +1,4 @@
+"use client";
 
 import React from "react";
 import Link from 'next/link'; // Update import for Next.js Link
