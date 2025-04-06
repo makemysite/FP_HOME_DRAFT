@@ -1,8 +1,8 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* Existing globals.css content */
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -223,3 +223,6 @@
   text-align: left;
   flex-shrink: 0;
 }
+
+/* Import the new app.css styles */
+@import './app.css';
