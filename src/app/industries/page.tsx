@@ -11,6 +11,14 @@ export const metadata: Metadata = {
     title: "Industries | Field Promax - Field Service Management Software",
     description: "Industry-specific field service management solutions designed for various service sectors. Find the perfect solution for your business needs.",
     type: "website",
+    images: [
+      {
+        url: 'https://fieldpromax.com/images/industry-solutions.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'Field Promax Industry Solutions',
+      },
+    ],
   },
 };
 

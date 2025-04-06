@@ -26,8 +26,8 @@ export const metadata: Metadata = {
     template: '%s | Field Promax',
     default: 'Field Promax - Field Service Management Software',
   },
-  description: 'Field service management software for service businesses',
-  keywords: 'field service management, FSM software, service business software',
+  description: 'Field service management software for service businesses. Streamline operations, manage teams, and grow your business.',
+  keywords: 'field service management, FSM software, service business software, field operations management, service scheduling',
   authors: [{ name: 'Field Promax Team' }],
   creator: 'Field Promax',
   publisher: 'Field Promax',
@@ -39,6 +39,14 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'en_US',
     siteName: 'Field Promax',
+    images: [
+      {
+        url: 'https://fieldpromax.com/og-image.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'Field Promax - Field Service Management Software',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',

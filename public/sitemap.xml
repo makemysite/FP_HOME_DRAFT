@@ -31,5 +31,17 @@
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
+  <url>
+    <loc>https://fieldpromax.com/contact</loc>
+    <lastmod>2025-04-06</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://fieldpromax.com/about</loc>
+    <lastmod>2025-04-06</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
   <!-- Blog posts would be dynamically generated and added here -->
 </urlset>

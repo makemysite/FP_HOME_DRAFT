@@ -6,6 +6,12 @@ Allow: /
 # Sitemap location
 Sitemap: https://fieldpromax.com/sitemap.xml
 
+# Important directories for SEO
+Allow: /blog/
+Allow: /features/
+Allow: /pricing/
+Allow: /industries/
+
 # Block specific directories or files if needed
 # Disallow: /admin/
 # Disallow: /dashboard/
