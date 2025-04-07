@@ -2,7 +2,7 @@
 import React from "react";
 import ServerBlogPage from "./ServerBlogPage";
 import BlogClientContent from "./BlogClientContent";
-import { ClientOnly } from "@/lib/client-utils";
+import { ClientOnly } from "@/lib/client-components";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {

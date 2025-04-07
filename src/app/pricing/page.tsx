@@ -1,7 +1,7 @@
 
 import React from "react";
 import Navbar from "@/components/landing/Navbar";
-import { ClientOnly } from "@/lib/client-utils";
+import { ClientOnly } from "@/lib/client-components";
 import PricingPageClient from "@/components/pricing/PricingPageClient";
 import { Metadata } from "next";
 

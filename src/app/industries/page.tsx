@@ -2,7 +2,7 @@
 import React from "react";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/features/Footer";
-import { ClientOnly } from "@/lib/client-utils";
+import { ClientOnly } from "@/lib/client-components";
 import IndustriesClientContent from "./IndustriesClientContent";
 import { Metadata } from "next";
 
