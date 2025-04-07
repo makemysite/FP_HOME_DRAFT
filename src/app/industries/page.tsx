@@ -40,7 +40,20 @@ export default function IndustriesPage() {
           </p>
         </div>
         
-        <ClientOnly>
+        <ClientOnly fallback={
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {Array(12).fill(0).map((_, index) => (
+              <div key={`skeleton-${index}`} className="flex-1 p-6 bg-white rounded-lg border border-gray-200 shadow-sm">
+                <div className="h-6 bg-gray-200 rounded mb-4 w-3/4"></div>
+                <div className="space-y-2">
+                  <div className="h-4 bg-gray-200 rounded w-full"></div>
+                  <div className="h-4 bg-gray-200 rounded w-full"></div>
+                  <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        }>
           <IndustriesClientContent />
         </ClientOnly>
       </main>

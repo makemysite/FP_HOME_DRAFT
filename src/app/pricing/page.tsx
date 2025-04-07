@@ -1,7 +1,8 @@
 
 import React from "react";
 import Navbar from "@/components/landing/Navbar";
-import ServerPricingLayout from "@/components/pricing/ServerPricingLayout";
+import { ClientOnly } from "@/lib/client-utils";
+import PricingPageClient from "@/components/pricing/PricingPageClient";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -16,5 +17,32 @@ export const metadata: Metadata = {
 };
 
 export default function PricingPage() {
-  return <ServerPricingLayout navbarComponent={<Navbar />} />;
+  return (
+    <ClientOnly fallback={
+      <div className="w-full px-[76px] max-md:px-5 space-y-16">
+        <div className="text-center space-y-4">
+          <div className="h-10 bg-gray-200 rounded w-3/4 mx-auto"></div>
+          <div className="h-4 bg-gray-200 rounded w-1/2 mx-auto"></div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {Array(3).fill(0).map((_, i) => (
+            <div key={i} className="border border-gray-200 rounded-xl p-8 space-y-6">
+              <div className="h-8 bg-gray-200 rounded w-1/2"></div>
+              <div className="h-10 bg-gray-200 rounded w-3/4"></div>
+              <div className="space-y-4">
+                {Array(5).fill(0).map((_, j) => (
+                  <div key={j} className="flex items-center gap-2">
+                    <div className="h-5 w-5 rounded-full bg-gray-200"></div>
+                    <div className="h-4 bg-gray-200 rounded w-full"></div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    }>
+      <PricingPageClient navbarComponent={<Navbar />} />
+    </ClientOnly>
+  );
 }
