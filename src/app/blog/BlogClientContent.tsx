@@ -11,10 +11,10 @@ interface BlogPost {
   id: string;
   slug: string;
   title: string;
-  description: string;
-  hero_image: string;
+  description: string | null;
+  hero_image: string | null;
   created_at: string;
-  category: string;
+  category: "Industry Insights" | "Field Operations" | "Technology Trends" | "Growth" | null;
 }
 
 export default function BlogClientContent() {
