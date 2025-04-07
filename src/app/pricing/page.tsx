@@ -1,7 +1,7 @@
 
 import React from "react";
-import PricingPageClient from "@/components/pricing/PricingPageClient";
 import Navbar from "@/components/landing/Navbar";
+import ServerPricingLayout from "@/components/pricing/ServerPricingLayout";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -16,5 +16,5 @@ export const metadata: Metadata = {
 };
 
 export default function PricingPage() {
-  return <PricingPageClient navbarComponent={<Navbar />} />;
+  return <ServerPricingLayout navbarComponent={<Navbar />} />;
 }

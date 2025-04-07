@@ -7,11 +7,11 @@ import React from "react";
  * This component serves as a boundary for client-side code.
  * Use this to wrap components that need client-side functionality.
  */
-export function ClientOnly({ 
+export function ClientOnly<T extends React.ReactNode>({ 
   children, 
   fallback = null 
 }: { 
-  children: React.ReactNode; 
+  children: T; 
   fallback?: React.ReactNode;
 }) {
   const [mounted, setMounted] = React.useState(false);
