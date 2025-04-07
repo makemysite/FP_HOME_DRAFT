@@ -1,9 +1,11 @@
 
 import React from "react";
-import BlogPostClient from "@/components/blog/BlogPostClient";
 import { getBlogPostBySlug } from "@/lib/blog/queries";
 import { notFound } from "next/navigation";
 import { Metadata, ResolvingMetadata } from "next";
+import ServerBlogPage from "../ServerBlogPage";
+import BlogPostClientContent from "./BlogPostClientContent";
+import { ClientOnly } from "@/lib/client-utils";
 
 type Props = {
   params: { slug: string }
@@ -47,5 +49,14 @@ export default async function BlogPostPage({ params }: Props) {
     notFound();
   }
   
-  return <BlogPostClient initialPost={post} slug={params.slug} />;
+  return (
+    <ServerBlogPage 
+      heading={post.title}
+      subheading=""
+    >
+      <ClientOnly>
+        <BlogPostClientContent initialPost={post} slug={params.slug} />
+      </ClientOnly>
+    </ServerBlogPage>
+  );
 }
