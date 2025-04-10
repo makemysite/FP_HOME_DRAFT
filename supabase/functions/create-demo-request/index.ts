@@ -48,7 +48,7 @@ serve(async (req) => {
       .eq('id', data.id);
     
     // Generate a real Calendly URL with prefilled email
-    const calendlyUrl = `https://calendly.com/fieldpromax/demo?email=${encodeURIComponent(email)}`;
+    const calendlyUrl = `https://calendly.com/fieldpromaxapp/field-promax-demo?email=${encodeURIComponent(email)}`;
     
     console.log(`Demo request created for ${email}, redirecting to Calendly: ${calendlyUrl}`);
     
@@ -76,3 +76,4 @@ serve(async (req) => {
     );
   }
 });
+
