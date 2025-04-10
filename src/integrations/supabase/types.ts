@@ -127,6 +127,27 @@ export type Database = {
           },
         ]
       }
+      demo_requests: {
+        Row: {
+          calendly_redirect_status: boolean | null
+          created_at: string
+          email: string
+          id: string
+        }
+        Insert: {
+          calendly_redirect_status?: boolean | null
+          created_at?: string
+          email: string
+          id?: string
+        }
+        Update: {
+          calendly_redirect_status?: boolean | null
+          created_at?: string
+          email?: string
+          id?: string
+        }
+        Relationships: []
+      }
       section_content: {
         Row: {
           content: Json

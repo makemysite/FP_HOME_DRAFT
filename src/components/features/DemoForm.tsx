@@ -1,5 +1,7 @@
 
 import React, { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface DemoFormProps {
   className?: string;
@@ -8,25 +10,54 @@ interface DemoFormProps {
 const DemoForm: React.FC<DemoFormProps> = ({ className }) => {
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const { toast } = useToast();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) return;
 
     setIsSubmitting(true);
 
-    // Simulate API call
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setIsSubmitted(true);
-      setEmail("");
+    try {
+      const response = await fetch(`https://emdldcecqgrdgronpcoc.supabase.co/functions/v1/create-demo-request`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || supabase.auth.anon_key}`
+        },
+        body: JSON.stringify({ email })
+      });
+      
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to submit request');
+      }
 
-      // Reset success message after 3 seconds
+      // Show success message
+      toast({
+        title: "Demo requested!",
+        description: "Redirecting you to schedule your demo...",
+        duration: 3000,
+      });
+
+      // Redirect to Calendly
       setTimeout(() => {
-        setIsSubmitted(false);
-      }, 3000);
-    }, 1000);
+        window.location.href = result.redirectUrl;
+      }, 1500);
+      
+    } catch (error) {
+      console.error("Error submitting demo request:", error);
+      toast({
+        title: "Error",
+        description: "Failed to submit your request. Please try again.",
+        variant: "destructive",
+        duration: 5000,
+      });
+    } finally {
+      setIsSubmitting(false);
+      setEmail("");
+    }
   };
 
   return (
@@ -37,18 +68,17 @@ const DemoForm: React.FC<DemoFormProps> = ({ className }) => {
         onChange={(e) => setEmail(e.target.value)}
         placeholder="Email Address"
         required
+        disabled={isSubmitting}
         className="bg-[rgba(245,246,251,1)] mr-[-62px] text-[rgba(87,84,85,1)] font-normal grow shrink-0 basis-0 w-fit px-6 py-3.5 rounded-[50px] max-md:px-5 focus:outline-none focus:ring-2 focus:ring-[rgba(233,138,35,0.5)]"
       />
       <button
         type="submit"
         disabled={isSubmitting}
-        className="bg-[rgba(233,138,35,1)] shadow-[0px_3px_12px_rgba(74,58,255,0.18)] min-h-[55px] text-white font-medium leading-none px-[39px] py-[18px] rounded-[56px] hover:bg-[rgba(233,138,35,0.9)] transition-colors"
+        className="bg-[rgba(233,138,35,1)] shadow-[0px_3px_12px_rgba(74,58,255,0.18)] min-h-[55px] text-white font-medium leading-none px-[39px] py-[18px] rounded-[56px] hover:bg-[rgba(233,138,35,0.9)] transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
       >
         {isSubmitting
-          ? "Submitting..."
-          : isSubmitted
-            ? "Submitted!"
-            : "Take a Demo"}
+          ? "Processing..."
+          : "Take a Demo"}
       </button>
     </form>
   );

@@ -1,15 +1,59 @@
 
 import React, { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const Hero: React.FC = () => {
   const [email, setEmail] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission - would connect to backend in production
-    console.log("Email submitted:", email);
-    alert(`Free trial requested with email: ${email}`);
-    setEmail("");
+    if (!email) return;
+
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch(`https://emdldcecqgrdgronpcoc.supabase.co/functions/v1/create-demo-request`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || supabase.auth.anon_key}`
+        },
+        body: JSON.stringify({ email })
+      });
+      
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to submit request');
+      }
+
+      // Show success message
+      toast({
+        title: "Free trial requested!",
+        description: "Redirecting you to schedule your demo...",
+        duration: 3000,
+      });
+
+      // Redirect to Calendly
+      setTimeout(() => {
+        // Replace with your actual Calendly URL
+        window.location.href = result.redirectUrl;
+      }, 1500);
+      
+    } catch (error) {
+      console.error("Error submitting demo request:", error);
+      toast({
+        title: "Error",
+        description: "Failed to submit your request. Please try again.",
+        variant: "destructive",
+        duration: 5000,
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -44,12 +88,14 @@ const Hero: React.FC = () => {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   className="text-[#26393F] font-normal leading-loose my-auto bg-transparent outline-none flex-1"
+                  disabled={isSubmitting}
                 />
                 <button
                   type="submit"
-                  className="self-stretch bg-[rgba(233,138,35,1)] shadow-[0px_3px_12px_rgba(74,58,255,0.18)] gap-2 text-white font-bold text-center leading-none pt-4 pb-[19px] px-8 rounded-[56px] max-md:px-5 hover:bg-[rgba(233,138,35,0.9)] transition-colors"
+                  className="self-stretch bg-[rgba(233,138,35,1)] shadow-[0px_3px_12px_rgba(74,58,255,0.18)] gap-2 text-white font-bold text-center leading-none pt-4 pb-[19px] px-8 rounded-[56px] max-md:px-5 hover:bg-[rgba(233,138,35,0.9)] transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
+                  disabled={isSubmitting}
                 >
-                  Start Free Trial
+                  {isSubmitting ? "Processing..." : "Start Free Trial"}
                 </button>
               </form>
               <p className="text-[#6f6c90] text-center text-base font-normal leading-none self-center mt-[27px] max-md:max-w-full">
