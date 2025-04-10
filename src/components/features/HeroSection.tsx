@@ -1,5 +1,6 @@
 
 import React from "react";
+import DemoForm from "./DemoForm";
 
 interface HeroSectionProps {
   className?: string;
@@ -24,11 +25,9 @@ const HeroSection: React.FC<HeroSectionProps> = ({ className }) => {
               <br />
               business efficiently with powerful features
             </p>
-            <button 
-              className="mt-[34px] w-[193px] bg-[rgba(233,138,35,1)] shadow-[0px_3px_12px_rgba(74,58,255,0.18)] text-white font-medium leading-none px-[39px] py-[18px] rounded-[56px] hover:bg-[rgba(233,138,35,0.9)] transition-colors"
-            >
-              Take a Demo
-            </button>
+            <div className="mt-[34px]">
+              <DemoForm />
+            </div>
           </div>
         </div>
         <div className="w-[43%] ml-5 max-md:w-full max-md:ml-0">

@@ -1,7 +1,6 @@
 
 import React, { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 
 interface DemoFormProps {
   className?: string;
@@ -14,7 +13,15 @@ const DemoForm: React.FC<DemoFormProps> = ({ className }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email) return;
+    if (!email) {
+      toast({
+        title: "Error",
+        description: "Please enter your email address.",
+        variant: "destructive",
+        duration: 3000,
+      });
+      return;
+    }
 
     setIsSubmitting(true);
 
@@ -28,18 +35,21 @@ const DemoForm: React.FC<DemoFormProps> = ({ className }) => {
         body: JSON.stringify({ email })
       });
       
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to submit request');
+      }
+      
       const result = await response.json();
       
-      if (!response.ok) {
-        throw new Error(result.error || 'Failed to submit request');
-      }
-
       // Show success message
       toast({
         title: "Demo requested!",
         description: "Redirecting you to schedule your demo...",
         duration: 3000,
       });
+
+      console.log("Redirecting to:", result.redirectUrl);
 
       // Redirect to Calendly
       setTimeout(() => {

@@ -41,8 +41,16 @@ serve(async (req) => {
     
     if (error) throw error;
     
-    // Generate Calendly URL with prefilled email
-    const calendlyUrl = `https://calendly.com/your-calendly-username/demo?email=${encodeURIComponent(email)}`;
+    // Update the record to indicate the redirect has been initiated
+    await supabase
+      .from('demo_requests')
+      .update({ calendly_redirect_status: true })
+      .eq('id', data.id);
+    
+    // Generate a real Calendly URL with prefilled email
+    const calendlyUrl = `https://calendly.com/fieldpromax/demo?email=${encodeURIComponent(email)}`;
+    
+    console.log(`Demo request created for ${email}, redirecting to Calendly: ${calendlyUrl}`);
     
     return new Response(
       JSON.stringify({ 

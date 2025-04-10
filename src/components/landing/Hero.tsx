@@ -1,7 +1,6 @@
 
 import React, { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 
 const Hero: React.FC = () => {
   const [email, setEmail] = useState("");
@@ -10,7 +9,15 @@ const Hero: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email) return;
+    if (!email) {
+      toast({
+        title: "Error",
+        description: "Please enter your email address.",
+        variant: "destructive",
+        duration: 3000,
+      });
+      return;
+    }
 
     setIsSubmitting(true);
 
@@ -24,12 +31,13 @@ const Hero: React.FC = () => {
         body: JSON.stringify({ email })
       });
       
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to submit request');
+      }
+      
       const result = await response.json();
       
-      if (!response.ok) {
-        throw new Error(result.error || 'Failed to submit request');
-      }
-
       // Show success message
       toast({
         title: "Free trial requested!",
@@ -37,9 +45,10 @@ const Hero: React.FC = () => {
         duration: 3000,
       });
 
+      console.log("Redirecting to:", result.redirectUrl);
+
       // Redirect to Calendly
       setTimeout(() => {
-        // Replace with your actual Calendly URL
         window.location.href = result.redirectUrl;
       }, 1500);
       
