@@ -133,17 +133,17 @@ const Hero: React.FC = () => {
             <img
               src="https://cdn.builder.io/api/v1/image/assets/a720917f9ee741a78621d5e6666ab10a/212570bc4db3d238ca6ee132fb873c0b0d7a1a0b?placeholderIfAbsent=true"
               alt="Client Logo 1"
-              className="aspect-[1.93] object-contain w-[147px] shrink-0 grayscale hover:grayscale-0 transition-all duration-300"
+              className="aspect-[1.93] object-contain w-[147px] shrink-0 grayscale hover:grayscale-0 transition-all duration-300 border-2 border-red-500"
             />
             <img
               src="https://cdn.builder.io/api/v1/image/assets/a720917f9ee741a78621d5e6666ab10a/c20eb160304e3e2229cde01a6d10c14a70c83e1f?placeholderIfAbsent=true"
               alt="Client Logo 2"
-              className="aspect-[1.93] object-contain w-[147px] shrink-0 grayscale hover:grayscale-0 transition-all duration-300"
+              className="aspect-[1.93] object-contain w-[147px] shrink-0 grayscale hover:grayscale-0 transition-all duration-300 border-2 border-blue-500"
             />
             <img
               src="https://cdn.builder.io/api/v1/image/assets/a720917f9ee741a78621d5e6666ab10a/71c187e5b6feaca90e194fb2fcefdf852eee4a32?placeholderIfAbsent=true"
               alt="Client Logo 3"
-              className="aspect-[1.93] object-contain w-[147px] shrink-0 grayscale hover:grayscale-0 transition-all duration-300"
+              className="aspect-[1.93] object-contain w-[147px] shrink-0 grayscale hover:grayscale-0 transition-all duration-300 border-2 border-green-500"
             />
           </div>
         </div>
