@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -124,27 +123,27 @@ const Hero: React.FC = () => {
         <div className="text-[#26393F] text-center text-lg font-normal leading-loose mt-[111px] max-md:max-w-full max-md:mt-10">
           Automate Your Service Business With Our Exclusive Features
         </div>
-        <div className="shadow-[0px_3px_14px_0px_rgba(74,58,255,0.03),0px_-2px_4px_0px_rgba(20,20,43,0.02),0px_12px_24px_0px_rgba(20,20,43,0.04)] bg-white flex w-[1242px] max-w-full items-stretch gap-[40px_100px] flex-wrap pl-6 pr-20 py-4 rounded-[18px] max-md:px-5">
-          <div className="text-[rgba(7,15,24,1)] text-base font-semibold my-auto">
+        <div className="shadow-[0px_3px_14px_0px_rgba(74,58,255,0.03),0px_-2px_4px_0px_rgba(20,20,43,0.02),0px_12px_24px_0px_rgba(20,20,43,0.04)] bg-white flex w-[1242px] max-w-full items-center justify-center gap-[40px] flex-wrap px-6 py-4 rounded-[18px] max-md:px-5">
+          <div className="text-[rgba(7,15,24,1)] text-base font-semibold text-center mr-10 max-md:w-full max-md:text-center max-md:mb-4">
             Trusted by
             <br />
             Our Clients
           </div>
-          <div className="flex gap-[40px_127px]">
+          <div className="flex items-center justify-center gap-[40px] max-md:flex-col max-md:gap-4">
             <img
               src="https://cdn.builder.io/api/v1/image/assets/a720917f9ee741a78621d5e6666ab10a/212570bc4db3d238ca6ee132fb873c0b0d7a1a0b?placeholderIfAbsent=true"
               alt="Client Logo 1"
-              className="aspect-[1.93] object-contain w-[147px] shrink-0"
+              className="aspect-[1.93] object-contain w-[147px] shrink-0 grayscale hover:grayscale-0 transition-all duration-300"
             />
             <img
               src="https://cdn.builder.io/api/v1/image/assets/a720917f9ee741a78621d5e6666ab10a/c20eb160304e3e2229cde01a6d10c14a70c83e1f?placeholderIfAbsent=true"
               alt="Client Logo 2"
-              className="aspect-[1.93] object-contain w-[147px] shrink-0"
+              className="aspect-[1.93] object-contain w-[147px] shrink-0 grayscale hover:grayscale-0 transition-all duration-300"
             />
             <img
               src="https://cdn.builder.io/api/v1/image/assets/a720917f9ee741a78621d5e6666ab10a/71c187e5b6feaca90e194fb2fcefdf852eee4a32?placeholderIfAbsent=true"
               alt="Client Logo 3"
-              className="aspect-[1.93] object-contain w-[147px] shrink-0"
+              className="aspect-[1.93] object-contain w-[147px] shrink-0 grayscale hover:grayscale-0 transition-all duration-300"
             />
           </div>
         </div>

@@ -46,9 +46,11 @@ export type Database = {
       }
       blog_posts: {
         Row: {
+          author_name: string | null
           category: Database["public"]["Enums"]["blog_category"] | null
           conclusion: string | null
           created_at: string
+          custom_publish_date: string | null
           description: string | null
           hero_image: string | null
           id: string
@@ -62,9 +64,11 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          author_name?: string | null
           category?: Database["public"]["Enums"]["blog_category"] | null
           conclusion?: string | null
           created_at?: string
+          custom_publish_date?: string | null
           description?: string | null
           hero_image?: string | null
           id?: string
@@ -78,9 +82,11 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          author_name?: string | null
           category?: Database["public"]["Enums"]["blog_category"] | null
           conclusion?: string | null
           created_at?: string
+          custom_publish_date?: string | null
           description?: string | null
           hero_image?: string | null
           id?: string
@@ -101,6 +107,8 @@ export type Database = {
           created_at: string
           id: string
           position: number
+          subheading: string | null
+          subheading2: string | null
           title: string
         }
         Insert: {
@@ -108,6 +116,8 @@ export type Database = {
           created_at?: string
           id?: string
           position: number
+          subheading?: string | null
+          subheading2?: string | null
           title: string
         }
         Update: {
@@ -115,6 +125,8 @@ export type Database = {
           created_at?: string
           id?: string
           position?: number
+          subheading?: string | null
+          subheading2?: string | null
           title?: string
         }
         Relationships: [
