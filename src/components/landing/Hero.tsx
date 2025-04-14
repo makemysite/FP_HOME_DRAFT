@@ -123,13 +123,13 @@ const Hero: React.FC = () => {
         <div className="text-[#26393F] text-center text-lg font-normal leading-loose mt-[111px] max-md:max-w-full max-md:mt-10">
           Automate Your Service Business With Our Exclusive Features
         </div>
-        <div className="shadow-[0px_3px_14px_0px_rgba(74,58,255,0.03),0px_-2px_4px_0px_rgba(20,20,43,0.02),0px_12px_24px_0px_rgba(20,20,43,0.04)] bg-white flex w-[1242px] max-w-full items-center justify-center gap-[40px] flex-wrap px-6 py-4 rounded-[18px] max-md:px-5">
-          <div className="text-[rgba(7,15,24,1)] text-base font-semibold text-center mr-10 max-md:w-full max-md:text-center max-md:mb-4">
+        <div className="shadow-[0px_3px_14px_0px_rgba(74,58,255,0.03),0px_-2px_4px_0px_rgba(20,20,43,0.02),0px_12px_24px_0px_rgba(20,20,43,0.04)] bg-white flex w-full items-center justify-start gap-[40px] px-6 py-4 rounded-[18px] max-md:flex-col max-md:items-start">
+          <div className="text-[rgba(7,15,24,1)] text-base font-semibold text-left mr-10 max-md:w-full max-md:mb-4">
             Trusted by
             <br />
             Our Clients
           </div>
-          <div className="flex items-center justify-center gap-[40px] max-md:flex-col max-md:gap-4">
+          <div className="flex-1 flex items-center justify-between gap-4 max-md:flex-col max-md:w-full">
             <img
               src="https://cdn.builder.io/api/v1/image/assets/a720917f9ee741a78621d5e6666ab10a/212570bc4db3d238ca6ee132fb873c0b0d7a1a0b?placeholderIfAbsent=true"
               alt="Client Logo 1"
