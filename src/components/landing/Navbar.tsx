@@ -1,13 +1,11 @@
 
-"use client";
-
 import React from "react";
-import Link from "next/link";
+import { Link } from "react-router-dom";
 
 const Navbar: React.FC = () => {
   return (
     <nav className="flex items-center gap-[40px_100px] text-center flex-wrap max-md:max-w-full">
-      <Link href="/">
+      <Link to="/">
         <img
           src="https://cdn.builder.io/api/v1/image/assets/a720917f9ee741a78621d5e6666ab10a/f5c25da502e1d373adabf184e60dd9d28eead17e?placeholderIfAbsent=true"
           alt="Field Promax Logo"
@@ -16,31 +14,31 @@ const Navbar: React.FC = () => {
       </Link>
       <div className="self-stretch flex min-w-60 items-center gap-[40px_65px] text-base text-[rgba(7,15,24,1)] font-normal whitespace-nowrap flex-wrap my-auto max-md:max-w-full">
         <Link
-          href="/"
+          to="/"
           className="text-[rgba(18,20,22,1)] self-stretch my-auto hover:text-[rgba(233,138,35,1)] transition-colors"
         >
           Home
         </Link>
         <Link
-          href="/features"
+          to="/features"
           className="self-stretch my-auto hover:text-[rgba(233,138,35,1)] transition-colors"
         >
           Features
         </Link>
         <Link
-          href="/pricing"
+          to="/pricing"
           className="self-stretch my-auto hover:text-[rgba(233,138,35,1)] transition-colors"
         >
           Pricing
         </Link>
         <Link
-          href="/industries"
+          to="/industries"
           className="self-stretch my-auto hover:text-[rgba(233,138,35,1)] transition-colors"
         >
           Industries
         </Link>
         <Link
-          href="/blog"
+          to="/blog"
           className="self-stretch my-auto hover:text-[rgba(233,138,35,1)] transition-colors"
         >
           Blogs
