@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
@@ -180,10 +181,14 @@ const Features: React.FC = () => {
               {featureOrder.map((featureKey, index) => (
                 <div
                   key={featureKey}
-                  ref={(el) => (cardRefs.current[featureKey] = el)}
+                  ref={(el) => {
+                    if (el) {
+                      cardRefs.current[featureKey] = el;
+                    }
+                  }}
                   data-feature={featureKey}
                   className={cn(
-                    "feature-card transition-all duration-500 ease-in-out",
+                    "feature-card transition-all duration-500 ease-in-out mb-4 p-4 rounded-lg cursor-pointer",
                     activeFeature === featureKey
                       ? "shadow-[0px_20px_30px_5px_rgba(0,0,0,0.15)] bg-white transform translate-y-0 opacity-100"
                       : "bg-white hover:bg-gray-50 transform translate-y-4 opacity-80",
