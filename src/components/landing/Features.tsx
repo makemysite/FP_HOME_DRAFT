@@ -188,11 +188,11 @@ const Features: React.FC = () => {
                   }}
                   data-feature={featureKey}
                   className={cn(
-                    "feature-card transition-all duration-500 ease-in-out mb-4 p-4 rounded-lg cursor-pointer",
+                    "feature-card group transition-all duration-500 ease-in-out mb-4 p-4 rounded-lg cursor-pointer",
                     activeFeature === featureKey
-                      ? "shadow-[0px_20px_30px_5px_rgba(0,0,0,0.15)] bg-white transform translate-y-0 opacity-100"
-                      : "bg-white hover:bg-gray-50 transform translate-y-4 opacity-80",
-                    visibleFeatures.includes(featureKey) && "translate-y-0 opacity-100"
+                      ? "shadow-[0px_20px_30px_5px_rgba(0,0,0,0.15)] bg-white transform translate-y-0 opacity-100 scale-100"
+                      : "bg-white hover:bg-gray-50 transform translate-y-4 opacity-70 scale-95",
+                    visibleFeatures.includes(featureKey) && "translate-y-0 opacity-100 scale-100"
                   )}
                   onClick={() => handleFeatureClick(featureKey, index)}
                 >
@@ -201,7 +201,7 @@ const Features: React.FC = () => {
                       <img
                         src={features[featureKey as keyof typeof features].icon}
                         alt={`${featureKey} Icon`}
-                        className="aspect-[1] object-contain w-9 shrink-0"
+                        className="aspect-[1] object-contain w-9 shrink-0 transition-transform group-hover:scale-110"
                       />
                     )}
                     <div
@@ -209,7 +209,7 @@ const Features: React.FC = () => {
                         "grow shrink w-[301px] basis-auto mt-3.5 transition-colors duration-300",
                         activeFeature === featureKey
                           ? "text-[rgba(233,138,35,1)]"
-                          : "text-[#202225]"
+                          : "text-[#202225] group-hover:text-[rgba(233,138,35,0.7)]"
                       )}
                     >
                       {features[featureKey as keyof typeof features].title}
@@ -217,7 +217,7 @@ const Features: React.FC = () => {
                   </div>
                   <div
                     className={cn(
-                      "flex gap-[40px_60px] text-sm text-[#202225] font-normal leading-[22px] flex-wrap px-[54px] max-md:max-w-full max-md:px-5 transition-all duration-300 ease-in-out",
+                      "flex gap-[40px_60px] text-sm text-[#202225] font-normal leading-[22px] flex-wrap px-[54px] max-md:max-w-full max-md:px-5 transition-all duration-500 ease-in-out overflow-hidden",
                       activeFeature === featureKey
                         ? "opacity-100 max-h-[200px] mt-2"
                         : "opacity-0 max-h-0 mt-0"
@@ -226,9 +226,9 @@ const Features: React.FC = () => {
                     <div className="w-[276px]">
                       {features[featureKey as keyof typeof features].description}
                     </div>
-                    <div className="flex items-center mt-2 text-[rgba(233,138,35,1)] font-semibold">
+                    <div className="flex items-center mt-2 text-[rgba(233,138,35,1)] font-semibold group-hover:text-[rgba(233,138,35,0.7)] transition-colors duration-300">
                       Learn More 
-                      <ArrowRightIcon className="ml-1" />
+                      <ArrowRightIcon className="ml-1 transition-transform group-hover:translate-x-1" />
                     </div>
                   </div>
                 </div>
@@ -245,8 +245,8 @@ const Features: React.FC = () => {
                   className={cn(
                     "absolute top-0 left-0 aspect-[1.4] object-contain w-full transition-all duration-800 ease-in-out",
                     activeFeature === key
-                      ? "opacity-100 translate-y-0"
-                      : "opacity-0 translate-y-8"
+                      ? "opacity-100 translate-y-0 scale-100"
+                      : "opacity-0 translate-y-8 scale-95"
                   )}
                 />
               ))}
@@ -259,3 +259,4 @@ const Features: React.FC = () => {
 };
 
 export default Features;
+
