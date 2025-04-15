@@ -1,38 +1,15 @@
 
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import ArrowRightIcon from "../ui/ArrowRightIcon";
 
 const Features: React.FC = () => {
   const [activeFeature, setActiveFeature] = useState("reports");
   const [isAnimating, setIsAnimating] = useState(false);
-
-  // Auto-rotate features every 5 seconds when not manually interacting
-  useEffect(() => {
-    const features = ["reports", "tools", "scheduling", "invoicing"];
-    const currentIndex = features.indexOf(activeFeature);
-    
-    const timer = setTimeout(() => {
-      if (!isAnimating) {
-        const nextIndex = (currentIndex + 1) % features.length;
-        setIsAnimating(true);
-        setActiveFeature(features[nextIndex]);
-      }
-    }, 5000);
-    
-    return () => clearTimeout(timer);
-  }, [activeFeature, isAnimating]);
-
-  // Reset animation state after transition completes
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsAnimating(false);
-    }, 500);
-    
-    return () => clearTimeout(timer);
-  }, [activeFeature]);
-
+  const featuresRef = useRef<HTMLDivElement>(null);
+  const featureSectionRef = useRef<HTMLElement>(null);
+  
   const features = {
     reports: {
       title: "Reports and Dashboard",
@@ -67,9 +44,60 @@ const Features: React.FC = () => {
     },
   };
 
+  // Reset animation state after transition completes
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsAnimating(false);
+    }, 500);
+    
+    return () => clearTimeout(timer);
+  }, [activeFeature]);
+
+  // Handle scroll-based feature transitions
+  useEffect(() => {
+    const featureElements = document.querySelectorAll('.feature-card');
+    const featureOrder = ["reports", "tools", "scheduling", "invoicing"];
+    
+    const handleScroll = () => {
+      if (!featureSectionRef.current) return;
+      
+      const sectionRect = featureSectionRef.current.getBoundingClientRect();
+      const sectionTop = sectionRect.top;
+      const sectionHeight = sectionRect.height;
+      const windowHeight = window.innerHeight;
+      
+      // Check if section is in view
+      if (sectionTop < windowHeight && sectionTop > -sectionHeight) {
+        // Calculate progress through the section (0 to 1)
+        const sectionProgress = Math.min(Math.max((windowHeight - sectionTop) / (windowHeight + sectionHeight), 0), 1);
+        
+        // Determine which feature should be active based on scroll position
+        const featureIndex = Math.min(
+          Math.floor(sectionProgress * 4),
+          featureOrder.length - 1
+        );
+        
+        const newActiveFeature = featureOrder[featureIndex];
+        
+        if (newActiveFeature !== activeFeature && !isAnimating) {
+          setIsAnimating(true);
+          setActiveFeature(newActiveFeature);
+        }
+      }
+    };
+    
+    window.addEventListener('scroll', handleScroll);
+    handleScroll(); // Check on mount
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [activeFeature, isAnimating]);
+
   return (
     <section
       id="features"
+      ref={featureSectionRef}
       className="flex w-full max-w-[1335px] flex-col items-center mt-14 max-md:max-w-full max-md:mt-10"
     >
       <div className="text-[rgba(233,138,35,1)] text-lg font-bold leading-none tracking-[1.8px] text-center uppercase">
@@ -85,13 +113,13 @@ const Features: React.FC = () => {
         View all features
       </button>
 
-      <div className="self-stretch max-md:max-w-full mt-14">
+      <div className="self-stretch max-md:max-w-full mt-14" ref={featuresRef}>
         <div className="gap-5 flex max-md:flex-col max-md:items-stretch">
           <div className="w-[43%] max-md:w-full max-md:ml-0">
             <div className="flex w-full flex-col self-stretch my-auto max-md:max-w-full max-md:mt-10">
               {/* Reports and Dashboard */}
               <div
-                className={`${
+                className={`feature-card ${
                   activeFeature === "reports"
                     ? "shadow-[0px_20px_30px_5px_rgba(0,0,0,0.15)] bg-white"
                     : "bg-white hover:bg-gray-50"
@@ -100,6 +128,7 @@ const Features: React.FC = () => {
                   setIsAnimating(true);
                   setActiveFeature("reports");
                 }}
+                data-feature="reports"
               >
                 <div className="flex w-[361px] max-w-full gap-[17px] text-lg font-bold leading-[3] pb-1.5">
                   <img
@@ -128,7 +157,7 @@ const Features: React.FC = () => {
 
               {/* Tools & Integrations */}
               <div
-                className={`${
+                className={`feature-card ${
                   activeFeature === "tools"
                     ? "shadow-[0px_20px_30px_5px_rgba(0,0,0,0.15)] bg-white"
                     : "bg-white hover:bg-gray-50"
@@ -137,6 +166,7 @@ const Features: React.FC = () => {
                   setIsAnimating(true);
                   setActiveFeature("tools");
                 }}
+                data-feature="tools"
               >
                 <div className="flex w-[361px] max-w-full gap-[17px] text-lg font-bold leading-[3] pb-1.5">
                   <div className="w-9 shrink-0"></div> {/* Placeholder for icon */}
@@ -162,7 +192,7 @@ const Features: React.FC = () => {
 
               {/* Smart Scheduling */}
               <div
-                className={`${
+                className={`feature-card ${
                   activeFeature === "scheduling"
                     ? "shadow-[0px_20px_30px_5px_rgba(0,0,0,0.15)] bg-white"
                     : "bg-white hover:bg-gray-50"
@@ -171,6 +201,7 @@ const Features: React.FC = () => {
                   setIsAnimating(true);
                   setActiveFeature("scheduling");
                 }}
+                data-feature="scheduling"
               >
                 <div className="flex w-[361px] max-w-full gap-[17px] text-lg font-bold leading-[3] pb-1.5">
                   <img
@@ -200,7 +231,7 @@ const Features: React.FC = () => {
 
               {/* Invoicing & Payments */}
               <div
-                className={`${
+                className={`feature-card ${
                   activeFeature === "invoicing"
                     ? "shadow-[0px_20px_30px_5px_rgba(0,0,0,0.15)] bg-white"
                     : "bg-white hover:bg-gray-50"
@@ -209,6 +240,7 @@ const Features: React.FC = () => {
                   setIsAnimating(true);
                   setActiveFeature("invoicing");
                 }}
+                data-feature="invoicing"
               >
                 <div className="flex w-[361px] max-w-full gap-[17px] text-lg font-bold leading-[3] pb-1.5">
                   <img
