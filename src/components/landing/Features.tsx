@@ -1,16 +1,16 @@
-
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import ArrowRightIcon from "../ui/ArrowRightIcon";
 import { Progress } from "../ui/progress";
+import { cn } from "@/lib/utils";
 
 const Features: React.FC = () => {
-  const navigate = useNavigate(); // Replace useRouter with useNavigate
+  const navigate = useNavigate();
   const [activeFeature, setActiveFeature] = useState("reports");
   const [isAnimating, setIsAnimating] = useState(false);
-  const [sectionInView, setSectionInView] = useState(false);
+  const [visibleFeatures, setVisibleFeatures] = useState<string[]>([]);
   const featuresRef = useRef<HTMLDivElement>(null);
   const featureSectionRef = useRef<HTMLElement>(null);
   const transitionInProgress = useRef(false);
@@ -18,8 +18,9 @@ const Features: React.FC = () => {
   const featureOrder = ["reports", "tools", "scheduling", "invoicing"];
   const [currentIndex, setCurrentIndex] = useState(0);
   const [progress, setProgress] = useState(0);
-  const sectionObserverRef = useRef<IntersectionObserver | null>(null);
-  
+  const cardRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+  const observerRef = useRef<IntersectionObserver | null>(null);
+
   const features = {
     reports: {
       title: "Reports and Dashboard",
@@ -54,35 +55,43 @@ const Features: React.FC = () => {
     },
   };
 
-  // Set up intersection observer to detect when section is in view
   useEffect(() => {
-    const observerOptions = {
-      root: null,
-      rootMargin: '0px',
-      threshold: 0.8, // Consider section in view when 80% visible
-    };
-
-    sectionObserverRef.current = new IntersectionObserver((entries) => {
-      const [entry] = entries;
-      setSectionInView(entry.isIntersecting);
-      
-      if (entry.isIntersecting && !animationComplete.current) {
-        startSequentialTransition();
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const featureId = entry.target.getAttribute("data-feature");
+          if (featureId) {
+            if (entry.isIntersecting) {
+              setVisibleFeatures((prev) => [...prev, featureId]);
+              if (!transitionInProgress.current) {
+                setActiveFeature(featureId);
+                setCurrentIndex(featureOrder.indexOf(featureId));
+              }
+            } else {
+              setVisibleFeatures((prev) => prev.filter((id) => id !== featureId));
+            }
+          }
+        });
+      },
+      {
+        threshold: 0.6,
+        rootMargin: "-10% 0px -10% 0px"
       }
-    }, observerOptions);
+    );
 
-    if (featureSectionRef.current) {
-      sectionObserverRef.current.observe(featureSectionRef.current);
-    }
+    Object.values(cardRefs.current).forEach((ref) => {
+      if (ref) {
+        observerRef.current?.observe(ref);
+      }
+    });
 
     return () => {
-      if (sectionObserverRef.current) {
-        sectionObserverRef.current.disconnect();
+      if (observerRef.current) {
+        observerRef.current.disconnect();
       }
     };
   }, []);
 
-  // Function to handle feature card click
   const handleFeatureClick = (featureName: string, index: number) => {
     if (transitionInProgress.current) return;
     
@@ -96,8 +105,7 @@ const Features: React.FC = () => {
       transitionInProgress.current = false;
     }, 600);
   };
-  
-  // Function to start sequential transition through all features
+
   const startSequentialTransition = () => {
     if (animationComplete.current) return;
     
@@ -106,7 +114,6 @@ const Features: React.FC = () => {
     setActiveFeature(featureOrder[0]);
     
     const transitionInterval = setInterval(() => {
-      // Update progress continuously
       const progressInterval = setInterval(() => {
         setProgress(prev => {
           const newProgress = prev + 1;
@@ -128,15 +135,14 @@ const Features: React.FC = () => {
         
         setCurrentIndex(index);
         setActiveFeature(featureOrder[index]);
-      }, 3000); // Each feature displays for 3 seconds
+      }, 3000);
     }, 3000);
     
     return () => clearInterval(transitionInterval);
   };
-  
-  // Handle "View all features" button click
+
   const handleViewAllFeaturesClick = () => {
-    navigate('/features'); // Changed from router.push to navigate
+    navigate('/features');
   };
 
   return (
@@ -165,163 +171,63 @@ const Features: React.FC = () => {
         <div className="gap-5 flex max-md:flex-col max-md:items-stretch">
           <div className="w-[43%] max-md:w-full max-md:ml-0">
             <div className="flex w-full flex-col self-stretch my-auto max-md:max-w-full max-md:mt-10">
-              {/* Progress bar */}
               <div className="w-full mb-6">
                 {currentIndex < featureOrder.length - 1 && (
-                  <Progress 
-                    value={progress} 
-                    className="h-1.5 bg-gray-200" 
-                  />
+                  <Progress value={progress} className="h-1.5 bg-gray-200" />
                 )}
               </div>
-              
-              {/* Feature cards with progress indicators */}
-              <div className="flex gap-2 mb-4 justify-center">
-                {featureOrder.map((feature, index) => (
-                  <div 
-                    key={feature}
-                    className={`h-2 w-16 rounded-full transition-all duration-300 cursor-pointer ${
-                      index === currentIndex ? 'bg-[rgba(233,138,35,1)]' : 'bg-gray-200'
-                    }`}
-                    onClick={() => handleFeatureClick(feature, index)}
-                  />
-                ))}
-              </div>
 
-              {/* Reports and Dashboard */}
-              <div
-                className={`feature-card ${
-                  activeFeature === "reports"
-                    ? "shadow-[0px_20px_30px_5px_rgba(0,0,0,0.15)] bg-white"
-                    : "bg-white hover:bg-gray-50"
-                } self-stretch flex min-h-[100px] w-full flex-col px-[22px] py-7 max-md:max-w-full max-md:px-5 cursor-pointer transition-all duration-500 ease-in-out overflow-hidden`}
-                onClick={() => handleFeatureClick("reports", 0)}
-              >
-                <div className="flex w-[361px] max-w-full gap-[17px] text-lg font-bold leading-[3] pb-1.5">
-                  <img
-                    src="https://cdn.builder.io/api/v1/image/assets/a720917f9ee741a78621d5e6666ab10a/66f38502a5fef33818316ca0f35b1bc4094641c8?placeholderIfAbsent=true"
-                    alt="Reports Icon"
-                    className="aspect-[1] object-contain w-9 shrink-0"
-                  />
-                  <div className={`grow shrink w-[301px] basis-auto mt-3.5 ${activeFeature === "reports" ? "text-[rgba(233,138,35,1)]" : "text-[#202225]"} transition-colors duration-300`}>
-                    Reports and Dashboard
-                  </div>
-                </div>
-                <div 
-                  className={`flex gap-[40px_60px] text-sm text-[#202225] font-normal leading-[22px] flex-wrap px-[54px] max-md:max-w-full max-md:px-5 transition-all duration-300 ease-in-out ${
-                    activeFeature === "reports" ? "opacity-100 max-h-[200px] mt-2" : "opacity-0 max-h-0 mt-0"
-                  }`}
+              {featureOrder.map((featureKey, index) => (
+                <div
+                  key={featureKey}
+                  ref={(el) => (cardRefs.current[featureKey] = el)}
+                  data-feature={featureKey}
+                  className={cn(
+                    "feature-card transition-all duration-500 ease-in-out",
+                    activeFeature === featureKey
+                      ? "shadow-[0px_20px_30px_5px_rgba(0,0,0,0.15)] bg-white transform translate-y-0 opacity-100"
+                      : "bg-white hover:bg-gray-50 transform translate-y-4 opacity-80",
+                    visibleFeatures.includes(featureKey) && "translate-y-0 opacity-100"
+                  )}
+                  onClick={() => handleFeatureClick(featureKey, index)}
                 >
-                  <div className="w-[276px]">
-                    {features.reports.description}
+                  <div className="flex w-[361px] max-w-full gap-[17px] text-lg font-bold leading-[3] pb-1.5">
+                    {features[featureKey as keyof typeof features].icon && (
+                      <img
+                        src={features[featureKey as keyof typeof features].icon}
+                        alt={`${featureKey} Icon`}
+                        className="aspect-[1] object-contain w-9 shrink-0"
+                      />
+                    )}
+                    <div
+                      className={cn(
+                        "grow shrink w-[301px] basis-auto mt-3.5 transition-colors duration-300",
+                        activeFeature === featureKey
+                          ? "text-[rgba(233,138,35,1)]"
+                          : "text-[#202225]"
+                      )}
+                    >
+                      {features[featureKey as keyof typeof features].title}
+                    </div>
                   </div>
-                  <div className="flex items-center mt-2 text-[rgba(233,138,35,1)] font-semibold">
-                    Learn More 
-                    <ArrowRightIcon className="ml-1" />
-                  </div>
-                </div>
-              </div>
-
-              {/* Tools & Integrations */}
-              <div
-                className={`feature-card ${
-                  activeFeature === "tools"
-                    ? "shadow-[0px_20px_30px_5px_rgba(0,0,0,0.15)] bg-white"
-                    : "bg-white hover:bg-gray-50"
-                } flex min-h-[100px] w-full flex-col px-[22px] py-7 max-md:px-5 cursor-pointer transition-all duration-500 ease-in-out overflow-hidden`}
-                onClick={() => handleFeatureClick("tools", 1)}
-              >
-                <div className="flex w-[361px] max-w-full gap-[17px] text-lg font-bold leading-[3] pb-1.5">
-                  <div className="w-9 shrink-0"></div>
-                  <div className={`grow shrink w-[301px] basis-auto mt-3.5 ${activeFeature === "tools" ? "text-[rgba(233,138,35,1)]" : "text-[#202225]"} transition-colors duration-300`}>
-                    Tools & Integrations
-                  </div>
-                </div>
-                <div 
-                  className={`flex gap-[40px_60px] text-sm text-[#202225] font-normal leading-[22px] flex-wrap px-[54px] max-md:max-w-full max-md:px-5 transition-all duration-300 ease-in-out ${
-                    activeFeature === "tools" ? "opacity-100 max-h-[200px] mt-2" : "opacity-0 max-h-0 mt-0"
-                  }`}
-                >
-                  <div className="w-[276px]">
-                    {features.tools.description}
-                  </div>
-                  <div className="flex items-center mt-2 text-[rgba(233,138,35,1)] font-semibold">
-                    Learn More 
-                    <ArrowRightIcon className="ml-1" />
+                  <div
+                    className={cn(
+                      "flex gap-[40px_60px] text-sm text-[#202225] font-normal leading-[22px] flex-wrap px-[54px] max-md:max-w-full max-md:px-5 transition-all duration-300 ease-in-out",
+                      activeFeature === featureKey
+                        ? "opacity-100 max-h-[200px] mt-2"
+                        : "opacity-0 max-h-0 mt-0"
+                    )}
+                  >
+                    <div className="w-[276px]">
+                      {features[featureKey as keyof typeof features].description}
+                    </div>
+                    <div className="flex items-center mt-2 text-[rgba(233,138,35,1)] font-semibold">
+                      Learn More 
+                      <ArrowRightIcon className="ml-1" />
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div className="border w-[465px] shrink-0 max-w-full h-px border-[rgba(225,225,225,1)] border-solid" />
-
-              {/* Smart Scheduling */}
-              <div
-                className={`feature-card ${
-                  activeFeature === "scheduling"
-                    ? "shadow-[0px_20px_30px_5px_rgba(0,0,0,0.15)] bg-white"
-                    : "bg-white hover:bg-gray-50"
-                } flex min-h-[100px] w-full flex-col px-[22px] py-7 max-md:px-5 cursor-pointer transition-all duration-500 ease-in-out overflow-hidden`}
-                onClick={() => handleFeatureClick("scheduling", 2)}
-              >
-                <div className="flex w-[361px] max-w-full gap-[17px] text-lg font-bold leading-[3] pb-1.5">
-                  <img
-                    src="https://cdn.builder.io/api/v1/image/assets/a720917f9ee741a78621d5e6666ab10a/90cb4c0f51b0744019a62d928e470e8fb001908f?placeholderIfAbsent=true"
-                    alt="Scheduling Icon"
-                    className="aspect-[1] object-contain w-9 shrink-0"
-                  />
-                  <div className={`grow shrink w-[301px] basis-auto mt-3.5 ${activeFeature === "scheduling" ? "text-[rgba(233,138,35,1)]" : "text-[#202225]"} transition-colors duration-300`}>
-                    Smart Scheduling
-                  </div>
-                </div>
-                <div 
-                  className={`flex gap-[40px_60px] text-sm text-[#202225] font-normal leading-[22px] flex-wrap px-[54px] max-md:max-w-full max-md:px-5 transition-all duration-300 ease-in-out ${
-                    activeFeature === "scheduling" ? "opacity-100 max-h-[200px] mt-2" : "opacity-0 max-h-0 mt-0"
-                  }`}
-                >
-                  <div className="w-[276px]">
-                    {features.scheduling.description}
-                  </div>
-                  <div className="flex items-center mt-2 text-[rgba(233,138,35,1)] font-semibold">
-                    Learn More 
-                    <ArrowRightIcon className="ml-1" />
-                  </div>
-                </div>
-              </div>
-              <div className="border w-[465px] shrink-0 max-w-full h-px border-[rgba(225,225,225,1)] border-solid" />
-
-              {/* Invoicing & Payments */}
-              <div
-                className={`feature-card ${
-                  activeFeature === "invoicing"
-                    ? "shadow-[0px_20px_30px_5px_rgba(0,0,0,0.15)] bg-white"
-                    : "bg-white hover:bg-gray-50"
-                } flex min-h-[100px] w-full flex-col px-[22px] py-7 max-md:px-5 cursor-pointer transition-all duration-500 ease-in-out overflow-hidden`}
-                onClick={() => handleFeatureClick("invoicing", 3)}
-              >
-                <div className="flex w-[361px] max-w-full gap-[17px] text-lg font-bold leading-[3] pb-1.5">
-                  <img
-                    src="https://cdn.builder.io/api/v1/image/assets/a720917f9ee741a78621d5e6666ab10a/c5a7c18383b0c23ef99644f4f1abd3fdc92273d3?placeholderIfAbsent=true"
-                    alt="Invoicing Icon"
-                    className="aspect-[1] object-contain w-9 shrink-0"
-                  />
-                  <div className={`grow shrink w-[301px] basis-auto mt-3.5 ${activeFeature === "invoicing" ? "text-[rgba(233,138,35,1)]" : "text-[#202225]"} transition-colors duration-300`}>
-                    Invoicing & Payments
-                  </div>
-                </div>
-                <div 
-                  className={`flex gap-[40px_60px] text-sm text-[#202225] font-normal leading-[22px] flex-wrap px-[54px] max-md:max-w-full max-md:px-5 transition-all duration-300 ease-in-out ${
-                    activeFeature === "invoicing" ? "opacity-100 max-h-[200px] mt-2" : "opacity-0 max-h-0 mt-0"
-                  }`}
-                >
-                  <div className="w-[276px]">
-                    {features.invoicing.description}
-                  </div>
-                  <div className="flex items-center mt-2 text-[rgba(233,138,35,1)] font-semibold">
-                    Learn More 
-                    <ArrowRightIcon className="ml-1" />
-                  </div>
-                </div>
-              </div>
-              <div className="border w-[465px] shrink-0 max-w-full h-px border-[rgba(225,225,225,1)] border-solid" />
+              ))}
             </div>
           </div>
           <div className="w-[57%] ml-5 max-md:w-full max-md:ml-0">
@@ -331,11 +237,12 @@ const Features: React.FC = () => {
                   key={key}
                   src={features[key as keyof typeof features].image}
                   alt={`${features[key as keyof typeof features].title} Screenshot`}
-                  className={`absolute top-0 left-0 aspect-[1.4] object-contain w-full transition-all duration-800 ease-in-out ${
-                    activeFeature === key 
-                      ? "opacity-100 translate-y-0" 
+                  className={cn(
+                    "absolute top-0 left-0 aspect-[1.4] object-contain w-full transition-all duration-800 ease-in-out",
+                    activeFeature === key
+                      ? "opacity-100 translate-y-0"
                       : "opacity-0 translate-y-8"
-                  }`}
+                  )}
                 />
               ))}
             </div>
