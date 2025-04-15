@@ -44,11 +44,11 @@ const Features: React.FC = () => {
     },
   };
 
-  // Reset animation state after transition completes
+  // Reset animation state after transition completes - longer transition time
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsAnimating(false);
-    }, 500);
+    }, 800); // Increased from 500ms to 800ms for smoother transitions
     
     return () => clearTimeout(timer);
   }, [activeFeature]);
@@ -66,12 +66,23 @@ const Features: React.FC = () => {
       const sectionHeight = sectionRect.height;
       const windowHeight = window.innerHeight;
       
-      // Check if section is in view
-      if (sectionTop < windowHeight && sectionTop > -sectionHeight) {
-        // Calculate progress through the section (0 to 1)
-        const sectionProgress = Math.min(Math.max((windowHeight - sectionTop) / (windowHeight + sectionHeight), 0), 1);
+      // Check if section is in view - more visibility required before triggering
+      if (sectionTop < windowHeight * 0.7 && sectionTop > -sectionHeight * 0.8) {
+        // Adjusted to require the section to be more visible before starting transitions
+        // Calculate progress through the section with adjusted thresholds
+        // This now starts later in the scroll and progresses more gradually
+        const scrollPosition = windowHeight - sectionTop;
+        const totalScrollDistance = windowHeight + sectionHeight * 0.7;
         
-        // Determine which feature should be active based on scroll position
+        // Normalized progress from 0 to 1, starting when section is 30% in view
+        let sectionProgress = Math.min(Math.max((scrollPosition - windowHeight * 0.3) / totalScrollDistance, 0), 1);
+        
+        // Add a delay threshold before the first change
+        if (sectionProgress < 0.15) {
+          sectionProgress = 0; // Keep at first feature until scrolled a bit more
+        }
+        
+        // Determine which feature should be active based on adjusted scroll position
         const featureIndex = Math.min(
           Math.floor(sectionProgress * 4),
           featureOrder.length - 1
@@ -123,7 +134,7 @@ const Features: React.FC = () => {
                   activeFeature === "reports"
                     ? "shadow-[0px_20px_30px_5px_rgba(0,0,0,0.15)] bg-white"
                     : "bg-white hover:bg-gray-50"
-                } self-stretch flex min-h-[100px] w-full flex-col px-[22px] py-7 max-md:max-w-full max-md:px-5 cursor-pointer transition-all duration-300 ease-in-out overflow-hidden`}
+                } self-stretch flex min-h-[100px] w-full flex-col px-[22px] py-7 max-md:max-w-full max-md:px-5 cursor-pointer transition-all duration-500 ease-in-out overflow-hidden`}
                 onClick={() => {
                   setIsAnimating(true);
                   setActiveFeature("reports");
@@ -161,7 +172,7 @@ const Features: React.FC = () => {
                   activeFeature === "tools"
                     ? "shadow-[0px_20px_30px_5px_rgba(0,0,0,0.15)] bg-white"
                     : "bg-white hover:bg-gray-50"
-                } flex min-h-[100px] w-full flex-col px-[22px] py-7 max-md:px-5 cursor-pointer transition-all duration-300 ease-in-out overflow-hidden`}
+                } flex min-h-[100px] w-full flex-col px-[22px] py-7 max-md:px-5 cursor-pointer transition-all duration-500 ease-in-out overflow-hidden`}
                 onClick={() => {
                   setIsAnimating(true);
                   setActiveFeature("tools");
@@ -196,7 +207,7 @@ const Features: React.FC = () => {
                   activeFeature === "scheduling"
                     ? "shadow-[0px_20px_30px_5px_rgba(0,0,0,0.15)] bg-white"
                     : "bg-white hover:bg-gray-50"
-                } flex min-h-[100px] w-full flex-col px-[22px] py-7 max-md:px-5 cursor-pointer transition-all duration-300 ease-in-out overflow-hidden`}
+                } flex min-h-[100px] w-full flex-col px-[22px] py-7 max-md:px-5 cursor-pointer transition-all duration-500 ease-in-out overflow-hidden`}
                 onClick={() => {
                   setIsAnimating(true);
                   setActiveFeature("scheduling");
@@ -235,7 +246,7 @@ const Features: React.FC = () => {
                   activeFeature === "invoicing"
                     ? "shadow-[0px_20px_30px_5px_rgba(0,0,0,0.15)] bg-white"
                     : "bg-white hover:bg-gray-50"
-                } flex min-h-[100px] w-full flex-col px-[22px] py-7 max-md:px-5 cursor-pointer transition-all duration-300 ease-in-out overflow-hidden`}
+                } flex min-h-[100px] w-full flex-col px-[22px] py-7 max-md:px-5 cursor-pointer transition-all duration-500 ease-in-out overflow-hidden`}
                 onClick={() => {
                   setIsAnimating(true);
                   setActiveFeature("invoicing");
@@ -276,7 +287,7 @@ const Features: React.FC = () => {
                   key={key}
                   src={features[key as keyof typeof features].image}
                   alt={`${features[key as keyof typeof features].title} Screenshot`}
-                  className={`absolute top-0 left-0 aspect-[1.4] object-contain w-full transition-all duration-500 ease-in-out ${
+                  className={`absolute top-0 left-0 aspect-[1.4] object-contain w-full transition-all duration-800 ease-in-out ${
                     activeFeature === key 
                       ? "opacity-100 translate-y-0" 
                       : "opacity-0 translate-y-8"
