@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
@@ -8,9 +9,8 @@ const Features: React.FC = () => {
   const [isAnimating, setIsAnimating] = useState(false);
   const featuresRef = useRef<HTMLDivElement>(null);
   const featureSectionRef = useRef<HTMLElement>(null);
-  const scrollPosRef = useRef(0);
-  const animationInProgressRef = useRef(false);
-  const sectionFullyVisibleRef = useRef(false);
+  const lastScrollPosition = useRef(0);
+  const featureChangeTimeout = useRef<NodeJS.Timeout | null>(null);
   
   const features = {
     reports: {
@@ -46,106 +46,79 @@ const Features: React.FC = () => {
     },
   };
 
-  const lockScroll = () => {
-    if (document.body.style.position !== 'fixed') {
-      scrollPosRef.current = window.scrollY;
-      document.body.style.position = 'fixed';
-      document.body.style.top = `-${scrollPosRef.current}px`;
-      document.body.style.width = '100%';
-      document.body.style.overflow = 'hidden';
-    }
-  };
-
-  const unlockScroll = () => {
-    if (document.body.style.position === 'fixed') {
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.width = '';
-      document.body.style.overflow = '';
-      window.scrollTo(0, scrollPosRef.current);
-    }
-  };
-
-  const startFeatureTransition = (featureName: string) => {
-    if (animationInProgressRef.current) return;
+  const handleFeatureClick = (featureName: string) => {
+    if (isAnimating) return;
     
-    lockScroll();
-    animationInProgressRef.current = true;
     setIsAnimating(true);
     setActiveFeature(featureName);
     
-    setTimeout(() => {
-      unlockScroll();
+    if (featureChangeTimeout.current) {
+      clearTimeout(featureChangeTimeout.current);
+    }
+    
+    featureChangeTimeout.current = setTimeout(() => {
       setIsAnimating(false);
-      animationInProgressRef.current = false;
-    }, 1200);
+      featureChangeTimeout.current = null;
+    }, 800);
   };
-
-  const handleFeatureClick = (featureName: string) => {
-    startFeatureTransition(featureName);
-  };
-
-  useEffect(() => {
-    return () => {
-      if (isAnimating) {
-        unlockScroll();
-        animationInProgressRef.current = false;
-      }
-    };
-  }, [isAnimating]);
 
   useEffect(() => {
     const featureOrder = ["reports", "tools", "scheduling", "invoicing"];
     let currentFeatureIndex = 0;
     
     const handleScroll = () => {
-      if (!featureSectionRef.current || animationInProgressRef.current) return;
+      if (!featureSectionRef.current) return;
       
       const sectionRect = featureSectionRef.current.getBoundingClientRect();
-      const sectionTop = sectionRect.top;
-      const sectionHeight = sectionRect.height;
       const windowHeight = window.innerHeight;
       
-      if (sectionTop <= 0 && sectionTop > -sectionHeight) {
-        const scrollPosition = -sectionTop;
-        const sectionProgress = Math.min(Math.max(scrollPosition / sectionHeight, 0), 1);
+      // Calculate how visible the section is
+      const visibleHeight = Math.min(windowHeight, sectionRect.bottom) - Math.max(0, sectionRect.top);
+      const visibleRatio = visibleHeight / sectionRect.height;
+      
+      // If section is at least 50% visible
+      if (visibleRatio > 0.5 && !isAnimating) {
+        const scrollDirection = window.scrollY > lastScrollPosition.current ? 'down' : 'up';
+        lastScrollPosition.current = window.scrollY;
         
-        if (sectionProgress >= 0.95 && !sectionFullyVisibleRef.current) {
-          sectionFullyVisibleRef.current = true;
-          startFeatureTransition(featureOrder[0]);
-        } 
-        else if (sectionProgress < 0.95 && sectionFullyVisibleRef.current) {
-          sectionFullyVisibleRef.current = false;
-        }
-        
-        if (sectionFullyVisibleRef.current && !animationInProgressRef.current) {
-          const internalScrollProgress = (sectionProgress - 0.95) / 0.05;
-          if (internalScrollProgress > 0) {
-            const nextFeatureIndex = Math.min(
-              Math.floor(internalScrollProgress * featureOrder.length),
-              featureOrder.length - 1
-            );
+        // Only trigger feature changes when scrolling down
+        if (scrollDirection === 'down') {
+          // Determine which feature to show based on scroll position
+          const scrollPastSection = Math.max(0, -sectionRect.top) / (sectionRect.height - windowHeight);
+          const targetIndex = Math.min(
+            Math.floor(scrollPastSection * featureOrder.length),
+            featureOrder.length - 1
+          );
+          
+          if (targetIndex !== currentFeatureIndex) {
+            currentFeatureIndex = targetIndex;
+            handleFeatureClick(featureOrder[currentFeatureIndex]);
             
-            if (nextFeatureIndex > currentFeatureIndex) {
-              currentFeatureIndex = nextFeatureIndex;
-              startFeatureTransition(featureOrder[currentFeatureIndex]);
-            }
+            // Slight delay to make transition visible
+            setTimeout(() => {
+              if (window.scrollY === lastScrollPosition.current) {
+                // Only auto-scroll if user stopped scrolling
+                window.scrollBy({ 
+                  top: 10, 
+                  behavior: 'smooth' 
+                });
+              }
+            }, 400);
           }
         }
-      } else {
-        sectionFullyVisibleRef.current = false;
       }
     };
     
     window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll();
+    handleScroll(); // Initial check
     
     return () => {
       window.removeEventListener('scroll', handleScroll);
-      unlockScroll();
-      animationInProgressRef.current = false;
+      if (featureChangeTimeout.current) {
+        clearTimeout(featureChangeTimeout.current);
+      }
     };
-  }, []);
+  }, [isAnimating]);
 
   return (
     <section
