@@ -48,7 +48,7 @@ const Features: React.FC = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsAnimating(false);
-    }, 800); // Increased from 500ms to 800ms for smoother transitions
+    }, 1200); // Increased from 800ms to 1200ms for even smoother transitions
     
     return () => clearTimeout(timer);
   }, [activeFeature]);
@@ -67,22 +67,22 @@ const Features: React.FC = () => {
       const windowHeight = window.innerHeight;
       
       // Check if section is in view - more visibility required before triggering
-      if (sectionTop < windowHeight * 0.7 && sectionTop > -sectionHeight * 0.8) {
-        // Adjusted to require the section to be more visible before starting transitions
-        // Calculate progress through the section with adjusted thresholds
-        // This now starts later in the scroll and progresses more gradually
+      if (sectionTop < windowHeight * 0.6 && sectionTop > -sectionHeight * 0.9) {
+        // Start transitions only when section is 40% visible (increased from 30%)
         const scrollPosition = windowHeight - sectionTop;
-        const totalScrollDistance = windowHeight + sectionHeight * 0.7;
+        const totalScrollDistance = windowHeight + sectionHeight * 0.6; // Adjusted to complete transitions earlier
         
-        // Normalized progress from 0 to 1, starting when section is 30% in view
-        let sectionProgress = Math.min(Math.max((scrollPosition - windowHeight * 0.3) / totalScrollDistance, 0), 1);
+        // Normalized progress from 0 to 1, starting when section is 40% in view
+        let sectionProgress = Math.min(Math.max((scrollPosition - windowHeight * 0.4) / totalScrollDistance, 0), 1);
         
         // Add a delay threshold before the first change
-        if (sectionProgress < 0.15) {
-          sectionProgress = 0; // Keep at first feature until scrolled a bit more
+        if (sectionProgress < 0.2) { // Increased delay threshold from 0.15 to 0.2
+          sectionProgress = 0;
         }
         
-        // Determine which feature should be active based on adjusted scroll position
+        // Ensure transitions complete before reaching pricing section
+        sectionProgress = Math.min(sectionProgress * 1.2, 1); // Scale progress to complete earlier
+        
         const featureIndex = Math.min(
           Math.floor(sectionProgress * 4),
           featureOrder.length - 1
