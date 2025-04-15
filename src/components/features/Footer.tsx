@@ -1,8 +1,6 @@
 
-"use client";
-
 import React from "react";
-import Link from 'next/link'; // Update import for Next.js Link
+import { Link } from "react-router-dom";
 import { Facebook, Twitter, Linkedin, Youtube, Phone, Mail } from "lucide-react";
 
 const Footer: React.FC = () => {
@@ -129,7 +127,7 @@ const Footer: React.FC = () => {
               {features.map((feature, index) => (
                 <Link 
                   key={index} 
-                  href={feature.path} 
+                  to={feature.path} 
                   className="text-sm text-gray-600 hover:text-[rgba(233,138,35,1)] transition-colors"
                 >
                   {feature.name}
@@ -145,7 +143,7 @@ const Footer: React.FC = () => {
                 {industriesColumn1.map((industry, index) => (
                   <Link 
                     key={index} 
-                    href={industry.path} 
+                    to={industry.path} 
                     className="block text-sm text-gray-600 hover:text-[rgba(233,138,35,1)] transition-colors mb-2"
                   >
                     {industry.name}
@@ -157,7 +155,7 @@ const Footer: React.FC = () => {
                 {industriesColumn2.map((industry, index) => (
                   <Link 
                     key={index} 
-                    href={industry.path} 
+                    to={industry.path} 
                     className="block text-sm text-gray-600 hover:text-[rgba(233,138,35,1)] transition-colors mb-2"
                   >
                     {industry.name}
@@ -173,7 +171,7 @@ const Footer: React.FC = () => {
               {quickLinks.map((link, index) => (
                 <Link 
                   key={index} 
-                  href={link.path} 
+                  to={link.path} 
                   className="text-sm text-gray-600 hover:text-[rgba(233,138,35,1)] transition-colors"
                 >
                   {link.name}
@@ -191,10 +189,10 @@ const Footer: React.FC = () => {
             © {new Date().getFullYear()} Field Promax. All rights reserved.
           </p>
           <div className="flex gap-4 mt-4 md:mt-0">
-            <Link href="/terms" className="text-sm text-gray-600 hover:text-[rgba(233,138,35,1)] transition-colors">
+            <Link to="/terms" className="text-sm text-gray-600 hover:text-[rgba(233,138,35,1)] transition-colors">
               Terms of Service
             </Link>
-            <Link href="/privacy" className="text-sm text-gray-600 hover:text-[rgba(233,138,35,1)] transition-colors">
+            <Link to="/privacy" className="text-sm text-gray-600 hover:text-[rgba(233,138,35,1)] transition-colors">
               Privacy Policy
             </Link>
           </div>

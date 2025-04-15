@@ -2,6 +2,7 @@
 import React from "react";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/features/Footer";
+import { Link } from "react-router-dom";
 
 interface PageWrapperProps {
   children: React.ReactNode;
