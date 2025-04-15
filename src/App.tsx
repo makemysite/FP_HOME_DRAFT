@@ -6,7 +6,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import ErrorBoundary from "./components/ErrorBoundary";
 import Index from "./pages/Index";
-import Features from "./pages/Features";
 import FeaturesPage from "./pages/FeaturesPage";
 import PricingPage from "./pages/PricingPage";
 import Industries from "./pages/Industries";
@@ -15,6 +14,7 @@ import BlogPost from "./pages/BlogPost";
 import NotFound from "./pages/NotFound";
 import "./styles/blog.css";
 
+// Create a new QueryClient instance
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -28,8 +28,8 @@ const queryClient = new QueryClient({
 const App = () => {
   return (
     <ErrorBoundary>
-      <BrowserRouter>
-        <QueryClientProvider client={queryClient}>
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>
           <TooltipProvider>
             <Routes>
               <Route path="/" element={<Index />} />
@@ -43,8 +43,8 @@ const App = () => {
             <Toaster />
             <Sonner />
           </TooltipProvider>
-        </QueryClientProvider>
-      </BrowserRouter>
+        </BrowserRouter>
+      </QueryClientProvider>
     </ErrorBoundary>
   );
 };
