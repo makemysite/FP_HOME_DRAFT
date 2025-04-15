@@ -2,20 +2,23 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import ArrowRightIcon from "../ui/ArrowRightIcon";
+import { Progress } from "../ui/progress";
 
 const Features: React.FC = () => {
+  const router = useRouter();
   const [activeFeature, setActiveFeature] = useState("reports");
   const [isAnimating, setIsAnimating] = useState(false);
+  const [sectionInView, setSectionInView] = useState(false);
   const featuresRef = useRef<HTMLDivElement>(null);
   const featureSectionRef = useRef<HTMLElement>(null);
-  const lastScrollY = useRef(window.scrollY);
-  const featureChangeTimeout = useRef<NodeJS.Timeout | null>(null);
-  const scrollDebounceTimeout = useRef<NodeJS.Timeout | null>(null);
   const transitionInProgress = useRef(false);
-  
+  const animationComplete = useRef(false);
   const featureOrder = ["reports", "tools", "scheduling", "invoicing"];
-  const currentFeatureIndex = useRef(0);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [progress, setProgress] = useState(0);
+  const sectionObserverRef = useRef<IntersectionObserver | null>(null);
   
   const features = {
     reports: {
@@ -51,110 +54,90 @@ const Features: React.FC = () => {
     },
   };
 
-  // Function to handle manual feature selection via click
-  const handleFeatureClick = (featureName: string) => {
+  // Set up intersection observer to detect when section is in view
+  useEffect(() => {
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.8, // Consider section in view when 80% visible
+    };
+
+    sectionObserverRef.current = new IntersectionObserver((entries) => {
+      const [entry] = entries;
+      setSectionInView(entry.isIntersecting);
+      
+      if (entry.isIntersecting && !animationComplete.current) {
+        startSequentialTransition();
+      }
+    }, observerOptions);
+
+    if (featureSectionRef.current) {
+      sectionObserverRef.current.observe(featureSectionRef.current);
+    }
+
+    return () => {
+      if (sectionObserverRef.current) {
+        sectionObserverRef.current.disconnect();
+      }
+    };
+  }, []);
+
+  // Function to handle feature card click
+  const handleFeatureClick = (featureName: string, index: number) => {
     if (transitionInProgress.current) return;
     
     transitionInProgress.current = true;
     setIsAnimating(true);
     setActiveFeature(featureName);
-    currentFeatureIndex.current = featureOrder.indexOf(featureName);
+    setCurrentIndex(index);
     
-    if (featureChangeTimeout.current) {
-      clearTimeout(featureChangeTimeout.current);
-    }
-    
-    featureChangeTimeout.current = setTimeout(() => {
+    setTimeout(() => {
       setIsAnimating(false);
       transitionInProgress.current = false;
-      featureChangeTimeout.current = null;
-    }, 800);
+    }, 600);
   };
   
-  // Function to handle transition to the next feature in order
-  const transitionToNextFeature = () => {
-    if (transitionInProgress.current) return;
+  // Function to start sequential transition through all features
+  const startSequentialTransition = () => {
+    if (animationComplete.current) return;
     
-    const nextIndex = (currentFeatureIndex.current + 1) % featureOrder.length;
-    currentFeatureIndex.current = nextIndex;
-    handleFeatureClick(featureOrder[nextIndex]);
+    let index = 0;
+    setCurrentIndex(0);
+    setActiveFeature(featureOrder[0]);
+    
+    const transitionInterval = setInterval(() => {
+      // Update progress continuously
+      const progressInterval = setInterval(() => {
+        setProgress(prev => {
+          const newProgress = prev + 1;
+          return newProgress > 100 ? 100 : newProgress;
+        });
+      }, 30);
+      
+      setTimeout(() => {
+        clearInterval(progressInterval);
+        setProgress(0);
+        
+        index++;
+        
+        if (index >= featureOrder.length) {
+          clearInterval(transitionInterval);
+          animationComplete.current = true;
+          return;
+        }
+        
+        setCurrentIndex(index);
+        setActiveFeature(featureOrder[index]);
+      }, 3000); // Each feature displays for 3 seconds
+    }, 3000);
+    
+    return () => clearInterval(transitionInterval);
   };
   
-  // Enhanced scroll handler with improved transition logic
-  useEffect(() => {
-    const handleScroll = () => {
-      if (scrollDebounceTimeout.current) {
-        clearTimeout(scrollDebounceTimeout.current);
-      }
-      
-      scrollDebounceTimeout.current = setTimeout(() => {
-        if (!featureSectionRef.current || transitionInProgress.current) return;
-        
-        const sectionRect = featureSectionRef.current.getBoundingClientRect();
-        const windowHeight = window.innerHeight;
-        
-        // Calculate section visibility
-        const visibleHeight = Math.min(windowHeight, sectionRect.bottom) - Math.max(0, sectionRect.top);
-        const visibleRatio = visibleHeight / sectionRect.height;
-        
-        // Get scroll direction
-        const scrollDirection = window.scrollY > lastScrollY.current ? 'down' : 'up';
-        lastScrollY.current = window.scrollY;
-        
-        // Check if section is highly visible (60% or more) when scrolling down
-        if (visibleRatio > 0.6 && scrollDirection === 'down') {
-          // Determine how far we've scrolled within the section
-          const sectionProgress = Math.max(0, -sectionRect.top) / (sectionRect.height - windowHeight);
-          
-          // Map scroll progress to feature index (0-3)
-          const targetIndex = Math.min(
-            Math.floor(sectionProgress * featureOrder.length),
-            featureOrder.length - 1
-          );
-          
-          // Only trigger transition if the target index is different
-          if (targetIndex !== currentFeatureIndex.current) {
-            // Make sure we're transitioning sequentially
-            const nextIndex = currentFeatureIndex.current + 1;
-            if (nextIndex < featureOrder.length) {
-              currentFeatureIndex.current = nextIndex;
-              handleFeatureClick(featureOrder[nextIndex]);
-            }
-          }
-        }
-        
-        scrollDebounceTimeout.current = null;
-      }, 50); // Small debounce for smoother operation
-    };
-    
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    
-    // Setup automatic cycling through features when section is fully visible
-    const cycleInterval = setInterval(() => {
-      if (featureSectionRef.current) {
-        const rect = featureSectionRef.current.getBoundingClientRect();
-        const isFullyVisible = rect.top >= 0 && rect.bottom <= window.innerHeight;
-        
-        // If section is fully visible and no transitions are in progress, cycle to next feature
-        if (isFullyVisible && !transitionInProgress.current) {
-          transitionToNextFeature();
-        }
-      }
-    }, 5000); // Cycle every 5 seconds if visible
-    
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-      clearInterval(cycleInterval);
-      
-      if (featureChangeTimeout.current) {
-        clearTimeout(featureChangeTimeout.current);
-      }
-      
-      if (scrollDebounceTimeout.current) {
-        clearTimeout(scrollDebounceTimeout.current);
-      }
-    };
-  }, []);
+  // Handle "View all features" button click
+  const handleViewAllFeaturesClick = () => {
+    router.push('/features');
+  };
 
   return (
     <section
@@ -171,7 +154,10 @@ const Features: React.FC = () => {
       <div className="text-[#26393F] text-center text-lg font-normal leading-loose mt-[29px] max-md:max-w-full">
         Automate Your Service Business With Our Exclusive Features
       </div>
-      <button className="bg-[rgba(245,246,251,1)] border w-[175px] max-w-full text-lg text-[rgba(7,15,24,1)] font-normal text-center mt-[29px] px-5 py-[21px] rounded-[56px] border-[rgba(233,138,35,1)] border-solid hover:bg-[rgba(245,246,251,0.8)] transition-colors">
+      <button 
+        className="bg-[rgba(245,246,251,1)] border w-[175px] max-w-full text-lg text-[rgba(7,15,24,1)] font-normal text-center mt-[29px] px-5 py-[21px] rounded-[56px] border-[rgba(233,138,35,1)] border-solid hover:bg-[rgba(245,246,251,0.8)] transition-colors"
+        onClick={handleViewAllFeaturesClick}
+      >
         View all features
       </button>
 
@@ -179,15 +165,25 @@ const Features: React.FC = () => {
         <div className="gap-5 flex max-md:flex-col max-md:items-stretch">
           <div className="w-[43%] max-md:w-full max-md:ml-0">
             <div className="flex w-full flex-col self-stretch my-auto max-md:max-w-full max-md:mt-10">
+              {/* Progress bar */}
+              <div className="w-full mb-6">
+                {currentIndex < featureOrder.length - 1 && (
+                  <Progress 
+                    value={progress} 
+                    className="h-1.5 bg-gray-200" 
+                  />
+                )}
+              </div>
+              
               {/* Feature cards with progress indicators */}
               <div className="flex gap-2 mb-4 justify-center">
                 {featureOrder.map((feature, index) => (
                   <div 
                     key={feature}
-                    className={`h-2 w-16 rounded-full transition-colors duration-300 cursor-pointer ${
-                      index === currentFeatureIndex.current ? 'bg-[rgba(233,138,35,1)]' : 'bg-gray-200'
+                    className={`h-2 w-16 rounded-full transition-all duration-300 cursor-pointer ${
+                      index === currentIndex ? 'bg-[rgba(233,138,35,1)]' : 'bg-gray-200'
                     }`}
-                    onClick={() => handleFeatureClick(feature)}
+                    onClick={() => handleFeatureClick(feature, index)}
                   />
                 ))}
               </div>
@@ -199,8 +195,7 @@ const Features: React.FC = () => {
                     ? "shadow-[0px_20px_30px_5px_rgba(0,0,0,0.15)] bg-white"
                     : "bg-white hover:bg-gray-50"
                 } self-stretch flex min-h-[100px] w-full flex-col px-[22px] py-7 max-md:max-w-full max-md:px-5 cursor-pointer transition-all duration-500 ease-in-out overflow-hidden`}
-                onClick={() => handleFeatureClick("reports")}
-                data-feature="reports"
+                onClick={() => handleFeatureClick("reports", 0)}
               >
                 <div className="flex w-[361px] max-w-full gap-[17px] text-lg font-bold leading-[3] pb-1.5">
                   <img
@@ -234,8 +229,7 @@ const Features: React.FC = () => {
                     ? "shadow-[0px_20px_30px_5px_rgba(0,0,0,0.15)] bg-white"
                     : "bg-white hover:bg-gray-50"
                 } flex min-h-[100px] w-full flex-col px-[22px] py-7 max-md:px-5 cursor-pointer transition-all duration-500 ease-in-out overflow-hidden`}
-                onClick={() => handleFeatureClick("tools")}
-                data-feature="tools"
+                onClick={() => handleFeatureClick("tools", 1)}
               >
                 <div className="flex w-[361px] max-w-full gap-[17px] text-lg font-bold leading-[3] pb-1.5">
                   <div className="w-9 shrink-0"></div>
@@ -266,8 +260,7 @@ const Features: React.FC = () => {
                     ? "shadow-[0px_20px_30px_5px_rgba(0,0,0,0.15)] bg-white"
                     : "bg-white hover:bg-gray-50"
                 } flex min-h-[100px] w-full flex-col px-[22px] py-7 max-md:px-5 cursor-pointer transition-all duration-500 ease-in-out overflow-hidden`}
-                onClick={() => handleFeatureClick("scheduling")}
-                data-feature="scheduling"
+                onClick={() => handleFeatureClick("scheduling", 2)}
               >
                 <div className="flex w-[361px] max-w-full gap-[17px] text-lg font-bold leading-[3] pb-1.5">
                   <img
@@ -302,8 +295,7 @@ const Features: React.FC = () => {
                     ? "shadow-[0px_20px_30px_5px_rgba(0,0,0,0.15)] bg-white"
                     : "bg-white hover:bg-gray-50"
                 } flex min-h-[100px] w-full flex-col px-[22px] py-7 max-md:px-5 cursor-pointer transition-all duration-500 ease-in-out overflow-hidden`}
-                onClick={() => handleFeatureClick("invoicing")}
-                data-feature="invoicing"
+                onClick={() => handleFeatureClick("invoicing", 3)}
               >
                 <div className="flex w-[361px] max-w-full gap-[17px] text-lg font-bold leading-[3] pb-1.5">
                   <img
