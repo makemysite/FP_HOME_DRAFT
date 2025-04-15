@@ -26,13 +26,15 @@ const Features: React.FC = () => {
   const scrollTimer = useRef<NodeJS.Timeout | null>(null);
   const isScrolling = useRef(false);
   const targetFeatureIndex = useRef(0);
+  const reachedEnd = useRef(false);
 
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
       
       // Determine scroll direction
-      setScrollDirection(currentScrollY > lastScrollY.current ? 'down' : 'up');
+      const newDirection = currentScrollY > lastScrollY.current ? 'down' : 'up';
+      setScrollDirection(newDirection);
       lastScrollY.current = currentScrollY;
       
       // Set scrolling flag and clear previous timer
@@ -54,6 +56,17 @@ const Features: React.FC = () => {
           transitionToFeature(featureOrder[targetIndex], targetIndex);
         }
       }, 150);
+
+      // Check if we've reached end boundaries and prevent further progression
+      if (newDirection === 'down' && previousActiveFeature.current === featureOrder[featureOrder.length - 1]) {
+        reachedEnd.current = true;
+        return;
+      } else if (newDirection === 'up' && previousActiveFeature.current === featureOrder[0]) {
+        reachedEnd.current = true;
+        return;
+      } else {
+        reachedEnd.current = false;
+      }
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
@@ -117,7 +130,7 @@ const Features: React.FC = () => {
 
   // Function to handle ordered feature transitions based on scroll direction
   const handleOrderedFeatureTransition = (entries: IntersectionObserverEntry[]) => {
-    if (transitionInProgress.current) return;
+    if (transitionInProgress.current || reachedEnd.current) return;
     
     // Find the most visible element
     const mostVisibleEntry = entries.reduce((prev, current) => {
@@ -132,24 +145,35 @@ const Features: React.FC = () => {
       const currentFeatureIndex = featureOrder.indexOf(featureId);
       const previousFeatureIndex = featureOrder.indexOf(previousActiveFeature.current);
       
-      // Update the target index based on scroll direction
+      // Update the target index based on scroll direction with boundary checks
       if (scrollDirection === 'down') {
-        // When scrolling down, move forward one step at a time
-        targetFeatureIndex.current = Math.min(
+        // When scrolling down, move forward one step at a time, but don't exceed the last feature
+        const nextIndex = Math.min(
           featureOrder.length - 1, 
           previousFeatureIndex + 1
         );
+        targetFeatureIndex.current = nextIndex;
+        
+        // If we're at the last feature, mark as reached end to prevent further transitions
+        if (nextIndex === featureOrder.length - 1 && previousFeatureIndex === featureOrder.length - 1) {
+          reachedEnd.current = true;
+        }
       } else {
-        // When scrolling up, move backward one step at a time
-        targetFeatureIndex.current = Math.max(
+        // When scrolling up, move backward one step at a time, but don't go below the first feature
+        const prevIndex = Math.max(
           0,
           previousFeatureIndex - 1
         );
+        targetFeatureIndex.current = prevIndex;
+        
+        // If we're at the first feature, mark as reached end to prevent further transitions
+        if (prevIndex === 0 && previousFeatureIndex === 0) {
+          reachedEnd.current = true;
+        }
       }
       
-      // Only transition if we're not already at the target feature
-      // This prevents skipping when scrolling fast
-      if (currentFeatureIndex === targetFeatureIndex.current) {
+      // Only transition if we're not already at the target feature and haven't reached an end
+      if (currentFeatureIndex === targetFeatureIndex.current && !reachedEnd.current) {
         transitionToFeature(featureId, currentFeatureIndex);
       }
     }
@@ -191,10 +215,19 @@ const Features: React.FC = () => {
     };
   }, [scrollDirection]);
 
+  // Reset reachedEnd when scroll direction changes
+  useEffect(() => {
+    // Reset the reachedEnd flag when direction changes
+    // This allows transitions to work again when changing direction
+    reachedEnd.current = false;
+  }, [scrollDirection]);
+
   const handleFeatureClick = (featureName: string, index: number) => {
     transitionToFeature(featureName, index);
     // Update target index to match clicked feature
     targetFeatureIndex.current = index;
+    // Reset reachedEnd flag on manual click
+    reachedEnd.current = false;
     setIsAnimating(true);
     
     setTimeout(() => {
@@ -362,3 +395,4 @@ const Features: React.FC = () => {
 };
 
 export default Features;
+
