@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
@@ -10,6 +9,7 @@ const Features: React.FC = () => {
   const featuresRef = useRef<HTMLDivElement>(null);
   const featureSectionRef = useRef<HTMLElement>(null);
   const scrollPosRef = useRef(0);
+  const animationInProgressRef = useRef(false);
   
   const features = {
     reports: {
@@ -46,10 +46,7 @@ const Features: React.FC = () => {
   };
 
   const lockScroll = () => {
-    // Store current scroll position
     scrollPosRef.current = window.scrollY;
-    
-    // Apply fixed position and set top to maintain visual position
     document.body.style.position = 'fixed';
     document.body.style.top = `-${scrollPosRef.current}px`;
     document.body.style.width = '100%';
@@ -57,31 +54,30 @@ const Features: React.FC = () => {
   };
 
   const unlockScroll = () => {
-    // Remove fixed position
     document.body.style.position = '';
     document.body.style.top = '';
     document.body.style.width = '';
     document.body.style.overflow = '';
-    
-    // Restore scroll position
     window.scrollTo(0, scrollPosRef.current);
   };
 
   useEffect(() => {
     if (isAnimating) {
       lockScroll();
+      animationInProgressRef.current = true;
     }
     
     const timer = setTimeout(() => {
       setIsAnimating(false);
       unlockScroll();
+      animationInProgressRef.current = false;
     }, 1200);
     
     return () => {
       clearTimeout(timer);
-      // Always make sure to unlock on unmount or cleanup
       if (isAnimating) {
         unlockScroll();
+        animationInProgressRef.current = false;
       }
     };
   }, [activeFeature, isAnimating]);
@@ -90,7 +86,7 @@ const Features: React.FC = () => {
     const featureOrder = ["reports", "tools", "scheduling", "invoicing"];
     
     const handleScroll = () => {
-      if (!featureSectionRef.current || isAnimating) return;
+      if (!featureSectionRef.current || animationInProgressRef.current) return;
       
       const sectionRect = featureSectionRef.current.getBoundingClientRect();
       const sectionTop = sectionRect.top;
@@ -105,16 +101,16 @@ const Features: React.FC = () => {
         
         if (sectionProgress < 0.4) {
           sectionProgress = 0;
-        } else if (!isAnimating && sectionProgress >= 0.4) {
-          // Only trigger animation if not already animating
+        } else if (!isAnimating && !animationInProgressRef.current) {
           setIsAnimating(true);
           
+          const adjustedProgress = (sectionProgress - 0.4) / 0.6;
           const featureIndex = Math.min(
-            Math.floor((sectionProgress - 0.4) / 0.15) * 4,
+            Math.floor(adjustedProgress * featureOrder.length),
             featureOrder.length - 1
           );
           
-          const newActiveFeature = featureOrder[Math.min(featureIndex, featureOrder.length - 1)];
+          const newActiveFeature = featureOrder[featureIndex];
           if (newActiveFeature !== activeFeature) {
             setActiveFeature(newActiveFeature);
           }
@@ -127,8 +123,8 @@ const Features: React.FC = () => {
     
     return () => {
       window.removeEventListener('scroll', handleScroll);
-      // Ensure scroll is unlocked when component unmounts
       unlockScroll();
+      animationInProgressRef.current = false;
     };
   }, [activeFeature, isAnimating]);
 
