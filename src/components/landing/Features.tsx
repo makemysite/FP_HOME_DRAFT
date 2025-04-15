@@ -9,8 +9,13 @@ const Features: React.FC = () => {
   const [isAnimating, setIsAnimating] = useState(false);
   const featuresRef = useRef<HTMLDivElement>(null);
   const featureSectionRef = useRef<HTMLElement>(null);
-  const lastScrollPosition = useRef(0);
+  const lastScrollY = useRef(window.scrollY);
   const featureChangeTimeout = useRef<NodeJS.Timeout | null>(null);
+  const scrollDebounceTimeout = useRef<NodeJS.Timeout | null>(null);
+  const transitionInProgress = useRef(false);
+  
+  const featureOrder = ["reports", "tools", "scheduling", "invoicing"];
+  const currentFeatureIndex = useRef(0);
   
   const features = {
     reports: {
@@ -46,11 +51,14 @@ const Features: React.FC = () => {
     },
   };
 
+  // Function to handle manual feature selection via click
   const handleFeatureClick = (featureName: string) => {
-    if (isAnimating) return;
+    if (transitionInProgress.current) return;
     
+    transitionInProgress.current = true;
     setIsAnimating(true);
     setActiveFeature(featureName);
+    currentFeatureIndex.current = featureOrder.indexOf(featureName);
     
     if (featureChangeTimeout.current) {
       clearTimeout(featureChangeTimeout.current);
@@ -58,67 +66,95 @@ const Features: React.FC = () => {
     
     featureChangeTimeout.current = setTimeout(() => {
       setIsAnimating(false);
+      transitionInProgress.current = false;
       featureChangeTimeout.current = null;
     }, 800);
   };
-
-  useEffect(() => {
-    const featureOrder = ["reports", "tools", "scheduling", "invoicing"];
-    let currentFeatureIndex = 0;
+  
+  // Function to handle transition to the next feature in order
+  const transitionToNextFeature = () => {
+    if (transitionInProgress.current) return;
     
+    const nextIndex = (currentFeatureIndex.current + 1) % featureOrder.length;
+    currentFeatureIndex.current = nextIndex;
+    handleFeatureClick(featureOrder[nextIndex]);
+  };
+  
+  // Enhanced scroll handler with improved transition logic
+  useEffect(() => {
     const handleScroll = () => {
-      if (!featureSectionRef.current) return;
+      if (scrollDebounceTimeout.current) {
+        clearTimeout(scrollDebounceTimeout.current);
+      }
       
-      const sectionRect = featureSectionRef.current.getBoundingClientRect();
-      const windowHeight = window.innerHeight;
-      
-      // Calculate how visible the section is
-      const visibleHeight = Math.min(windowHeight, sectionRect.bottom) - Math.max(0, sectionRect.top);
-      const visibleRatio = visibleHeight / sectionRect.height;
-      
-      // If section is at least 50% visible
-      if (visibleRatio > 0.5 && !isAnimating) {
-        const scrollDirection = window.scrollY > lastScrollPosition.current ? 'down' : 'up';
-        lastScrollPosition.current = window.scrollY;
+      scrollDebounceTimeout.current = setTimeout(() => {
+        if (!featureSectionRef.current || transitionInProgress.current) return;
         
-        // Only trigger feature changes when scrolling down
-        if (scrollDirection === 'down') {
-          // Determine which feature to show based on scroll position
-          const scrollPastSection = Math.max(0, -sectionRect.top) / (sectionRect.height - windowHeight);
+        const sectionRect = featureSectionRef.current.getBoundingClientRect();
+        const windowHeight = window.innerHeight;
+        
+        // Calculate section visibility
+        const visibleHeight = Math.min(windowHeight, sectionRect.bottom) - Math.max(0, sectionRect.top);
+        const visibleRatio = visibleHeight / sectionRect.height;
+        
+        // Get scroll direction
+        const scrollDirection = window.scrollY > lastScrollY.current ? 'down' : 'up';
+        lastScrollY.current = window.scrollY;
+        
+        // Check if section is highly visible (60% or more) when scrolling down
+        if (visibleRatio > 0.6 && scrollDirection === 'down') {
+          // Determine how far we've scrolled within the section
+          const sectionProgress = Math.max(0, -sectionRect.top) / (sectionRect.height - windowHeight);
+          
+          // Map scroll progress to feature index (0-3)
           const targetIndex = Math.min(
-            Math.floor(scrollPastSection * featureOrder.length),
+            Math.floor(sectionProgress * featureOrder.length),
             featureOrder.length - 1
           );
           
-          if (targetIndex !== currentFeatureIndex) {
-            currentFeatureIndex = targetIndex;
-            handleFeatureClick(featureOrder[currentFeatureIndex]);
-            
-            // Slight delay to make transition visible
-            setTimeout(() => {
-              if (window.scrollY === lastScrollPosition.current) {
-                // Only auto-scroll if user stopped scrolling
-                window.scrollBy({ 
-                  top: 10, 
-                  behavior: 'smooth' 
-                });
-              }
-            }, 400);
+          // Only trigger transition if the target index is different
+          if (targetIndex !== currentFeatureIndex.current) {
+            // Make sure we're transitioning sequentially
+            const nextIndex = currentFeatureIndex.current + 1;
+            if (nextIndex < featureOrder.length) {
+              currentFeatureIndex.current = nextIndex;
+              handleFeatureClick(featureOrder[nextIndex]);
+            }
           }
         }
-      }
+        
+        scrollDebounceTimeout.current = null;
+      }, 50); // Small debounce for smoother operation
     };
     
     window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll(); // Initial check
+    
+    // Setup automatic cycling through features when section is fully visible
+    const cycleInterval = setInterval(() => {
+      if (featureSectionRef.current) {
+        const rect = featureSectionRef.current.getBoundingClientRect();
+        const isFullyVisible = rect.top >= 0 && rect.bottom <= window.innerHeight;
+        
+        // If section is fully visible and no transitions are in progress, cycle to next feature
+        if (isFullyVisible && !transitionInProgress.current) {
+          transitionToNextFeature();
+        }
+      }
+    }, 5000); // Cycle every 5 seconds if visible
     
     return () => {
       window.removeEventListener('scroll', handleScroll);
+      clearInterval(cycleInterval);
+      
       if (featureChangeTimeout.current) {
         clearTimeout(featureChangeTimeout.current);
       }
+      
+      if (scrollDebounceTimeout.current) {
+        clearTimeout(scrollDebounceTimeout.current);
+      }
     };
-  }, [isAnimating]);
+  }, []);
 
   return (
     <section
@@ -143,6 +179,20 @@ const Features: React.FC = () => {
         <div className="gap-5 flex max-md:flex-col max-md:items-stretch">
           <div className="w-[43%] max-md:w-full max-md:ml-0">
             <div className="flex w-full flex-col self-stretch my-auto max-md:max-w-full max-md:mt-10">
+              {/* Feature cards with progress indicators */}
+              <div className="flex gap-2 mb-4 justify-center">
+                {featureOrder.map((feature, index) => (
+                  <div 
+                    key={feature}
+                    className={`h-2 w-16 rounded-full transition-colors duration-300 cursor-pointer ${
+                      index === currentFeatureIndex.current ? 'bg-[rgba(233,138,35,1)]' : 'bg-gray-200'
+                    }`}
+                    onClick={() => handleFeatureClick(feature)}
+                  />
+                ))}
+              </div>
+
+              {/* Reports and Dashboard */}
               <div
                 className={`feature-card ${
                   activeFeature === "reports"
@@ -177,6 +227,7 @@ const Features: React.FC = () => {
                 </div>
               </div>
 
+              {/* Tools & Integrations */}
               <div
                 className={`feature-card ${
                   activeFeature === "tools"
@@ -208,6 +259,7 @@ const Features: React.FC = () => {
               </div>
               <div className="border w-[465px] shrink-0 max-w-full h-px border-[rgba(225,225,225,1)] border-solid" />
 
+              {/* Smart Scheduling */}
               <div
                 className={`feature-card ${
                   activeFeature === "scheduling"
@@ -243,6 +295,7 @@ const Features: React.FC = () => {
               </div>
               <div className="border w-[465px] shrink-0 max-w-full h-px border-[rgba(225,225,225,1)] border-solid" />
 
+              {/* Invoicing & Payments */}
               <div
                 className={`feature-card ${
                   activeFeature === "invoicing"
