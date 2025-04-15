@@ -23,16 +23,46 @@ const Features: React.FC = () => {
   const [scrollDirection, setScrollDirection] = useState<'up' | 'down'>('down');
   const lastScrollY = useRef(0);
   const previousActiveFeature = useRef("reports");
+  const scrollTimer = useRef<NodeJS.Timeout | null>(null);
+  const isScrolling = useRef(false);
+  const targetFeatureIndex = useRef(0);
 
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
+      
+      // Determine scroll direction
       setScrollDirection(currentScrollY > lastScrollY.current ? 'down' : 'up');
       lastScrollY.current = currentScrollY;
+      
+      // Set scrolling flag and clear previous timer
+      isScrolling.current = true;
+      if (scrollTimer.current) {
+        clearTimeout(scrollTimer.current);
+      }
+      
+      // Set a timeout to handle the end of scroll event
+      scrollTimer.current = setTimeout(() => {
+        isScrolling.current = false;
+        
+        // When scrolling stops, ensure we're at the correct feature state
+        const currentFeatureIndex = featureOrder.indexOf(previousActiveFeature.current);
+        const targetIndex = targetFeatureIndex.current;
+        
+        // If we're not at the target index when scrolling stops, move to it
+        if (currentFeatureIndex !== targetIndex && !transitionInProgress.current) {
+          transitionToFeature(featureOrder[targetIndex], targetIndex);
+        }
+      }, 150);
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (scrollTimer.current) {
+        clearTimeout(scrollTimer.current);
+      }
+    };
   }, []);
 
   const features = {
@@ -69,13 +99,32 @@ const Features: React.FC = () => {
     },
   };
 
+  // Centralized transition function to ensure consistent behavior
+  const transitionToFeature = (featureId: string, index: number) => {
+    if (transitionInProgress.current) return false;
+    
+    transitionInProgress.current = true;
+    setActiveFeature(featureId);
+    setCurrentIndex(index);
+    previousActiveFeature.current = featureId;
+    
+    setTimeout(() => {
+      transitionInProgress.current = false;
+    }, 400);
+    
+    return true;
+  };
+
   // Function to handle ordered feature transitions based on scroll direction
   const handleOrderedFeatureTransition = (entries: IntersectionObserverEntry[]) => {
+    if (transitionInProgress.current) return;
+    
+    // Find the most visible element
     const mostVisibleEntry = entries.reduce((prev, current) => {
       return (prev?.intersectionRatio > current.intersectionRatio) ? prev : current;
     }, entries[0]);
 
-    if (mostVisibleEntry && mostVisibleEntry.isIntersecting) {
+    if (mostVisibleEntry && mostVisibleEntry.isIntersecting && mostVisibleEntry.intersectionRatio > 0.4) {
       const featureId = mostVisibleEntry.target.getAttribute("data-feature") as string;
       
       if (!featureId) return;
@@ -83,42 +132,25 @@ const Features: React.FC = () => {
       const currentFeatureIndex = featureOrder.indexOf(featureId);
       const previousFeatureIndex = featureOrder.indexOf(previousActiveFeature.current);
       
-      // Determine if we should transition based on scroll direction and current state
-      let shouldTransition = false;
-      
+      // Update the target index based on scroll direction
       if (scrollDirection === 'down') {
-        // When scrolling down, only transition if the new feature is next in order
-        shouldTransition = currentFeatureIndex === previousFeatureIndex + 1 || 
-                           (previousFeatureIndex === featureOrder.length - 1 && currentFeatureIndex === featureOrder.length - 1);
+        // When scrolling down, move forward one step at a time
+        targetFeatureIndex.current = Math.min(
+          featureOrder.length - 1, 
+          previousFeatureIndex + 1
+        );
       } else {
-        // When scrolling up, only transition if the new feature is previous in order
-        shouldTransition = currentFeatureIndex === previousFeatureIndex - 1 || 
-                          (previousFeatureIndex === 0 && currentFeatureIndex === 0);
+        // When scrolling up, move backward one step at a time
+        targetFeatureIndex.current = Math.max(
+          0,
+          previousFeatureIndex - 1
+        );
       }
       
-      // Special case: always allow first transition from initial state
-      if (previousActiveFeature.current === featureOrder[0] && currentFeatureIndex > 0 && scrollDirection === 'down') {
-        shouldTransition = true;
-      }
-      
-      // Enforce the limits: don't go beyond first or last feature
-      if (scrollDirection === 'down' && previousFeatureIndex === featureOrder.length - 1) {
-        shouldTransition = false;
-      }
-      
-      if (scrollDirection === 'up' && previousFeatureIndex === 0) {
-        shouldTransition = false;
-      }
-      
-      if (shouldTransition && !transitionInProgress.current) {
-        transitionInProgress.current = true;
-        setActiveFeature(featureId);
-        setCurrentIndex(currentFeatureIndex);
-        previousActiveFeature.current = featureId;
-        
-        setTimeout(() => {
-          transitionInProgress.current = false;
-        }, 600);
+      // Only transition if we're not already at the target feature
+      // This prevents skipping when scrolling fast
+      if (currentFeatureIndex === targetFeatureIndex.current) {
+        transitionToFeature(featureId, currentFeatureIndex);
       }
     }
   };
@@ -141,8 +173,8 @@ const Features: React.FC = () => {
         });
       },
       {
-        threshold: [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8],
-        rootMargin: "-10% 0px -10% 0px"
+        threshold: [0.2, 0.3, 0.4, 0.5, 0.6],
+        rootMargin: "-15% 0px -15% 0px"
       }
     );
 
@@ -160,17 +192,13 @@ const Features: React.FC = () => {
   }, [scrollDirection]);
 
   const handleFeatureClick = (featureName: string, index: number) => {
-    if (transitionInProgress.current) return;
-    
-    transitionInProgress.current = true;
+    transitionToFeature(featureName, index);
+    // Update target index to match clicked feature
+    targetFeatureIndex.current = index;
     setIsAnimating(true);
-    setActiveFeature(featureName);
-    setCurrentIndex(index);
-    previousActiveFeature.current = featureName;
     
     setTimeout(() => {
       setIsAnimating(false);
-      transitionInProgress.current = false;
     }, 600);
   };
 
@@ -181,6 +209,7 @@ const Features: React.FC = () => {
     setCurrentIndex(0);
     setActiveFeature(featureOrder[0]);
     previousActiveFeature.current = featureOrder[0];
+    targetFeatureIndex.current = 0;
     
     const transitionInterval = setInterval(() => {
       const progressInterval = setInterval(() => {
@@ -205,6 +234,7 @@ const Features: React.FC = () => {
         setCurrentIndex(index);
         setActiveFeature(featureOrder[index]);
         previousActiveFeature.current = featureOrder[index];
+        targetFeatureIndex.current = index;
       }, 3000);
     }, 3000);
     
