@@ -202,9 +202,9 @@ const Features: React.FC = () => {
                       ? "shadow-[0px_20px_30px_5px_rgba(0,0,0,0.15)] bg-white transform translate-y-0 opacity-100 scale-100"
                       : "bg-white hover:bg-gray-50 transform opacity-70 scale-95",
                     !visibleFeatures.includes(featureKey) && scrollDirection === 'down' 
-                      ? "translate-y-16" 
+                      ? "translate-y-[100px]" 
                       : !visibleFeatures.includes(featureKey) && scrollDirection === 'up'
-                      ? "-translate-y-16"
+                      ? "-translate-y-[100px]"
                       : "translate-y-0",
                     visibleFeatures.includes(featureKey) && "opacity-100 scale-100"
                   )}
