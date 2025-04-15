@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
@@ -8,6 +9,7 @@ const Features: React.FC = () => {
   const [isAnimating, setIsAnimating] = useState(false);
   const featuresRef = useRef<HTMLDivElement>(null);
   const featureSectionRef = useRef<HTMLElement>(null);
+  const scrollPosRef = useRef(0);
   
   const features = {
     reports: {
@@ -44,16 +46,32 @@ const Features: React.FC = () => {
   };
 
   const lockScroll = () => {
+    // Store current scroll position
+    scrollPosRef.current = window.scrollY;
+    
+    // Apply fixed position and set top to maintain visual position
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${scrollPosRef.current}px`;
+    document.body.style.width = '100%';
     document.body.style.overflow = 'hidden';
-    document.body.style.height = '100vh';
   };
 
   const unlockScroll = () => {
+    // Remove fixed position
+    document.body.style.position = '';
+    document.body.style.top = '';
+    document.body.style.width = '';
     document.body.style.overflow = '';
-    document.body.style.height = '';
+    
+    // Restore scroll position
+    window.scrollTo(0, scrollPosRef.current);
   };
 
   useEffect(() => {
+    if (isAnimating) {
+      lockScroll();
+    }
+    
     const timer = setTimeout(() => {
       setIsAnimating(false);
       unlockScroll();
@@ -61,16 +79,18 @@ const Features: React.FC = () => {
     
     return () => {
       clearTimeout(timer);
-      unlockScroll();
+      // Always make sure to unlock on unmount or cleanup
+      if (isAnimating) {
+        unlockScroll();
+      }
     };
-  }, [activeFeature]);
+  }, [activeFeature, isAnimating]);
 
   useEffect(() => {
-    const featureElements = document.querySelectorAll('.feature-card');
     const featureOrder = ["reports", "tools", "scheduling", "invoicing"];
     
     const handleScroll = () => {
-      if (!featureSectionRef.current) return;
+      if (!featureSectionRef.current || isAnimating) return;
       
       const sectionRect = featureSectionRef.current.getBoundingClientRect();
       const sectionTop = sectionRect.top;
@@ -85,33 +105,29 @@ const Features: React.FC = () => {
         
         if (sectionProgress < 0.4) {
           sectionProgress = 0;
-        } else {
-          if (!isAnimating) {
-            lockScroll();
-          }
-        }
-        
-        sectionProgress = Math.min(sectionProgress * 1.2, 1);
-        
-        const featureIndex = Math.min(
-          Math.floor(sectionProgress * 4),
-          featureOrder.length - 1
-        );
-        
-        const newActiveFeature = featureOrder[featureIndex];
-        
-        if (newActiveFeature !== activeFeature && !isAnimating) {
+        } else if (!isAnimating && sectionProgress >= 0.4) {
+          // Only trigger animation if not already animating
           setIsAnimating(true);
-          setActiveFeature(newActiveFeature);
+          
+          const featureIndex = Math.min(
+            Math.floor((sectionProgress - 0.4) / 0.15) * 4,
+            featureOrder.length - 1
+          );
+          
+          const newActiveFeature = featureOrder[Math.min(featureIndex, featureOrder.length - 1)];
+          if (newActiveFeature !== activeFeature) {
+            setActiveFeature(newActiveFeature);
+          }
         }
       }
     };
     
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     handleScroll();
     
     return () => {
       window.removeEventListener('scroll', handleScroll);
+      // Ensure scroll is unlocked when component unmounts
       unlockScroll();
     };
   }, [activeFeature, isAnimating]);
