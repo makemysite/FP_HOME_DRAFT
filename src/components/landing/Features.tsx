@@ -10,6 +10,7 @@ const Features: React.FC = () => {
   const featureSectionRef = useRef<HTMLElement>(null);
   const scrollPosRef = useRef(0);
   const animationInProgressRef = useRef(false);
+  const sectionFullyVisibleRef = useRef(false);
   
   const features = {
     reports: {
@@ -46,44 +47,56 @@ const Features: React.FC = () => {
   };
 
   const lockScroll = () => {
-    scrollPosRef.current = window.scrollY;
-    document.body.style.position = 'fixed';
-    document.body.style.top = `-${scrollPosRef.current}px`;
-    document.body.style.width = '100%';
-    document.body.style.overflow = 'hidden';
+    if (document.body.style.position !== 'fixed') {
+      scrollPosRef.current = window.scrollY;
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollPosRef.current}px`;
+      document.body.style.width = '100%';
+      document.body.style.overflow = 'hidden';
+    }
   };
 
   const unlockScroll = () => {
-    document.body.style.position = '';
-    document.body.style.top = '';
-    document.body.style.width = '';
-    document.body.style.overflow = '';
-    window.scrollTo(0, scrollPosRef.current);
+    if (document.body.style.position === 'fixed') {
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
+      document.body.style.overflow = '';
+      window.scrollTo(0, scrollPosRef.current);
+    }
+  };
+
+  const startFeatureTransition = (featureName: string) => {
+    if (animationInProgressRef.current) return;
+    
+    lockScroll();
+    animationInProgressRef.current = true;
+    setIsAnimating(true);
+    setActiveFeature(featureName);
+    
+    setTimeout(() => {
+      unlockScroll();
+      setIsAnimating(false);
+      animationInProgressRef.current = false;
+    }, 1200);
+  };
+
+  const handleFeatureClick = (featureName: string) => {
+    startFeatureTransition(featureName);
   };
 
   useEffect(() => {
-    if (isAnimating) {
-      lockScroll();
-      animationInProgressRef.current = true;
-    }
-    
-    const timer = setTimeout(() => {
-      setIsAnimating(false);
-      unlockScroll();
-      animationInProgressRef.current = false;
-    }, 1200);
-    
     return () => {
-      clearTimeout(timer);
       if (isAnimating) {
         unlockScroll();
         animationInProgressRef.current = false;
       }
     };
-  }, [activeFeature, isAnimating]);
+  }, [isAnimating]);
 
   useEffect(() => {
     const featureOrder = ["reports", "tools", "scheduling", "invoicing"];
+    let currentFeatureIndex = 0;
     
     const handleScroll = () => {
       if (!featureSectionRef.current || animationInProgressRef.current) return;
@@ -95,26 +108,32 @@ const Features: React.FC = () => {
       
       if (sectionTop <= 0 && sectionTop > -sectionHeight) {
         const scrollPosition = -sectionTop;
-        const totalScrollDistance = sectionHeight;
+        const sectionProgress = Math.min(Math.max(scrollPosition / sectionHeight, 0), 1);
         
-        let sectionProgress = Math.min(Math.max(scrollPosition / totalScrollDistance, 0), 1);
+        if (sectionProgress >= 0.95 && !sectionFullyVisibleRef.current) {
+          sectionFullyVisibleRef.current = true;
+          startFeatureTransition(featureOrder[0]);
+        } 
+        else if (sectionProgress < 0.95 && sectionFullyVisibleRef.current) {
+          sectionFullyVisibleRef.current = false;
+        }
         
-        if (sectionProgress < 0.4) {
-          sectionProgress = 0;
-        } else if (!isAnimating && !animationInProgressRef.current) {
-          setIsAnimating(true);
-          
-          const adjustedProgress = (sectionProgress - 0.4) / 0.6;
-          const featureIndex = Math.min(
-            Math.floor(adjustedProgress * featureOrder.length),
-            featureOrder.length - 1
-          );
-          
-          const newActiveFeature = featureOrder[featureIndex];
-          if (newActiveFeature !== activeFeature) {
-            setActiveFeature(newActiveFeature);
+        if (sectionFullyVisibleRef.current && !animationInProgressRef.current) {
+          const internalScrollProgress = (sectionProgress - 0.95) / 0.05;
+          if (internalScrollProgress > 0) {
+            const nextFeatureIndex = Math.min(
+              Math.floor(internalScrollProgress * featureOrder.length),
+              featureOrder.length - 1
+            );
+            
+            if (nextFeatureIndex > currentFeatureIndex) {
+              currentFeatureIndex = nextFeatureIndex;
+              startFeatureTransition(featureOrder[currentFeatureIndex]);
+            }
           }
         }
+      } else {
+        sectionFullyVisibleRef.current = false;
       }
     };
     
@@ -126,7 +145,7 @@ const Features: React.FC = () => {
       unlockScroll();
       animationInProgressRef.current = false;
     };
-  }, [activeFeature, isAnimating]);
+  }, []);
 
   return (
     <section
@@ -157,10 +176,7 @@ const Features: React.FC = () => {
                     ? "shadow-[0px_20px_30px_5px_rgba(0,0,0,0.15)] bg-white"
                     : "bg-white hover:bg-gray-50"
                 } self-stretch flex min-h-[100px] w-full flex-col px-[22px] py-7 max-md:max-w-full max-md:px-5 cursor-pointer transition-all duration-500 ease-in-out overflow-hidden`}
-                onClick={() => {
-                  setIsAnimating(true);
-                  setActiveFeature("reports");
-                }}
+                onClick={() => handleFeatureClick("reports")}
                 data-feature="reports"
               >
                 <div className="flex w-[361px] max-w-full gap-[17px] text-lg font-bold leading-[3] pb-1.5">
@@ -194,10 +210,7 @@ const Features: React.FC = () => {
                     ? "shadow-[0px_20px_30px_5px_rgba(0,0,0,0.15)] bg-white"
                     : "bg-white hover:bg-gray-50"
                 } flex min-h-[100px] w-full flex-col px-[22px] py-7 max-md:px-5 cursor-pointer transition-all duration-500 ease-in-out overflow-hidden`}
-                onClick={() => {
-                  setIsAnimating(true);
-                  setActiveFeature("tools");
-                }}
+                onClick={() => handleFeatureClick("tools")}
                 data-feature="tools"
               >
                 <div className="flex w-[361px] max-w-full gap-[17px] text-lg font-bold leading-[3] pb-1.5">
@@ -228,10 +241,7 @@ const Features: React.FC = () => {
                     ? "shadow-[0px_20px_30px_5px_rgba(0,0,0,0.15)] bg-white"
                     : "bg-white hover:bg-gray-50"
                 } flex min-h-[100px] w-full flex-col px-[22px] py-7 max-md:px-5 cursor-pointer transition-all duration-500 ease-in-out overflow-hidden`}
-                onClick={() => {
-                  setIsAnimating(true);
-                  setActiveFeature("scheduling");
-                }}
+                onClick={() => handleFeatureClick("scheduling")}
                 data-feature="scheduling"
               >
                 <div className="flex w-[361px] max-w-full gap-[17px] text-lg font-bold leading-[3] pb-1.5">
@@ -266,10 +276,7 @@ const Features: React.FC = () => {
                     ? "shadow-[0px_20px_30px_5px_rgba(0,0,0,0.15)] bg-white"
                     : "bg-white hover:bg-gray-50"
                 } flex min-h-[100px] w-full flex-col px-[22px] py-7 max-md:px-5 cursor-pointer transition-all duration-500 ease-in-out overflow-hidden`}
-                onClick={() => {
-                  setIsAnimating(true);
-                  setActiveFeature("invoicing");
-                }}
+                onClick={() => handleFeatureClick("invoicing")}
                 data-feature="invoicing"
               >
                 <div className="flex w-[361px] max-w-full gap-[17px] text-lg font-bold leading-[3] pb-1.5">
