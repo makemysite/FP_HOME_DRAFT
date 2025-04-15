@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
@@ -44,16 +43,28 @@ const Features: React.FC = () => {
     },
   };
 
-  // Reset animation state after transition completes - longer transition time
+  const lockScroll = () => {
+    document.body.style.overflow = 'hidden';
+    document.body.style.height = '100vh';
+  };
+
+  const unlockScroll = () => {
+    document.body.style.overflow = '';
+    document.body.style.height = '';
+  };
+
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsAnimating(false);
-    }, 1200); // Increased from 800ms to 1200ms for even smoother transitions
+      unlockScroll();
+    }, 1200);
     
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      unlockScroll();
+    };
   }, [activeFeature]);
 
-  // Handle scroll-based feature transitions
   useEffect(() => {
     const featureElements = document.querySelectorAll('.feature-card');
     const featureOrder = ["reports", "tools", "scheduling", "invoicing"];
@@ -66,22 +77,21 @@ const Features: React.FC = () => {
       const sectionHeight = sectionRect.height;
       const windowHeight = window.innerHeight;
       
-      // Check if section is in view - more visibility required before triggering
-      if (sectionTop < windowHeight * 0.6 && sectionTop > -sectionHeight * 0.9) {
-        // Start transitions only when section is 40% visible (increased from 30%)
-        const scrollPosition = windowHeight - sectionTop;
-        const totalScrollDistance = windowHeight + sectionHeight * 0.6; // Adjusted to complete transitions earlier
+      if (sectionTop <= 0 && sectionTop > -sectionHeight) {
+        const scrollPosition = -sectionTop;
+        const totalScrollDistance = sectionHeight;
         
-        // Normalized progress from 0 to 1, starting when section is 40% in view
-        let sectionProgress = Math.min(Math.max((scrollPosition - windowHeight * 0.4) / totalScrollDistance, 0), 1);
+        let sectionProgress = Math.min(Math.max(scrollPosition / totalScrollDistance, 0), 1);
         
-        // Add a delay threshold before the first change
-        if (sectionProgress < 0.2) { // Increased delay threshold from 0.15 to 0.2
+        if (sectionProgress < 0.4) {
           sectionProgress = 0;
+        } else {
+          if (!isAnimating) {
+            lockScroll();
+          }
         }
         
-        // Ensure transitions complete before reaching pricing section
-        sectionProgress = Math.min(sectionProgress * 1.2, 1); // Scale progress to complete earlier
+        sectionProgress = Math.min(sectionProgress * 1.2, 1);
         
         const featureIndex = Math.min(
           Math.floor(sectionProgress * 4),
@@ -98,10 +108,11 @@ const Features: React.FC = () => {
     };
     
     window.addEventListener('scroll', handleScroll);
-    handleScroll(); // Check on mount
+    handleScroll();
     
     return () => {
       window.removeEventListener('scroll', handleScroll);
+      unlockScroll();
     };
   }, [activeFeature, isAnimating]);
 
@@ -128,7 +139,6 @@ const Features: React.FC = () => {
         <div className="gap-5 flex max-md:flex-col max-md:items-stretch">
           <div className="w-[43%] max-md:w-full max-md:ml-0">
             <div className="flex w-full flex-col self-stretch my-auto max-md:max-w-full max-md:mt-10">
-              {/* Reports and Dashboard */}
               <div
                 className={`feature-card ${
                   activeFeature === "reports"
@@ -166,7 +176,6 @@ const Features: React.FC = () => {
                 </div>
               </div>
 
-              {/* Tools & Integrations */}
               <div
                 className={`feature-card ${
                   activeFeature === "tools"
@@ -180,7 +189,7 @@ const Features: React.FC = () => {
                 data-feature="tools"
               >
                 <div className="flex w-[361px] max-w-full gap-[17px] text-lg font-bold leading-[3] pb-1.5">
-                  <div className="w-9 shrink-0"></div> {/* Placeholder for icon */}
+                  <div className="w-9 shrink-0"></div>
                   <div className={`grow shrink w-[301px] basis-auto mt-3.5 ${activeFeature === "tools" ? "text-[rgba(233,138,35,1)]" : "text-[#202225]"} transition-colors duration-300`}>
                     Tools & Integrations
                   </div>
@@ -201,7 +210,6 @@ const Features: React.FC = () => {
               </div>
               <div className="border w-[465px] shrink-0 max-w-full h-px border-[rgba(225,225,225,1)] border-solid" />
 
-              {/* Smart Scheduling */}
               <div
                 className={`feature-card ${
                   activeFeature === "scheduling"
@@ -240,7 +248,6 @@ const Features: React.FC = () => {
               </div>
               <div className="border w-[465px] shrink-0 max-w-full h-px border-[rgba(225,225,225,1)] border-solid" />
 
-              {/* Invoicing & Payments */}
               <div
                 className={`feature-card ${
                   activeFeature === "invoicing"
