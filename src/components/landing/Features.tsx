@@ -1,6 +1,3 @@
-
-"use client";
-
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import ArrowRightIcon from "../ui/ArrowRightIcon";
@@ -21,6 +18,20 @@ const Features: React.FC = () => {
   const [progress, setProgress] = useState(0);
   const cardRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const observerRef = useRef<IntersectionObserver | null>(null);
+  
+  const [scrollDirection, setScrollDirection] = useState<'up' | 'down'>('down');
+  const lastScrollY = useRef(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      setScrollDirection(currentScrollY > lastScrollY.current ? 'down' : 'up');
+      lastScrollY.current = currentScrollY;
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const features = {
     reports: {
@@ -182,17 +193,20 @@ const Features: React.FC = () => {
                 <div
                   key={featureKey}
                   ref={(el) => {
-                    if (el) {
-                      cardRefs.current[featureKey] = el;
-                    }
+                    if (el) cardRefs.current[featureKey] = el;
                   }}
                   data-feature={featureKey}
                   className={cn(
-                    "feature-card group transition-all duration-500 ease-in-out mb-4 p-4 rounded-lg cursor-pointer",
+                    "feature-card group transition-all duration-700 ease-in-out mb-4 p-4 rounded-lg cursor-pointer",
                     activeFeature === featureKey
                       ? "shadow-[0px_20px_30px_5px_rgba(0,0,0,0.15)] bg-white transform translate-y-0 opacity-100 scale-100"
-                      : "bg-white hover:bg-gray-50 transform translate-y-4 opacity-70 scale-95",
-                    visibleFeatures.includes(featureKey) && "translate-y-0 opacity-100 scale-100"
+                      : "bg-white hover:bg-gray-50 transform opacity-70 scale-95",
+                    !visibleFeatures.includes(featureKey) && scrollDirection === 'down' 
+                      ? "translate-y-16" 
+                      : !visibleFeatures.includes(featureKey) && scrollDirection === 'up'
+                      ? "-translate-y-16"
+                      : "translate-y-0",
+                    visibleFeatures.includes(featureKey) && "opacity-100 scale-100"
                   )}
                   onClick={() => handleFeatureClick(featureKey, index)}
                 >
@@ -235,6 +249,7 @@ const Features: React.FC = () => {
               ))}
             </div>
           </div>
+
           <div className="w-[57%] ml-5 max-md:w-full max-md:ml-0">
             <div className="relative w-full h-full">
               {Object.keys(features).map((key) => (
@@ -259,4 +274,3 @@ const Features: React.FC = () => {
 };
 
 export default Features;
-
