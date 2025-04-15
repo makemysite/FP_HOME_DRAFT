@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import Link from "next/link";
+import { Link } from "react-router-dom";
 import ArrowRightIcon from "../ui/ArrowRightIcon";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -56,7 +56,7 @@ const BlogHighlights: React.FC = () => {
       <h2 className="text-[#170F49] text-center text-[50px] font-bold leading-[62px] w-[668px] mt-[27px] max-md:max-w-full max-md:text-[40px] max-md:leading-[55px]">
         Spend Less Time Managing and More Time Growing
       </h2>
-      <Link href="/blog">
+      <Link to="/blog" className="inline-block">
         <button className="bg-[rgba(245,246,251,1)] border w-[175px] max-w-full text-lg text-[rgba(7,15,24,1)] font-normal text-center mt-[71px] px-[33px] py-[19px] rounded-[56px] border-[rgba(233,138,35,1)] border-solid max-md:mt-10 max-md:px-5 hover:bg-[rgba(245,246,251,0.8)] transition-colors">
           View all Blogs
         </button>
@@ -89,7 +89,7 @@ const BlogHighlights: React.FC = () => {
                   </h3>
                 </div>
                 <Link
-                  href={`/blog/${post.slug}`}
+                  to={`/blog/${post.slug}`}
                   className="flex items-center gap-[15px] text-[#E98A23] leading-loose mt-5 hover:text-[rgba(233,138,35,0.8)] transition-colors"
                 >
                   <span className="self-stretch my-auto">Read More</span>

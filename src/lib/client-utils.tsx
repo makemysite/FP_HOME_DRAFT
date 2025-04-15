@@ -1,28 +1,21 @@
 
-"use client";
+import React, { useEffect, useState } from 'react';
 
-import React from "react";
-
-/**
- * This component serves as a boundary for client-side code.
- * Use this to wrap components that need client-side functionality.
- */
-export function ClientOnly<T extends React.ReactNode>({ 
-  children, 
-  fallback = null 
-}: { 
-  children: T; 
+interface ClientOnlyProps {
+  children: React.ReactNode;
   fallback?: React.ReactNode;
-}) {
-  const [mounted, setMounted] = React.useState(false);
+}
 
-  React.useEffect(() => {
-    setMounted(true);
+export function ClientOnly({ children, fallback = null }: ClientOnlyProps) {
+  const [hasMounted, setHasMounted] = useState(false);
+  
+  useEffect(() => {
+    setHasMounted(true);
   }, []);
-
-  if (!mounted) {
+  
+  if (!hasMounted) {
     return <>{fallback}</>;
   }
-
+  
   return <>{children}</>;
 }
