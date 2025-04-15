@@ -29,6 +29,7 @@ const Features: React.FC = () => {
   const reachedEnd = useRef(false);
   const isPaused = useRef(false);
   const pauseTimeout = useRef<NodeJS.Timeout | null>(null);
+  const preventCycling = useRef(true); // New flag to prevent cycling back to first state
 
   useEffect(() => {
     const handleScroll = () => {
@@ -48,28 +49,25 @@ const Features: React.FC = () => {
         clearTimeout(scrollTimer.current);
       }
       
-      // Check if we've reached end boundaries and prevent further progression
+      // When scrolling down and at last feature, prevent any further transitions
       if (newDirection === 'down' && previousActiveFeature.current === featureOrder[featureOrder.length - 1]) {
-        if (!reachedEnd.current) {
-          reachedEnd.current = true;
-          // Apply pause with timeout to prevent immediate transition when direction changes
-          isPaused.current = true;
-          if (pauseTimeout.current) clearTimeout(pauseTimeout.current);
-          pauseTimeout.current = setTimeout(() => {
-            isPaused.current = false;
-          }, 600); // Pause for 600ms before allowing transitions again
-        }
+        // Fixed: Stay at the last feature when scrolling down further
+        reachedEnd.current = true;
+        isPaused.current = true;
+        if (pauseTimeout.current) clearTimeout(pauseTimeout.current);
+        pauseTimeout.current = setTimeout(() => {
+          isPaused.current = false;
+        }, 600);
         return;
-      } else if (newDirection === 'up' && previousActiveFeature.current === featureOrder[0]) {
-        if (!reachedEnd.current) {
-          reachedEnd.current = true;
-          // Apply pause with timeout to prevent immediate transition when direction changes
-          isPaused.current = true;
-          if (pauseTimeout.current) clearTimeout(pauseTimeout.current);
-          pauseTimeout.current = setTimeout(() => {
-            isPaused.current = false;
-          }, 600); // Pause for 600ms before allowing transitions again
-        }
+      } 
+      // When scrolling up and at first feature, prevent any further transitions
+      else if (newDirection === 'up' && previousActiveFeature.current === featureOrder[0]) {
+        reachedEnd.current = true;
+        isPaused.current = true;
+        if (pauseTimeout.current) clearTimeout(pauseTimeout.current);
+        pauseTimeout.current = setTimeout(() => {
+          isPaused.current = false;
+        }, 600);
         return;
       } else {
         reachedEnd.current = false;
@@ -140,6 +138,9 @@ const Features: React.FC = () => {
   const transitionToFeature = (featureId: string, index: number) => {
     if (transitionInProgress.current || isPaused.current) return false;
     
+    // Prevent transitioning beyond the bounds of the feature array
+    if (index < 0 || index >= featureOrder.length) return false;
+    
     transitionInProgress.current = true;
     setActiveFeature(featureId);
     setCurrentIndex(index);
@@ -179,14 +180,16 @@ const Features: React.FC = () => {
         targetFeatureIndex.current = nextIndex;
         
         // If we're at the last feature, mark as reached end to prevent further transitions
-        if (nextIndex === featureOrder.length - 1 && previousFeatureIndex === featureOrder.length - 1) {
-          reachedEnd.current = true;
-          // Apply pause when reaching the end
-          isPaused.current = true;
-          if (pauseTimeout.current) clearTimeout(pauseTimeout.current);
-          pauseTimeout.current = setTimeout(() => {
-            isPaused.current = false;
-          }, 600); // Pause for 600ms before allowing transitions again
+        if (nextIndex === featureOrder.length - 1) {
+          // Fixed: Ensure we stay at the last feature when scrolling down further
+          if (previousFeatureIndex === featureOrder.length - 1) {
+            reachedEnd.current = true;
+            isPaused.current = true;
+            if (pauseTimeout.current) clearTimeout(pauseTimeout.current);
+            pauseTimeout.current = setTimeout(() => {
+              isPaused.current = false;
+            }, 600);
+          }
         }
       } else {
         // When scrolling up, move backward one step at a time, but don't go below the first feature
@@ -197,14 +200,15 @@ const Features: React.FC = () => {
         targetFeatureIndex.current = prevIndex;
         
         // If we're at the first feature, mark as reached end to prevent further transitions
-        if (prevIndex === 0 && previousFeatureIndex === 0) {
-          reachedEnd.current = true;
-          // Apply pause when reaching the beginning
-          isPaused.current = true;
-          if (pauseTimeout.current) clearTimeout(pauseTimeout.current);
-          pauseTimeout.current = setTimeout(() => {
-            isPaused.current = false;
-          }, 600); // Pause for 600ms before allowing transitions again
+        if (prevIndex === 0) {
+          if (previousFeatureIndex === 0) {
+            reachedEnd.current = true;
+            isPaused.current = true;
+            if (pauseTimeout.current) clearTimeout(pauseTimeout.current);
+            pauseTimeout.current = setTimeout(() => {
+              isPaused.current = false;
+            }, 600);
+          }
         }
       }
       
