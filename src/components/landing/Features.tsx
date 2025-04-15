@@ -27,10 +27,15 @@ const Features: React.FC = () => {
   const isScrolling = useRef(false);
   const targetFeatureIndex = useRef(0);
   const reachedEnd = useRef(false);
+  const isPaused = useRef(false);
+  const pauseTimeout = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
+      
+      // If we're in a paused state, prevent transitions
+      if (isPaused.current) return;
       
       // Determine scroll direction
       const newDirection = currentScrollY > lastScrollY.current ? 'down' : 'up';
@@ -43,6 +48,33 @@ const Features: React.FC = () => {
         clearTimeout(scrollTimer.current);
       }
       
+      // Check if we've reached end boundaries and prevent further progression
+      if (newDirection === 'down' && previousActiveFeature.current === featureOrder[featureOrder.length - 1]) {
+        if (!reachedEnd.current) {
+          reachedEnd.current = true;
+          // Apply pause with timeout to prevent immediate transition when direction changes
+          isPaused.current = true;
+          if (pauseTimeout.current) clearTimeout(pauseTimeout.current);
+          pauseTimeout.current = setTimeout(() => {
+            isPaused.current = false;
+          }, 600); // Pause for 600ms before allowing transitions again
+        }
+        return;
+      } else if (newDirection === 'up' && previousActiveFeature.current === featureOrder[0]) {
+        if (!reachedEnd.current) {
+          reachedEnd.current = true;
+          // Apply pause with timeout to prevent immediate transition when direction changes
+          isPaused.current = true;
+          if (pauseTimeout.current) clearTimeout(pauseTimeout.current);
+          pauseTimeout.current = setTimeout(() => {
+            isPaused.current = false;
+          }, 600); // Pause for 600ms before allowing transitions again
+        }
+        return;
+      } else {
+        reachedEnd.current = false;
+      }
+      
       // Set a timeout to handle the end of scroll event
       scrollTimer.current = setTimeout(() => {
         isScrolling.current = false;
@@ -52,21 +84,10 @@ const Features: React.FC = () => {
         const targetIndex = targetFeatureIndex.current;
         
         // If we're not at the target index when scrolling stops, move to it
-        if (currentFeatureIndex !== targetIndex && !transitionInProgress.current) {
+        if (currentFeatureIndex !== targetIndex && !transitionInProgress.current && !isPaused.current) {
           transitionToFeature(featureOrder[targetIndex], targetIndex);
         }
       }, 150);
-
-      // Check if we've reached end boundaries and prevent further progression
-      if (newDirection === 'down' && previousActiveFeature.current === featureOrder[featureOrder.length - 1]) {
-        reachedEnd.current = true;
-        return;
-      } else if (newDirection === 'up' && previousActiveFeature.current === featureOrder[0]) {
-        reachedEnd.current = true;
-        return;
-      } else {
-        reachedEnd.current = false;
-      }
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
@@ -74,6 +95,9 @@ const Features: React.FC = () => {
       window.removeEventListener('scroll', handleScroll);
       if (scrollTimer.current) {
         clearTimeout(scrollTimer.current);
+      }
+      if (pauseTimeout.current) {
+        clearTimeout(pauseTimeout.current);
       }
     };
   }, []);
@@ -114,7 +138,7 @@ const Features: React.FC = () => {
 
   // Centralized transition function to ensure consistent behavior
   const transitionToFeature = (featureId: string, index: number) => {
-    if (transitionInProgress.current) return false;
+    if (transitionInProgress.current || isPaused.current) return false;
     
     transitionInProgress.current = true;
     setActiveFeature(featureId);
@@ -130,7 +154,7 @@ const Features: React.FC = () => {
 
   // Function to handle ordered feature transitions based on scroll direction
   const handleOrderedFeatureTransition = (entries: IntersectionObserverEntry[]) => {
-    if (transitionInProgress.current || reachedEnd.current) return;
+    if (transitionInProgress.current || reachedEnd.current || isPaused.current) return;
     
     // Find the most visible element
     const mostVisibleEntry = entries.reduce((prev, current) => {
@@ -157,6 +181,12 @@ const Features: React.FC = () => {
         // If we're at the last feature, mark as reached end to prevent further transitions
         if (nextIndex === featureOrder.length - 1 && previousFeatureIndex === featureOrder.length - 1) {
           reachedEnd.current = true;
+          // Apply pause when reaching the end
+          isPaused.current = true;
+          if (pauseTimeout.current) clearTimeout(pauseTimeout.current);
+          pauseTimeout.current = setTimeout(() => {
+            isPaused.current = false;
+          }, 600); // Pause for 600ms before allowing transitions again
         }
       } else {
         // When scrolling up, move backward one step at a time, but don't go below the first feature
@@ -169,11 +199,17 @@ const Features: React.FC = () => {
         // If we're at the first feature, mark as reached end to prevent further transitions
         if (prevIndex === 0 && previousFeatureIndex === 0) {
           reachedEnd.current = true;
+          // Apply pause when reaching the beginning
+          isPaused.current = true;
+          if (pauseTimeout.current) clearTimeout(pauseTimeout.current);
+          pauseTimeout.current = setTimeout(() => {
+            isPaused.current = false;
+          }, 600); // Pause for 600ms before allowing transitions again
         }
       }
       
       // Only transition if we're not already at the target feature and haven't reached an end
-      if (currentFeatureIndex === targetFeatureIndex.current && !reachedEnd.current) {
+      if (currentFeatureIndex === targetFeatureIndex.current && !reachedEnd.current && !isPaused.current) {
         transitionToFeature(featureId, currentFeatureIndex);
       }
     }
@@ -215,19 +251,27 @@ const Features: React.FC = () => {
     };
   }, [scrollDirection]);
 
-  // Reset reachedEnd when scroll direction changes
+  // Reset reachedEnd and isPaused when scroll direction changes
   useEffect(() => {
-    // Reset the reachedEnd flag when direction changes
+    // Reset the flags when direction changes
     // This allows transitions to work again when changing direction
     reachedEnd.current = false;
+    isPaused.current = false;
+    if (pauseTimeout.current) {
+      clearTimeout(pauseTimeout.current);
+    }
   }, [scrollDirection]);
 
   const handleFeatureClick = (featureName: string, index: number) => {
     transitionToFeature(featureName, index);
     // Update target index to match clicked feature
     targetFeatureIndex.current = index;
-    // Reset reachedEnd flag on manual click
+    // Reset flags on manual click
     reachedEnd.current = false;
+    isPaused.current = false;
+    if (pauseTimeout.current) {
+      clearTimeout(pauseTimeout.current);
+    }
     setIsAnimating(true);
     
     setTimeout(() => {
@@ -395,4 +439,3 @@ const Features: React.FC = () => {
 };
 
 export default Features;
-
