@@ -2,12 +2,12 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "react-router-dom";
 import ArrowRightIcon from "../ui/ArrowRightIcon";
 import { Progress } from "../ui/progress";
 
 const Features: React.FC = () => {
-  const router = useRouter();
+  const navigate = useNavigate(); // Replace useRouter with useNavigate
   const [activeFeature, setActiveFeature] = useState("reports");
   const [isAnimating, setIsAnimating] = useState(false);
   const [sectionInView, setSectionInView] = useState(false);
@@ -136,7 +136,7 @@ const Features: React.FC = () => {
   
   // Handle "View all features" button click
   const handleViewAllFeaturesClick = () => {
-    router.push('/features');
+    navigate('/features'); // Changed from router.push to navigate
   };
 
   return (
