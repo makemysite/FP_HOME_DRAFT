@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import ErrorBoundary from "./components/ErrorBoundary";
 import Index from "./pages/Index";
 import Features from "./pages/Features";
 import FeaturesPage from "./pages/FeaturesPage";
@@ -26,23 +27,25 @@ const queryClient = new QueryClient({
 
 const App = () => {
   return (
-    <BrowserRouter>
-      <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/features" element={<FeaturesPage />} />
-            <Route path="/pricing" element={<PricingPage />} />
-            <Route path="/industries" element={<Industries />} />
-            <Route path="/blog" element={<Blog />} />
-            <Route path="/blog/:slug" element={<BlogPost />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-          <Toaster />
-          <Sonner />
-        </TooltipProvider>
-      </QueryClientProvider>
-    </BrowserRouter>
+    <ErrorBoundary>
+      <BrowserRouter>
+        <QueryClientProvider client={queryClient}>
+          <TooltipProvider>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/features" element={<FeaturesPage />} />
+              <Route path="/pricing" element={<PricingPage />} />
+              <Route path="/industries" element={<Industries />} />
+              <Route path="/blog" element={<Blog />} />
+              <Route path="/blog/:slug" element={<BlogPost />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+            <Toaster />
+            <Sonner />
+          </TooltipProvider>
+        </QueryClientProvider>
+      </BrowserRouter>
+    </ErrorBoundary>
   );
 };
 
