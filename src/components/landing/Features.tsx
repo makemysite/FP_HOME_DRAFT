@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import ArrowRightIcon from "../ui/ArrowRightIcon";
@@ -96,7 +95,14 @@ const Features: React.FC = () => {
     };
   }, []);
 
-  const features = {
+  interface FeatureItem {
+    title: string;
+    description: string;
+    icon: React.ReactNode;
+    image: string;
+  }
+
+  const features: Record<string, FeatureItem> = {
     reports: {
       title: "Reports and Dashboard",
       description:
@@ -367,13 +373,9 @@ const Features: React.FC = () => {
                   onClick={() => handleFeatureClick(featureKey, index)}
                 >
                   <div className="flex w-[361px] max-w-full gap-[17px] text-lg font-bold leading-[3] pb-1.5">
-                    {features[featureKey as keyof typeof features].icon && (
-                      <img
-                        src={features[featureKey as keyof typeof features].icon}
-                        alt={`${featureKey} Icon`}
-                        className="aspect-[1] object-contain w-9 shrink-0 transition-transform group-hover:scale-110"
-                      />
-                    )}
+                    <div className="aspect-[1] w-9 shrink-0 transition-transform group-hover:scale-110 flex items-center justify-center">
+                      {features[featureKey].icon}
+                    </div>
                     <div
                       className={cn(
                         "grow shrink w-[301px] basis-auto mt-3.5 transition-colors duration-300",
@@ -382,7 +384,7 @@ const Features: React.FC = () => {
                           : "text-[#202225] group-hover:text-[rgba(233,138,35,0.7)]"
                       )}
                     >
-                      {features[featureKey as keyof typeof features].title}
+                      {features[featureKey].title}
                     </div>
                   </div>
                   <div
@@ -394,7 +396,7 @@ const Features: React.FC = () => {
                     )}
                   >
                     <div className="w-[276px]">
-                      {features[featureKey as keyof typeof features].description}
+                      {features[featureKey].description}
                     </div>
                     <div className="flex items-center mt-2 text-[rgba(233,138,35,1)] font-semibold group-hover:text-[rgba(233,138,35,0.7)] transition-colors duration-300">
                       Learn More 
@@ -411,8 +413,8 @@ const Features: React.FC = () => {
               {Object.keys(features).map((key) => (
                 <img
                   key={key}
-                  src={features[key as keyof typeof features].image}
-                  alt={`${features[key as keyof typeof features].title} Screenshot`}
+                  src={features[key].image}
+                  alt={`${features[key].title} Screenshot`}
                   className={cn(
                     imageTransitionClasses,
                     activeFeature === key
