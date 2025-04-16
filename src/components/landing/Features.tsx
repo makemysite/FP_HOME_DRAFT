@@ -109,7 +109,7 @@ const Features: React.FC = () => {
         "Get comprehensive insights with custom reports and real-time dashboards that help you make data-driven decisions for your field service business.",
       icon: <LayoutDashboard size={28} className="text-[#E98A23]" />,
       image:
-        "https://cdn.builder.io/api/v1/image/assets/a720917f9ee741a78621d5e6666ab10a/a720917f9ee741a78621d5e6666ab10a?placeholderIfAbsent=true",
+        "https://ik.imagekit.io/d1cslxmlo/features_hero/Dashboard%20Desktop.png?updatedAt=1743607924289",
     },
     tools: {
       title: "Tools & Integrations",
