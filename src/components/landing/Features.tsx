@@ -1,8 +1,10 @@
+
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import ArrowRightIcon from "../ui/ArrowRightIcon";
 import { Progress } from "../ui/progress";
 import { cn } from "@/lib/utils";
+import { LayoutDashboard, Wrench, CalendarClock, Receipt } from "lucide-react";
 
 const Features: React.FC = () => {
   const navigate = useNavigate();
@@ -99,15 +101,15 @@ const Features: React.FC = () => {
       title: "Reports and Dashboard",
       description:
         "Get comprehensive insights with custom reports and real-time dashboards that help you make data-driven decisions for your field service business.",
-      icon: "https://cdn.builder.io/api/v1/image/assets/a720917f9ee741a78621d5e6666ab10a/66f38502a5fef33818316ca0f35b1bc4094641c8?placeholderIfAbsent=true",
+      icon: <LayoutDashboard size={28} className="text-[#E98A23]" />,
       image:
-        "https://cdn.builder.io/api/v1/image/assets/a720917f9ee741a78621d5e6666ab10a/dc35a0569446e6309fd19516f55984c7f2a0535e?placeholderIfAbsent=true",
+        "https://cdn.builder.io/api/v1/image/assets/a720917f9ee741a78621d5e6666ab10a/66f38502a5fef33818316ca0f35b1bc4094641c8?placeholderIfAbsent=true",
     },
     tools: {
       title: "Tools & Integrations",
       description:
         "Connect with your favorite tools and automate your workflow with our seamless integrations to QuickBooks, Xero, and other essential business software.",
-      icon: "",
+      icon: <Wrench size={28} className="text-[#E98A23]" />,
       image:
         "https://cdn.builder.io/api/v1/image/assets/a720917f9ee741a78621d5e6666ab10a/90cb4c0f51b0744019a62d928e470e8fb001908f?placeholderIfAbsent=true",
     },
@@ -115,14 +117,14 @@ const Features: React.FC = () => {
       title: "Smart Scheduling",
       description:
         "Optimize your team's schedule with AI-powered recommendations that maximize efficiency and reduce travel time between job sites.",
-      icon: "https://cdn.builder.io/api/v1/image/assets/a720917f9ee741a78621d5e6666ab10a/90cb4c0f51b0744019a62d928e470e8fb001908f?placeholderIfAbsent=true",
+      icon: <CalendarClock size={28} className="text-[#E98A23]" />,
       image:
         "https://cdn.builder.io/api/v1/image/assets/a720917f9ee741a78621d5e6666ab10a/66f38502a5fef33818316ca0f35b1bc4094641c8?placeholderIfAbsent=true",
     },
     invoicing: {
       title: "Invoicing & Payments",
       description: "Streamline your billing process, get paid faster, and maintain healthy cash flow with our integrated invoicing and payment solutions.",
-      icon: "https://cdn.builder.io/api/v1/image/assets/a720917f9ee741a78621d5e6666ab10a/c5a7c18383b0c23ef99644f4f1abd3fdc92273d3?placeholderIfAbsent=true",
+      icon: <Receipt size={28} className="text-[#E98A23]" />,
       image:
         "https://cdn.builder.io/api/v1/image/assets/a720917f9ee741a78621d5e6666ab10a/c5a7c18383b0c23ef99644f4f1abd3fdc92273d3?placeholderIfAbsent=true",
     },
