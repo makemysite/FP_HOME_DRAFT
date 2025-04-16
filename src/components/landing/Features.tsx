@@ -117,7 +117,7 @@ const Features: React.FC = () => {
         "Connect with your favorite tools and automate your workflow with our seamless integrations to QuickBooks, Xero, and other essential business software.",
       icon: <Wrench size={28} className="text-[#E98A23]" />,
       image:
-        "https://cdn.builder.io/api/v1/image/assets/a720917f9ee741a78621d5e6666ab10a/90cb4c0f51b0744019a62d928e470e8fb001908f?placeholderIfAbsent=true",
+        "https://ik.imagekit.io/d1cslxmlo/features_hero/tools&integration.png?updatedAt=1744817523845",
     },
     scheduling: {
       title: "Smart Scheduling",
@@ -125,7 +125,7 @@ const Features: React.FC = () => {
         "Optimize your team's schedule with AI-powered recommendations that maximize efficiency and reduce travel time between job sites.",
       icon: <CalendarClock size={28} className="text-[#E98A23]" />,
       image:
-        "https://cdn.builder.io/api/v1/image/assets/a720917f9ee741a78621d5e6666ab10a/66f38502a5fef33818316ca0f35b1bc4094641c8?placeholderIfAbsent=true",
+        "https://ik.imagekit.io/d1cslxmlo/features_hero/scheduling%20&%20dispatching.png?updatedAt=1743602580941",
     },
     invoicing: {
       title: "Invoicing & Payments",
