@@ -3,6 +3,7 @@ import React from "react";
 import { usePricing } from "./PricingContext";
 import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import CheckIcon from "@/components/ui/CheckIcon";
 
 type FeatureType = "text" | "check" | "empty";
 
@@ -250,15 +251,15 @@ const PricingTable: React.FC = () => {
         </div>
         
         <div className="flex min-h-[158px] w-full flex-col items-center justify-center p-6 border-b border-r border-[#E6E9F5]">
-          <PricingPlanHeader price="$99" annualPrice="$79" />
+          <PricingPlanHeader price="$99" annualPrice="$79" planName="Basic" />
         </div>
         
         <div className="flex min-h-[158px] w-full flex-col items-center justify-center p-6 border-b border-r border-[#E6E9F5]">
-          <PricingPlanHeader price="$149" annualPrice="$99" />
+          <PricingPlanHeader price="$149" annualPrice="$99" planName="Standard" />
         </div>
         
         <div className="flex min-h-[158px] w-full flex-col items-center justify-center p-6 border-b border-[#E6E9F5]">
-          <PricingPlanHeader price="$199" annualPrice="$169" />
+          <PricingPlanHeader price="$199" annualPrice="$169" planName="Premium" />
         </div>
         
         {features.map((feature, index) => (
@@ -309,7 +310,7 @@ const PricingTable: React.FC = () => {
   );
 };
 
-const PricingPlanHeader: React.FC<{ price: string; annualPrice: string }> = ({ price, annualPrice }) => {
+const PricingPlanHeader: React.FC<{ price: string; annualPrice: string; planName: string }> = ({ price, annualPrice, planName }) => {
   const { billingPeriod } = usePricing();
   
   const calculateMonthlyPrice = (yearlyPrice: string) => {
@@ -331,6 +332,26 @@ const PricingPlanHeader: React.FC<{ price: string; annualPrice: string }> = ({ p
   return (
     <>
       <div className="flex flex-col items-center">
+        <div className="flex items-center justify-center mb-3">
+          {planName === "Basic" && (
+            <div className="w-10 h-10 rounded-full bg-[#E98A23]/10 flex items-center justify-center">
+              <CheckIcon className="w-6 h-6" color="#E98A23" />
+            </div>
+          )}
+          {planName === "Standard" && (
+            <div className="w-10 h-10 rounded-full bg-[#E98A23]/10 flex items-center justify-center">
+              <CheckIcon className="w-6 h-6" color="#E98A23" />
+            </div>
+          )}
+          {planName === "Premium" && (
+            <div className="w-10 h-10 rounded-full bg-[#E98A23]/10 flex items-center justify-center">
+              <CheckIcon className="w-6 h-6" color="#E98A23" />
+            </div>
+          )}
+        </div>
+        <div className="text-lg font-bold text-[#252430] mb-1">
+          {planName}
+        </div>
         <div className="flex items-end gap-1 mb-2">
           <div className="text-black text-[34px] font-bold">{displayPrice}</div>
           <div className="text-xs text-[#858BA0] font-medium mb-1">/month</div>
