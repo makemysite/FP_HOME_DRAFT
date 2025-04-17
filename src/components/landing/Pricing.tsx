@@ -134,7 +134,13 @@ const Pricing: React.FC = () => {
               <div className="bg-[rgba(255,255,255,0.01)] flex w-10 shrink-0 h-[352px] mt-[174px] max-md:mt-10" />
               <div className="self-stretch flex flex-col">
                 <div className="flex gap-[18px]">
-                  <div className="bg-[#ECEBFF] flex w-[72px] shrink-0 h-[72px] rounded-2xl" />
+                  <div className="bg-[#ECEBFF] flex w-[72px] shrink-0 h-[72px] items-center justify-center rounded-2xl">
+                    <img
+                      src="https://cdn.builder.io/api/v1/image/assets/a720917f9ee741a78621d5e6666ab10a/acddc058243ca331b397e95b5e49c70eb9b8fc7c?placeholderIfAbsent=true"
+                      alt="Standard Plan Icon"
+                      className="aspect-[1] object-contain w-[52px] shrink-0"
+                    />
+                  </div>
                   <div className="mt-1.5">
                     <div className="text-[#26393F] text-lg font-medium leading-none">
                       For big companies
@@ -198,7 +204,13 @@ const Pricing: React.FC = () => {
           <div className="w-[33%] ml-5 max-md:w-full max-md:ml-0">
             <div className="border border-[color:var(--Neutral-300,#EFF0F6)] shadow-[0px_2px_12px_0px_rgba(20,20,43,0.08)] bg-[#E98A23] flex w-full flex-col items-center mx-auto px-[3px] py-7 rounded-3xl border-solid max-md:mt-[30px]">
               <div className="flex w-80 max-w-full gap-5 justify-between">
-                <div className="bg-white flex w-[72px] shrink-0 h-[72px] mt-[18px] rounded-2xl" />
+                <div className="bg-white flex w-[72px] shrink-0 h-[72px] mt-[18px] items-center justify-center rounded-2xl">
+                  <img
+                    src="https://cdn.builder.io/api/v1/image/assets/a720917f9ee741a78621d5e6666ab10a/acddc058243ca331b397e95b5e49c70eb9b8fc7c?placeholderIfAbsent=true"
+                    alt="Premium Plan Icon"
+                    className="aspect-[1] object-contain w-[52px] shrink-0"
+                  />
+                </div>
                 <div className="self-stretch my-auto">
                   <div className="text-[#EFF0F6] text-center text-lg font-medium leading-none max-md:mr-0.5">
                     For startups
@@ -284,3 +296,4 @@ const Pricing: React.FC = () => {
 };
 
 export default Pricing;
+
