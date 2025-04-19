@@ -5,6 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/landing/Navbar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/components/ui/use-toast";
+import BlogFilters from "@/components/blog/BlogFilters";
+import Footer from "@/components/features/Footer";
 
 interface BlogPost {
   id: string;
@@ -18,8 +20,14 @@ interface BlogPost {
 
 const Blog = () => {
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
+  const [filteredPosts, setFilteredPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [dateRange, setDateRange] = useState<{ from: Date; to: Date } | null>(null);
   const { toast } = useToast();
+
+  const categories = ["Industry Insights", "Field Operations", "Technology Trends", "Growth"];
 
   useEffect(() => {
     const fetchBlogPosts = async () => {
@@ -41,6 +49,7 @@ const Blog = () => {
         }
         
         setBlogPosts(data || []);
+        setFilteredPosts(data || []);
       } catch (error) {
         console.error('Error fetching blog posts:', error);
         toast({
@@ -55,6 +64,30 @@ const Blog = () => {
 
     fetchBlogPosts();
   }, [toast]);
+
+  useEffect(() => {
+    let filtered = [...blogPosts];
+
+    if (searchQuery) {
+      filtered = filtered.filter(post => 
+        post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        post.description?.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    if (selectedCategory) {
+      filtered = filtered.filter(post => post.category === selectedCategory);
+    }
+
+    if (dateRange) {
+      filtered = filtered.filter(post => {
+        const postDate = new Date(post.created_at);
+        return postDate >= dateRange.from && postDate <= dateRange.to;
+      });
+    }
+
+    setFilteredPosts(filtered);
+  }, [blogPosts, searchQuery, selectedCategory, dateRange]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -78,6 +111,13 @@ const Blog = () => {
           </p>
         </div>
 
+        <BlogFilters
+          onSearchChange={setSearchQuery}
+          onCategoryChange={setSelectedCategory}
+          onDateChange={setDateRange}
+          categories={categories}
+        />
+
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {Array(6).fill(0).map((_, index) => (
@@ -92,9 +132,9 @@ const Blog = () => {
               </div>
             ))}
           </div>
-        ) : blogPosts.length > 0 ? (
+        ) : filteredPosts.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {blogPosts.map((post) => (
+            {filteredPosts.map((post) => (
               <Link 
                 to={`/blog/${post.slug}`} 
                 key={post.id}
@@ -139,10 +179,12 @@ const Blog = () => {
         ) : (
           <div className="text-center py-12">
             <h3 className="text-xl font-medium text-gray-700 mb-4">No blog posts found</h3>
-            <p className="text-gray-500">Check back later for new content.</p>
+            <p className="text-gray-500">Try adjusting your filters or search criteria.</p>
           </div>
         )}
       </main>
+
+      <Footer />
     </div>
   );
 };
