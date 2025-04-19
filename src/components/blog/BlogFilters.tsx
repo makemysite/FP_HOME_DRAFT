@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/popover";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { format } from "date-fns";
+import { DateRange } from "react-day-picker";
 
 interface BlogFiltersProps {
   onSearchChange: (value: string) => void;
@@ -32,10 +33,24 @@ const BlogFilters = ({
   onDateChange,
   categories,
 }: BlogFiltersProps) => {
-  const [date, setDate] = React.useState<{
-    from: Date;
-    to: Date;
-  } | null>(null);
+  // Update the state type to match DateRange from react-day-picker
+  const [date, setDate] = React.useState<DateRange | undefined>(undefined);
+
+  // Helper function to handle date changes
+  const handleDateSelect = (selectedDateRange: DateRange | undefined) => {
+    setDate(selectedDateRange);
+    
+    // Only call onDateChange if both from and to dates are selected
+    if (selectedDateRange?.from && selectedDateRange?.to) {
+      onDateChange({
+        from: selectedDateRange.from,
+        to: selectedDateRange.to
+      });
+    } else if (selectedDateRange === undefined) {
+      // Clear the filter if date is cleared
+      onDateChange(null);
+    }
+  };
 
   return (
     <div className="w-full mb-8 space-y-4">
@@ -98,12 +113,7 @@ const BlogFilters = ({
               mode="range"
               defaultMonth={date?.from}
               selected={date}
-              onSelect={(dateRange) => {
-                setDate(dateRange);
-                if (dateRange?.from && dateRange?.to) {
-                  onDateChange(dateRange);
-                }
-              }}
+              onSelect={handleDateSelect}
               numberOfMonths={2}
               className="p-3 pointer-events-auto"
             />
