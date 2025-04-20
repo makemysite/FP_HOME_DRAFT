@@ -32,9 +32,10 @@ const Contact = () => {
 
   const onSubmit = async (data: ContactFormData) => {
     try {
+      // Fix: Pass the data object directly instead of as an array
       const { error } = await supabase
         .from('contact_submissions')
-        .insert([data]);
+        .insert(data);
 
       if (error) throw error;
 
