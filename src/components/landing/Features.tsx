@@ -3,10 +3,13 @@ import {
   LayoutDashboard, 
   Wrench, 
   CalendarClock, 
-  Receipt 
+  Receipt,
+  ArrowRight
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useFeatureTransition } from "@/hooks/useFeatureTransition";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 const Features = () => {
   const features = {
@@ -95,8 +98,28 @@ const Features = () => {
             <p className="text-[#202225] text-sm leading-relaxed mb-4">
               {feature.description}
             </p>
+            <Link 
+              to="/features" 
+              className="inline-flex items-center text-[#E98A23] hover:text-[#E98A23]/80 text-sm font-medium"
+              onClick={(e) => e.stopPropagation()}
+            >
+              Learn More
+              <ArrowRight className="ml-1 h-4 w-4" />
+            </Link>
           </div>
         ))}
+      </div>
+
+      <div className="mt-12 text-center">
+        <Link to="/features">
+          <Button 
+            variant="outline" 
+            className="bg-transparent border-2 border-[#E98A23] text-[#E98A23] hover:bg-[#E98A23] hover:text-white transition-all duration-300 text-base px-8 py-6 h-auto"
+          >
+            View All Features
+            <ArrowRight className="ml-2 h-5 w-5" />
+          </Button>
+        </Link>
       </div>
     </section>
   );
