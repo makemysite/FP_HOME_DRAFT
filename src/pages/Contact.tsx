@@ -12,12 +12,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import ClientPageWrapper from "@/components/layout/ClientPageWrapper";
 import { supabase } from "@/integrations/supabase/client";
 
+// Define schema that matches the required fields in the database
 const contactFormSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Please enter a valid email address"),
   message: z.string().min(10, "Message must be at least 10 characters"),
 });
 
+// Update the type to match the schema
 type ContactFormData = z.infer<typeof contactFormSchema>;
 
 const Contact = () => {
@@ -32,7 +34,7 @@ const Contact = () => {
 
   const onSubmit = async (data: ContactFormData) => {
     try {
-      // Fix: Pass the data object directly instead of as an array
+      // The data now matches the expected schema (non-optional fields)
       const { error } = await supabase
         .from('contact_submissions')
         .insert(data);
