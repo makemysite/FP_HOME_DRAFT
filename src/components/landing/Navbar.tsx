@@ -43,6 +43,12 @@ const Navbar: React.FC = () => {
         >
           Blogs
         </Link>
+        <Link
+          to="/contact"
+          className="self-stretch my-auto hover:text-[rgba(233,138,35,1)] transition-colors"
+        >
+          Contact
+        </Link>
       </div>
       <div className="self-stretch flex min-w-60 items-center gap-8 text-lg my-auto">
         <div className="self-stretch text-[rgba(7,15,24,1)] font-normal w-[150px] my-auto rounded-[56px]">
