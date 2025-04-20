@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 
-export const useFeatureTransition = (totalCards: number, autoTransitionDelay: number = 5000) => {
+export const useFeatureTransition = (totalCards: number, autoTransitionDelay: number = 4000) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
 
