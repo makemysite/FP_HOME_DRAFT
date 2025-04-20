@@ -34,10 +34,16 @@ const Contact = () => {
 
   const onSubmit = async (data: ContactFormData) => {
     try {
-      // The data now matches the expected schema (non-optional fields)
+      // Explicitly cast data to the required type to match Supabase's expectations
+      const submissionData = {
+        name: data.name,
+        email: data.email,
+        message: data.message
+      };
+      
       const { error } = await supabase
         .from('contact_submissions')
-        .insert(data);
+        .insert(submissionData);
 
       if (error) throw error;
 
