@@ -1,4 +1,3 @@
-
 import React from "react";
 import { 
   LayoutDashboard, 
@@ -52,8 +51,7 @@ const Features = () => {
         Automate Your Service Business With Our Exclusive Features
       </div>
       
-      {/* Hero Image Section */}
-      <div className="relative w-full max-w-[800px] aspect-[16/9] mt-12 mb-16 overflow-hidden">
+      <div className="relative w-full max-w-[1000px] aspect-[16/9] mt-12 mb-16 overflow-hidden">
         {featureEntries.map(([key, feature], index) => (
           <img
             key={key}
@@ -71,7 +69,6 @@ const Features = () => {
         ))}
       </div>
 
-      {/* Feature Cards */}
       <div className="w-full max-w-[1200px] grid grid-cols-1 md:grid-cols-4 gap-6 px-4">
         {featureEntries.map(([key, feature], index) => (
           <div
