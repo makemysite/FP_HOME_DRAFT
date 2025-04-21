@@ -13,6 +13,7 @@ interface BlogContent {
   alt?: string;
   caption?: string;
   content?: any; // Added to handle nested content objects
+  level?: number; // For heading levels
 }
 
 interface BlogSection {
@@ -47,12 +48,24 @@ interface BlogRendererProps {
 const BlogRenderer = ({ post }: BlogRendererProps) => {
   // Render content based on type
   const renderContent = (content: BlogContent) => {
+    if (!content) return null;
+    
     if (content.type === "text") {
       // Use ReactMarkdown to render Markdown content
       return (
         <div className="prose max-w-none dark:prose-invert blog-post-content">
           <ReactMarkdown>{content.text || ""}</ReactMarkdown>
         </div>
+      );
+    } else if (content.type === "heading") {
+      // Handle headings of different levels
+      const level = content.level || 3; // Default to h3 if level not specified
+      const HeadingTag = `h${level}` as keyof JSX.IntrinsicElements;
+      
+      return (
+        <HeadingTag className={`text-${level === 3 ? 'xl' : level === 4 ? 'lg' : 'md'} font-bold my-4`}>
+          {content.text || ""}
+        </HeadingTag>
       );
     } else if (content.type === "image") {
       // Check both content.src and content.content?.src/url for image source
@@ -74,6 +87,28 @@ const BlogRenderer = ({ post }: BlogRendererProps) => {
           )}
         </figure>
       );
+    } else if (content.type === "list") {
+      // Handle list content
+      const listItems = content.content?.items || [];
+      const isOrdered = content.content?.ordered === true;
+      
+      if (isOrdered) {
+        return (
+          <ol className="blog-post-content list-decimal pl-5 my-4">
+            {listItems.map((item: string, index: number) => (
+              <li key={index}>{item}</li>
+            ))}
+          </ol>
+        );
+      } else {
+        return (
+          <ul className="blog-post-content list-disc pl-5 my-4">
+            {listItems.map((item: string, index: number) => (
+              <li key={index}>{item}</li>
+            ))}
+          </ul>
+        );
+      }
     }
     return null;
   };
@@ -97,6 +132,21 @@ const BlogRenderer = ({ post }: BlogRendererProps) => {
     });
   };
 
+  // Render standalone content (content that's not part of a section)
+  const renderStandaloneContent = (content: BlogContent[]) => {
+    if (!content || content.length === 0) return null;
+    
+    return (
+      <div className="blog-standalone-content mb-10">
+        {content.map((item) => (
+          <div key={item.id} className="mb-4">
+            {renderContent(item)}
+          </div>
+        ))}
+      </div>
+    );
+  };
+
   // Render conclusion
   const renderConclusion = () => {
     if (!post.conclusion) return null;
@@ -110,6 +160,23 @@ const BlogRenderer = ({ post }: BlogRendererProps) => {
       </section>
     );
   };
+
+  // Check if post has standalone content
+  const hasStandaloneContent = post.sections && post.sections.some(section => 
+    !section.title && section.content && section.content.length > 0
+  );
+
+  // Filter sections into those with titles and those without
+  const titledSections = post.sections ? post.sections.filter(section => section.title) : [];
+  const untitledSections = post.sections ? post.sections.filter(section => !section.title) : [];
+  
+  // Combine all content from untitled sections
+  const standaloneContent = untitledSections.reduce((acc: BlogContent[], section) => {
+    if (section.content && section.content.length > 0) {
+      acc.push(...section.content);
+    }
+    return acc;
+  }, []);
 
   return (
     <article className="max-w-3xl mx-auto px-4 py-8">
@@ -137,14 +204,17 @@ const BlogRenderer = ({ post }: BlogRendererProps) => {
         )}
       </header>
 
-      {/* Table of Contents */}
-      {post.sections && post.sections.length > 0 && (
-        <TableOfContents sections={post.sections} />
+      {/* Table of Contents - only show for titled sections */}
+      {titledSections.length > 0 && (
+        <TableOfContents sections={titledSections} />
       )}
 
-      {/* Main Content */}
+      {/* Standalone Content (without section titles) */}
+      {standaloneContent.length > 0 && renderStandaloneContent(standaloneContent)}
+
+      {/* Main Content - Sections with titles */}
       <div className="blog-content-wrapper">
-        {renderSections(post.sections || [])}
+        {renderSections(titledSections)}
         {renderConclusion()}
         {post.faqs && post.faqs.length > 0 && <FAQAccordion faqs={post.faqs} />}
       </div>
