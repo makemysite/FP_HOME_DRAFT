@@ -1,6 +1,7 @@
 
 import React, { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 interface DemoFormProps {
   className?: string;
@@ -10,6 +11,7 @@ const DemoForm: React.FC<DemoFormProps> = ({ className }) => {
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,8 +42,6 @@ const DemoForm: React.FC<DemoFormProps> = ({ className }) => {
         throw new Error(errorData.error || 'Failed to submit request');
       }
       
-      const result = await response.json();
-      
       // Show success message
       toast({
         title: "Demo requested!",
@@ -49,11 +49,9 @@ const DemoForm: React.FC<DemoFormProps> = ({ className }) => {
         duration: 3000,
       });
 
-      console.log("Redirecting to:", result.redirectUrl);
-
-      // Redirect to Calendly
+      // Redirect to internal booking page with email parameter
       setTimeout(() => {
-        window.location.href = result.redirectUrl;
+        navigate(`/booking?email=${encodeURIComponent(email)}`);
       }, 1500);
       
     } catch (error) {
@@ -86,9 +84,7 @@ const DemoForm: React.FC<DemoFormProps> = ({ className }) => {
         disabled={isSubmitting}
         className="bg-[rgba(233,138,35,1)] shadow-[0px_3px_12px_rgba(74,58,255,0.18)] min-h-[55px] text-white font-medium leading-none px-[39px] py-[18px] rounded-[56px] hover:bg-[rgba(233,138,35,0.9)] transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
       >
-        {isSubmitting
-          ? "Processing..."
-          : "Take a Demo"}
+        {isSubmitting ? "Processing..." : "Take a Demo"}
       </button>
     </form>
   );

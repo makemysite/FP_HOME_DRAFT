@@ -1,7 +1,10 @@
 
 import React, { useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 
 const Booking = () => {
+  const location = useLocation();
+
   useEffect(() => {
     // Load Calendly widget script
     const script = document.createElement('script');
@@ -11,9 +14,15 @@ const Booking = () => {
 
     return () => {
       // Cleanup script when component unmounts
-      document.body.removeChild(script);
+      if (document.body.contains(script)) {
+        document.body.removeChild(script);
+      }
     };
   }, []);
+
+  // Get email from URL parameters
+  const searchParams = new URLSearchParams(location.search);
+  const email = searchParams.get('email');
 
   return (
     <div className="min-h-screen bg-white">
@@ -22,7 +31,7 @@ const Booking = () => {
           <h1 className="text-3xl font-bold text-center mb-8">Schedule Your Free Demo</h1>
           <div 
             className="calendly-inline-widget rounded-lg shadow-lg" 
-            data-url="https://calendly.com/fieldpromaxapp"
+            data-url={`https://calendly.com/fieldpromaxapp${email ? `?email=${encodeURIComponent(email)}` : ''}`}
             style={{ minWidth: '320px', height: '700px' }}
           />
         </div>

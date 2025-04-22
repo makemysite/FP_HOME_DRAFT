@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
@@ -44,9 +45,9 @@ const Hero: React.FC = () => {
         duration: 3000,
       });
 
-      // Redirect to internal booking page
+      // Redirect to internal booking page with email parameter
       setTimeout(() => {
-        navigate('/booking');
+        navigate(`/booking?email=${encodeURIComponent(email)}`);
       }, 1500);
       
     } catch (error) {
