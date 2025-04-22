@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 const Hero: React.FC = () => {
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,8 +37,6 @@ const Hero: React.FC = () => {
         throw new Error(errorData.error || 'Failed to submit request');
       }
       
-      const result = await response.json();
-      
       // Show success message
       toast({
         title: "Free trial requested!",
@@ -44,11 +44,9 @@ const Hero: React.FC = () => {
         duration: 3000,
       });
 
-      console.log("Redirecting to:", result.redirectUrl);
-
-      // Redirect to Calendly
+      // Redirect to internal booking page
       setTimeout(() => {
-        window.location.href = result.redirectUrl;
+        navigate('/booking');
       }, 1500);
       
     } catch (error) {
