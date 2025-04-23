@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -15,8 +16,7 @@ import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
 import Booking from "./pages/Booking";
 import FreeTools from "./pages/FreeTools";
-import CalculatorTool from "./pages/CalculatorTool";
-import "./styles/blog.css";
+import CalculatorTool from "./pages/tools/Calculator";
 
 const queryClient = new QueryClient({
   defaultOptions: {
