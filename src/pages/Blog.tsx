@@ -114,7 +114,7 @@ const Blog = () => {
         <BlogFilters
           onSearchChange={setSearchQuery}
           onCategoryChange={setSelectedCategory}
-          onDateChange={setDateRange}
+          onDateRange={setDateRange}
           categories={categories}
         />
 
