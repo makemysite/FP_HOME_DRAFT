@@ -23,14 +23,14 @@ import { DateRange } from "react-day-picker";
 interface BlogFiltersProps {
   onSearchChange: (value: string) => void;
   onCategoryChange: (category: string | null) => void;
-  onDateChange: (dateRange: { from: Date; to: Date } | null) => void;
+  onDateRange: (dateRange: { from: Date; to: Date } | null) => void;
   categories: string[];
 }
 
 const BlogFilters = ({
   onSearchChange,
   onCategoryChange,
-  onDateChange,
+  onDateRange,
   categories,
 }: BlogFiltersProps) => {
   // Update the state type to match DateRange from react-day-picker
@@ -40,15 +40,15 @@ const BlogFilters = ({
   const handleDateSelect = (selectedDateRange: DateRange | undefined) => {
     setDate(selectedDateRange);
     
-    // Only call onDateChange if both from and to dates are selected
+    // Only call onDateRange if both from and to dates are selected
     if (selectedDateRange?.from && selectedDateRange?.to) {
-      onDateChange({
+      onDateRange({
         from: selectedDateRange.from,
         to: selectedDateRange.to
       });
     } else if (selectedDateRange === undefined) {
       // Clear the filter if date is cleared
-      onDateChange(null);
+      onDateRange(null);
     }
   };
 
