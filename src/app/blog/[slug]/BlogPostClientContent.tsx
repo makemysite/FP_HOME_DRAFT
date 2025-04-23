@@ -7,12 +7,17 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 
 interface BlogPostClientContentProps {
-  post: any;
+  initialPost?: any;
+  post?: any;
+  slug?: string;
   loading?: boolean;
   error?: string | null;
 }
 
-const BlogPostClientContent = ({ post, loading, error }: BlogPostClientContentProps) => {
+const BlogPostClientContent = ({ initialPost, post, slug, loading, error }: BlogPostClientContentProps) => {
+  // Use initialPost if provided, otherwise use post
+  const blogPost = initialPost || post;
+  
   if (loading) {
     return (
       <div className="space-y-6">
@@ -31,7 +36,7 @@ const BlogPostClientContent = ({ post, loading, error }: BlogPostClientContentPr
     );
   }
 
-  if (error || !post) {
+  if (error || !blogPost) {
     return (
       <div className="text-center py-12">
         <h3 className="text-xl font-medium text-gray-700 mb-4">{error || "Blog post not found"}</h3>
@@ -55,7 +60,7 @@ const BlogPostClientContent = ({ post, loading, error }: BlogPostClientContentPr
         </Button>
         
         <div className="bg-white rounded-lg overflow-hidden">
-          <BlogRenderer post={post} />
+          <BlogRenderer post={blogPost} />
         </div>
       </div>
     </div>
