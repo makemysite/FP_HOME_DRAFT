@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -24,6 +25,7 @@ export default function BlogClientContent() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [dateRange, setDateRange] = useState<{ from: Date; to: Date } | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
   const categories = ["Industry Insights", "Field Operations", "Technology Trends", "Growth"];
@@ -31,6 +33,7 @@ export default function BlogClientContent() {
   useEffect(() => {
     const fetchBlogPosts = async () => {
       try {
+        console.log('Fetching blog posts...');
         const { data, error } = await supabase
           .from('blog_posts')
           .select('id, slug, title, description, hero_image, created_at, category')
@@ -39,6 +42,7 @@ export default function BlogClientContent() {
         
         if (error) {
           console.error('Error fetching blog posts:', error);
+          setError(`Failed to load blog posts: ${error.message}`);
           toast({
             title: "Error",
             description: "Failed to load blog posts. Please try again later.",
@@ -47,10 +51,12 @@ export default function BlogClientContent() {
           return;
         }
         
+        console.log('Blog posts fetched successfully:', data?.length);
         setBlogPosts(data || []);
         setFilteredPosts(data || []);
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error fetching blog posts:', error);
+        setError(`Failed to load blog posts: ${error.message || 'Unknown error'}`);
         toast({
           title: "Error",
           description: "Failed to load blog posts. Please try again later.",
@@ -114,12 +120,27 @@ export default function BlogClientContent() {
     );
   }
 
+  if (error) {
+    return (
+      <div className="text-center py-12">
+        <h3 className="text-xl font-medium text-gray-700 mb-4">Error Loading Blog Posts</h3>
+        <p className="text-gray-500 mb-6">{error}</p>
+        <button 
+          onClick={() => window.location.reload()} 
+          className="bg-[#E98A23] text-white px-6 py-2 rounded-lg hover:bg-opacity-90 transition-colors"
+        >
+          Try Again
+        </button>
+      </div>
+    );
+  }
+
   return (
     <>
       <BlogFilters
         onSearchChange={setSearchQuery}
         onCategoryChange={setSelectedCategory}
-        onDateChange={setDateRange}
+        onDateRange={setDateRange}
         categories={categories}
       />
       
