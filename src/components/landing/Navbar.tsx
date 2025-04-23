@@ -32,6 +32,12 @@ const Navbar: React.FC = () => {
           Pricing
         </Link>
         <Link
+          to="/tools"
+          className="self-stretch my-auto hover:text-[rgba(233,138,35,1)] transition-colors"
+        >
+          Tools
+        </Link>
+        <Link
           to="/industries"
           className="self-stretch my-auto hover:text-[rgba(233,138,35,1)] transition-colors"
         >

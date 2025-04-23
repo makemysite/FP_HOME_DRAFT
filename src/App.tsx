@@ -14,6 +14,8 @@ import BlogPost from "./pages/BlogPost";
 import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
 import Booking from "./pages/Booking";
+import FreeTools from "./pages/FreeTools";
+import CalculatorTool from "./pages/CalculatorTool";
 import "./styles/blog.css";
 
 const queryClient = new QueryClient({
@@ -41,6 +43,8 @@ const App = () => {
               <Route path="/blog/:slug" element={<BlogPost />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/booking" element={<Booking />} />
+              <Route path="/tools" element={<FreeTools />} />
+              <Route path="/tools/calculator" element={<CalculatorTool />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
             <Toaster />
