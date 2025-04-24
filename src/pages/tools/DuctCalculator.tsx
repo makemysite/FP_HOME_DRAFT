@@ -9,7 +9,7 @@ import { Wrench, Circle, Square } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import BenefitsSection from "@/components/tools/duct-calculator/BenefitsSection";
 import InstructionsSection from "@/components/tools/duct-calculator/InstructionsSection";
-import CalculationMethodSection;
+import CalculationMethodSection from "@/components/tools/duct-calculator/CalculationMethodSection";
 
 interface DuctSizeResult {
   width?: number;
