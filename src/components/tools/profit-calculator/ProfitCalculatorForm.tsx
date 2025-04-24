@@ -7,7 +7,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import ResultsDisplay from "./ResultsDisplay";
-import { Calculator, Reset } from "lucide-react";
+import { Calculator, RotateCcw } from "lucide-react"; // Replace 'Reset' with 'RotateCcw'
 
 const formSchema = z.object({
   revenue: z.string().refine((val) => !isNaN(Number(val)) && Number(val) >= 0, {
@@ -93,7 +93,7 @@ const ProfitCalculatorForm = () => {
               Calculate
             </Button>
             <Button type="button" variant="outline" onClick={handleReset} className="w-full md:w-auto">
-              <Reset className="w-4 h-4 mr-2" />
+              <RotateCcw className="w-4 h-4 mr-2" /> {/* Replaced 'Reset' with 'RotateCcw' */}
               Reset
             </Button>
           </div>
