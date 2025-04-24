@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import ClientPageWrapper from "@/components/layout/ClientPageWrapper";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -34,7 +33,7 @@ const DuctCalculator = () => {
   const [result, setResult] = useState<DuctCalculationResult | null>(null);
 
   const calculateDuct = () => {
-    if (!airflow || !maxVelocity || !maxStaticLoss) {
+    if (!airflow || !maxVelocity || maxStaticLoss === 0) {
       toast({
         title: "Missing Required Values",
         description: "Please enter airflow, maximum velocity, and maximum static pressure loss.",
@@ -61,22 +60,17 @@ const DuctCalculator = () => {
       return;
     }
 
-    // Calculate duct area
     const area = ductShape === "round" 
       ? (Math.PI * Math.pow(diameter / 12, 2)) / 4
       : (width / 12) * (height / 12);
 
-    // Calculate actual velocity
     const actualVelocity = airflow / area;
 
-    // Determine velocity status
     const velocityStatus = actualVelocity <= maxVelocity ? "within" : "exceeds";
 
-    // Calculate static loss
     const staticLossPerHundred = Math.pow(actualVelocity / maxVelocity, 2) * maxStaticLoss;
     const totalStaticLoss = (ductLength / 100) * staticLossPerHundred;
 
-    // Determine friction status
     const frictionStatus = totalStaticLoss <= maxStaticLoss ? "within" : "exceeds";
 
     setResult({
@@ -141,9 +135,11 @@ const DuctCalculator = () => {
                 <Label>Maximum Static Pressure Loss (inches of water per 100 ft)</Label>
                 <Input
                   type="number"
+                  step="0.01"
+                  min="0"
                   value={maxStaticLoss || ''}
-                  onChange={(e) => setMaxStaticLoss(Number(e.target.value))}
-                  placeholder="Enter maximum static pressure loss"
+                  onChange={(e) => setMaxStaticLoss(Number(parseFloat(e.target.value).toFixed(2)))}
+                  placeholder="Enter maximum static pressure loss (e.g., 0.10)"
                 />
               </div>
 
