@@ -252,17 +252,11 @@ const DuctCalculator = () => {
 
         <div className="my-8 bg-gradient-to-r from-[#E98A23] to-[#F9B348] p-8 rounded-lg text-white shadow-lg">
           <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-3xl font-bold mb-4">Simplify Your HVAC Design Today</h2>
-            <p className="text-lg mb-6 opacity-90">
-              Take the complexity out of duct sizing with our precision calculator. 
-              Save time, reduce errors, and boost your project efficiency.
+            <h2 className="text-3xl font-bold mb-4">Enhance Your HVAC Design Process</h2>
+            <p className="text-lg mb-0 opacity-90">
+              Our Duct Calculator provides precise, easy-to-use tools for professionals and DIY enthusiasts. 
+              Streamline your ductwork design with accurate, real-time calculations.
             </p>
-            <a 
-              href="/contact" 
-              className="inline-block bg-white text-[#E98A23] font-semibold px-8 py-3 rounded-full hover:bg-gray-100 transition-colors"
-            >
-              Get Started Now
-            </a>
           </div>
         </div>
       </div>
