@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import ClientPageWrapper from "@/components/layout/ClientPageWrapper";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,6 +5,9 @@ import { Calculator } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import SalaryCalculatorForm from "@/components/tools/salary-calculator/SalaryCalculatorForm";
 import ResultsDisplay from "@/components/tools/salary-calculator/ResultsDisplay";
+import DescriptionSection from "@/components/tools/salary-calculator/DescriptionSection";
+import UsageInstructions from "@/components/tools/salary-calculator/UsageInstructions";
+import AdditionalInfo from "@/components/tools/salary-calculator/AdditionalInfo";
 
 type CalculationResults = {
   annualSalary: number;
@@ -51,32 +53,31 @@ const SalaryCalculator = () => {
   };
 
   return (
-    <ClientPageWrapper
-      title="Salary to Hourly Calculator"
-      description="Convert your annual salary to hourly, monthly, and weekly rates"
-    >
-      <div className="max-w-3xl mx-auto px-4">
-        <div className="prose max-w-none mb-8">
-          <p className="text-lg text-gray-700">
-            This calculator helps you convert your annual salary into hourly, monthly, and weekly rates. 
-            Simply enter your salary information below to get started.
-          </p>
+    <ClientPageWrapper title="Salary to Hourly Calculator">
+      <div className="max-w-4xl mx-auto px-4">
+        <DescriptionSection />
+
+        <div className="my-8">
+          <Card>
+            <CardHeader>
+              <div className="flex items-center space-x-3">
+                <Calculator className="w-6 h-6 text-[#E98A23]" />
+                <CardTitle>Salary Calculator</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-8">
+                <SalaryCalculatorForm onCalculate={calculateResults} />
+                {results && <ResultsDisplay results={results} />}
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
-        <Card className="mb-8">
-          <CardHeader>
-            <div className="flex items-center space-x-3">
-              <Calculator className="w-6 h-6 text-[#E98A23]" />
-              <CardTitle>Salary Calculator</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-8">
-              <SalaryCalculatorForm onCalculate={calculateResults} />
-              {results && <ResultsDisplay results={results} />}
-            </div>
-          </CardContent>
-        </Card>
+        <div className="grid gap-8 md:grid-cols-2">
+          <UsageInstructions />
+          <AdditionalInfo />
+        </div>
       </div>
     </ClientPageWrapper>
   );
