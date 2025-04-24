@@ -3,6 +3,8 @@ import React from "react";
 import ClientPageWrapper from "@/components/layout/ClientPageWrapper";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartBar } from "lucide-react";
+import ProfitCalculatorForm from "@/components/tools/profit-calculator/ProfitCalculatorForm";
+import InstructionsSection from "@/components/tools/profit-calculator/InstructionsSection";
 
 const ProfitCalculator = () => {
   return (
@@ -10,7 +12,7 @@ const ProfitCalculator = () => {
       title="Profit Margin Calculator"
       description="Calculate your profit margins instantly"
     >
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-4xl mx-auto space-y-8">
         <Card>
           <CardHeader>
             <div className="flex items-center space-x-3">
@@ -19,11 +21,11 @@ const ProfitCalculator = () => {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-center p-4">
-              Coming soon! This calculator will help you determine your profit margins.
-            </div>
+            <ProfitCalculatorForm />
           </CardContent>
         </Card>
+
+        <InstructionsSection />
       </div>
     </ClientPageWrapper>
   );
