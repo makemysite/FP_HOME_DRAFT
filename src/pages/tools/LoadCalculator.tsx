@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import ClientPageWrapper from "@/components/layout/ClientPageWrapper";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,6 +9,8 @@ import { calculateHVACLoad } from "@/services/hvacCalculator";
 import BuildingInfoForm from "@/components/tools/load-calculator/BuildingInfoForm";
 import ResultsDisplay from "@/components/tools/load-calculator/ResultsDisplay";
 import InformationSection from "@/components/tools/load-calculator/InformationSection";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 const LoadCalculator = () => {
   const { toast } = useToast();
@@ -41,7 +42,6 @@ const LoadCalculator = () => {
   };
   
   const validateInputs = () => {
-    // Check for missing values
     const requiredFields = Object.entries(buildingInfo).filter(
       ([_, value]) => value === 0 || value === ""
     );
@@ -55,7 +55,6 @@ const LoadCalculator = () => {
       return false;
     }
     
-    // Temperature validation
     if (buildingInfo.outsideTemperatureF === buildingInfo.desiredIndoorTemperatureF) {
       toast({
         title: "Invalid Temperatures",
@@ -90,6 +89,12 @@ const LoadCalculator = () => {
     }
   };
   
+  const navigate = useNavigate();
+
+  const handleBookDemo = () => {
+    navigate("/booking");
+  };
+
   return (
     <ClientPageWrapper
       title="HVAC Load Calculator"
@@ -140,17 +145,18 @@ const LoadCalculator = () => {
 
         <div className="bg-gradient-to-r from-[#E98A23] to-[#F9B348] p-8 rounded-lg text-white shadow-lg">
           <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-3xl font-bold mb-4">Try Field Promax Free for 14 Days</h2>
+            <h2 className="text-2xl font-bold mb-4">
+              Take your HVAC business to the next level with Field Promax
+            </h2>
             <p className="text-lg mb-6 opacity-90">
-              Experience the full power of our field service management platform. 
-              No credit card required. Cancel anytime.
+              The key to smarter operations and greater profits.
             </p>
-            <a 
-              href="/booking" 
-              className="inline-block bg-white text-[#E98A23] font-semibold px-8 py-3 rounded-full hover:bg-gray-100 transition-colors"
+            <Button 
+              onClick={handleBookDemo}
+              className="bg-white text-[#E98A23] font-semibold px-8 py-3 rounded-full hover:bg-gray-100 transition-colors"
             >
               Book Your Free Demo
-            </a>
+            </Button>
           </div>
         </div>
       </div>
