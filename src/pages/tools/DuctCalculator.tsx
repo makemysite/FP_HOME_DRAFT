@@ -1,74 +1,92 @@
-import React, { useState } from "react";
+
+import React, { useState, useEffect } from "react";
 import ClientPageWrapper from "@/components/layout/ClientPageWrapper";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Wrench, Circle, Square } from "lucide-react";
+import { Wrench, Circle, Square, CircleCheck, CircleX } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import BenefitsSection from "@/components/tools/duct-calculator/BenefitsSection";
 import InstructionsSection from "@/components/tools/duct-calculator/InstructionsSection";
 import CalculationMethodSection from "@/components/tools/duct-calculator/CalculationMethodSection";
 
-interface DuctSizeResult {
-  width?: number;
-  height?: number;
-  diameter?: number;
-  pressureLoss?: number;
+interface DuctCalculationResult {
+  area: number;
+  actualVelocity: number;
+  velocityStatus: "within" | "exceeds";
+  staticLossPerHundred: number;
+  totalStaticLoss: number;
+  frictionStatus: "within" | "exceeds";
 }
-
-const getVelocityForStaticLoss = (staticLoss: number, airflow: number): number => {
-  const baseVelocity = 1000;
-  const adjustmentFactor = Math.sqrt(staticLoss);
-  return baseVelocity * adjustmentFactor;
-};
 
 const DuctCalculator = () => {
   const { toast } = useToast();
   const [airflow, setAirflow] = useState<number>(0);
+  const [maxVelocity, setMaxVelocity] = useState<number>(0);
+  const [maxStaticLoss, setMaxStaticLoss] = useState<number>(0);
   const [ductShape, setDuctShape] = useState<"round" | "rectangular">("round");
-  const [maxStaticLoss, setMaxStaticLoss] = useState<number>(0.1);
   const [ductLength, setDuctLength] = useState<number>(100);
-  const [aspectRatio, setAspectRatio] = useState<number>(2);
-  const [result, setResult] = useState<DuctSizeResult | null>(null);
+  const [diameter, setDiameter] = useState<number>(0);
+  const [width, setWidth] = useState<number>(0);
+  const [height, setHeight] = useState<number>(0);
+  const [result, setResult] = useState<DuctCalculationResult | null>(null);
 
-  const calculateDuctSize = () => {
-    if (!airflow || !maxStaticLoss) {
+  const calculateDuct = () => {
+    if (!airflow || !maxVelocity || !maxStaticLoss) {
       toast({
-        title: "Missing Values",
-        description: "Please enter airflow and maximum static pressure loss.",
+        title: "Missing Required Values",
+        description: "Please enter airflow, maximum velocity, and maximum static pressure loss.",
         variant: "destructive",
       });
       return;
     }
 
-    const velocity = getVelocityForStaticLoss(maxStaticLoss, airflow);
-
-    const area = airflow / velocity;
-    let calculatedResult: DuctSizeResult = {};
-
-    if (ductShape === "round") {
-      const diameter = Math.sqrt((4 * area) / Math.PI);
-      calculatedResult.diameter = Math.round(diameter * 12 * 100) / 100;
-    } else {
-      if (!aspectRatio) {
-        toast({
-          title: "Missing Value",
-          description: "Please enter an aspect ratio for rectangular duct.",
-          variant: "destructive",
-        });
-        return;
-      }
-      const height = Math.sqrt(area / aspectRatio);
-      const width = aspectRatio * height;
-      calculatedResult.width = Math.round(width * 12 * 100) / 100;
-      calculatedResult.height = Math.round(height * 12 * 100) / 100;
+    if (ductShape === "round" && !diameter) {
+      toast({
+        title: "Missing Value",
+        description: "Please enter duct diameter.",
+        variant: "destructive",
+      });
+      return;
     }
 
-    calculatedResult.pressureLoss = Math.round((ductLength / 100) * maxStaticLoss * 1000) / 1000;
+    if (ductShape === "rectangular" && (!width || !height)) {
+      toast({
+        title: "Missing Values",
+        description: "Please enter both width and height for rectangular duct.",
+        variant: "destructive",
+      });
+      return;
+    }
 
-    setResult(calculatedResult);
+    // Calculate duct area
+    const area = ductShape === "round" 
+      ? (Math.PI * Math.pow(diameter / 12, 2)) / 4
+      : (width / 12) * (height / 12);
+
+    // Calculate actual velocity
+    const actualVelocity = airflow / area;
+
+    // Determine velocity status
+    const velocityStatus = actualVelocity <= maxVelocity ? "within" : "exceeds";
+
+    // Calculate static loss
+    const staticLossPerHundred = Math.pow(actualVelocity / maxVelocity, 2) * maxStaticLoss;
+    const totalStaticLoss = (ductLength / 100) * staticLossPerHundred;
+
+    // Determine friction status
+    const frictionStatus = totalStaticLoss <= maxStaticLoss ? "within" : "exceeds";
+
+    setResult({
+      area,
+      actualVelocity,
+      velocityStatus,
+      staticLossPerHundred,
+      totalStaticLoss,
+      frictionStatus
+    });
   };
 
   return (
@@ -110,6 +128,16 @@ const DuctCalculator = () => {
               </div>
               
               <div>
+                <Label>Maximum Velocity (FPM)</Label>
+                <Input
+                  type="number"
+                  value={maxVelocity || ''}
+                  onChange={(e) => setMaxVelocity(Number(e.target.value))}
+                  placeholder="Enter maximum velocity"
+                />
+              </div>
+
+              <div>
                 <Label>Maximum Static Pressure Loss (inches of water per 100 ft)</Label>
                 <Input
                   type="number"
@@ -140,16 +168,37 @@ const DuctCalculator = () => {
                 </Select>
               </div>
 
-              {ductShape === "rectangular" && (
+              {ductShape === "round" ? (
                 <div>
-                  <Label>Aspect Ratio (Width:Height)</Label>
+                  <Label>Diameter (inches)</Label>
                   <Input
                     type="number"
-                    value={aspectRatio || ''}
-                    onChange={(e) => setAspectRatio(Number(e.target.value))}
-                    placeholder="Enter ratio (e.g., 2 for 2:1 width:height)"
+                    value={diameter || ''}
+                    onChange={(e) => setDiameter(Number(e.target.value))}
+                    placeholder="Enter duct diameter"
                   />
                 </div>
+              ) : (
+                <>
+                  <div>
+                    <Label>Width (inches)</Label>
+                    <Input
+                      type="number"
+                      value={width || ''}
+                      onChange={(e) => setWidth(Number(e.target.value))}
+                      placeholder="Enter duct width"
+                    />
+                  </div>
+                  <div>
+                    <Label>Height (inches)</Label>
+                    <Input
+                      type="number"
+                      value={height || ''}
+                      onChange={(e) => setHeight(Number(e.target.value))}
+                      placeholder="Enter duct height"
+                    />
+                  </div>
+                </>
               )}
 
               <div>
@@ -163,7 +212,7 @@ const DuctCalculator = () => {
               </div>
 
               <Button 
-                onClick={calculateDuctSize}
+                onClick={calculateDuct}
                 className="bg-[#E98A23] hover:bg-[#d47b1e]"
               >
                 Calculate
@@ -172,12 +221,28 @@ const DuctCalculator = () => {
               {result && (
                 <div className="space-y-4 p-4 border rounded-lg bg-gray-50">
                   <h3 className="text-lg font-semibold">Results:</h3>
-                  {ductShape === "round" ? (
-                    <p>Round duct diameter: {result.diameter} inches</p>
-                  ) : (
-                    <p>Rectangular duct size: {result.width} in × {result.height} in</p>
-                  )}
-                  <p>Estimated Total Static Pressure Loss: {result.pressureLoss} inches of water</p>
+                  <div className="space-y-2">
+                    <p>Airflow Rate: {airflow} CFM</p>
+                    <p>Duct Area: {result.area.toFixed(2)} ft²</p>
+                    <div className="flex items-center gap-2">
+                      <p>Velocity: {result.actualVelocity.toFixed(2)} FPM</p>
+                      {result.velocityStatus === "within" ? (
+                        <CircleCheck className="text-green-500 w-5 h-5" />
+                      ) : (
+                        <CircleX className="text-red-500 w-5 h-5" />
+                      )}
+                    </div>
+                    <p>Static Loss per 100ft: {result.staticLossPerHundred.toFixed(3)} inWG</p>
+                    <p>Total Static Loss: {result.totalStaticLoss.toFixed(3)} inWG</p>
+                    <div className="flex items-center gap-2">
+                      <p>Friction Status:</p>
+                      {result.frictionStatus === "within" ? (
+                        <span className="text-green-500 font-medium">Within acceptable range</span>
+                      ) : (
+                        <span className="text-red-500 font-medium">Exceeds static loss allowance</span>
+                      )}
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
