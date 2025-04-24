@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import ClientPageWrapper from "@/components/layout/ClientPageWrapper";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,7 +10,7 @@ import { Wrench, Circle, Square, CircleCheck, CircleX } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import BenefitsSection from "@/components/tools/duct-calculator/BenefitsSection";
 import InstructionsSection from "@/components/tools/duct-calculator/InstructionsSection";
-import CalculationMethodSection;
+import CalculationMethodSection from "@/components/tools/duct-calculator/CalculationMethodSection";
 
 interface DuctCalculationResult {
   area: number;
