@@ -138,12 +138,12 @@ const DuctCalculator = () => {
               {ductShape === "rectangular" && (
                 <>
                   <div>
-                    <Label>Aspect Ratio (width:height)</Label>
+                    <Label>Aspect Ratio (Width:Height)</Label>
                     <Input
                       type="number"
                       value={aspectRatio || ''}
                       onChange={(e) => setAspectRatio(Number(e.target.value))}
-                      placeholder="Enter aspect ratio (e.g., 2 for 2:1)"
+                      placeholder="Enter ratio (e.g., 2 for 2:1 width:height)"
                     />
                   </div>
                   <div className="space-y-2">
