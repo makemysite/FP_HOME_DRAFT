@@ -1,29 +1,158 @@
 
-import React from "react";
+import React, { useState } from "react";
 import ClientPageWrapper from "@/components/layout/ClientPageWrapper";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calculator } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Thermometer } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { BuildingInfo, HVACLoadResult } from "@/types/hvacTypes";
+import { calculateHVACLoad } from "@/services/hvacCalculator";
+import BuildingInfoForm from "@/components/tools/load-calculator/BuildingInfoForm";
+import ResultsDisplay from "@/components/tools/load-calculator/ResultsDisplay";
+import InformationSection from "@/components/tools/load-calculator/InformationSection";
 
 const LoadCalculator = () => {
+  const { toast } = useToast();
+  const [activeTab, setActiveTab] = useState<string>("input");
+  
+  const [buildingInfo, setBuildingInfo] = useState<BuildingInfo>({
+    buildingLocation: "south",
+    buildingAreaSqft: 1500,
+    ceilingHeightFt: 8,
+    insulationType: "average",
+    numberOfWindows: 8,
+    windowType: "double-pane",
+    numberOfExteriorDoors: 2,
+    doorType: "insulated",
+    numberOfOccupants: 4,
+    numberOfAppliances: 5,
+    lightingWattageTotal: 500,
+    outsideTemperatureF: 95,
+    desiredIndoorTemperatureF: 75
+  });
+  
+  const [results, setResults] = useState<HVACLoadResult | null>(null);
+  
+  const handleFieldChange = (field: keyof BuildingInfo, value: any) => {
+    setBuildingInfo(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+  
+  const validateInputs = () => {
+    // Check for missing values
+    const requiredFields = Object.entries(buildingInfo).filter(
+      ([_, value]) => value === 0 || value === ""
+    );
+    
+    if (requiredFields.length > 0) {
+      toast({
+        title: "Missing Values",
+        description: "Please fill in all required fields before calculating.",
+        variant: "destructive",
+      });
+      return false;
+    }
+    
+    // Temperature validation
+    if (buildingInfo.outsideTemperatureF === buildingInfo.desiredIndoorTemperatureF) {
+      toast({
+        title: "Invalid Temperatures",
+        description: "Outside and inside temperatures cannot be the same.",
+        variant: "destructive",
+      });
+      return false;
+    }
+    
+    return true;
+  };
+  
+  const calculateLoads = () => {
+    if (!validateInputs()) return;
+    
+    try {
+      const calculatedResults = calculateHVACLoad(buildingInfo);
+      setResults(calculatedResults);
+      setActiveTab("results");
+      
+      toast({
+        title: "Calculation Complete",
+        description: "HVAC load calculation results are ready to view.",
+      });
+    } catch (error) {
+      console.error("Calculation error:", error);
+      toast({
+        title: "Calculation Error",
+        description: "There was a problem calculating the HVAC loads. Please check your inputs.",
+        variant: "destructive",
+      });
+    }
+  };
+  
   return (
     <ClientPageWrapper
       title="HVAC Load Calculator"
       description="Calculate heating and cooling loads for your HVAC system"
     >
-      <div className="max-w-2xl mx-auto">
-        <Card>
+      <div className="max-w-4xl mx-auto px-4">
+        <div className="prose max-w-none mb-8">
+          <p className="text-lg text-gray-700">
+            Our HVAC Load Calculator helps you determine the right size heating and cooling equipment 
+            for your building. Enter your building details below to get precise load calculations 
+            and equipment recommendations.
+          </p>
+        </div>
+
+        <Card className="mb-8">
           <CardHeader>
             <div className="flex items-center space-x-3">
-              <Calculator className="w-6 h-6 text-[#E98A23]" />
+              <Thermometer className="w-6 h-6 text-[#E98A23]" />
               <CardTitle>HVAC Load Calculator</CardTitle>
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-center p-4">
-              Coming soon! This calculator will help you determine heating and cooling loads.
-            </div>
+            <Tabs value={activeTab} onValueChange={setActiveTab}>
+              <TabsList className="grid grid-cols-3 mb-6">
+                <TabsTrigger value="input">Input Data</TabsTrigger>
+                <TabsTrigger value="results" disabled={!results}>Results</TabsTrigger>
+                <TabsTrigger value="information">Information</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="input">
+                <BuildingInfoForm 
+                  buildingInfo={buildingInfo}
+                  onChange={handleFieldChange}
+                  onCalculate={calculateLoads}
+                />
+              </TabsContent>
+              
+              <TabsContent value="results">
+                {results && <ResultsDisplay results={results} />}
+              </TabsContent>
+              
+              <TabsContent value="information">
+                <InformationSection />
+              </TabsContent>
+            </Tabs>
           </CardContent>
         </Card>
+
+        <div className="bg-gradient-to-r from-[#E98A23] to-[#F9B348] p-8 rounded-lg text-white shadow-lg">
+          <div className="max-w-3xl mx-auto text-center">
+            <h2 className="text-3xl font-bold mb-4">Try Field Promax Free for 14 Days</h2>
+            <p className="text-lg mb-6 opacity-90">
+              Experience the full power of our field service management platform. 
+              No credit card required. Cancel anytime.
+            </p>
+            <a 
+              href="/booking" 
+              className="inline-block bg-white text-[#E98A23] font-semibold px-8 py-3 rounded-full hover:bg-gray-100 transition-colors"
+            >
+              Book Your Free Demo
+            </a>
+          </div>
+        </div>
       </div>
     </ClientPageWrapper>
   );
