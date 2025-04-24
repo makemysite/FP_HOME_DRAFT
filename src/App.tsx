@@ -26,6 +26,8 @@ import SalaryCalculator from "./pages/tools/SalaryCalculator";
 import ProfitCalculator from "./pages/tools/ProfitCalculator";
 import GrowthCalculator from "./pages/tools/GrowthCalculator";
 
+// Create a new QueryClient instance outside of the App component
+// to ensure it's only created once
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -40,8 +42,8 @@ const App = () => {
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        <BrowserRouter>
-          <TooltipProvider>
+        <TooltipProvider>
+          <BrowserRouter>
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/features" element={<FeaturesPage />} />
