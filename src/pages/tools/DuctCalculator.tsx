@@ -250,17 +250,20 @@ const DuctCalculator = () => {
         <InstructionsSection />
         <CalculationMethodSection />
 
-        <div className="my-8 bg-blue-50 p-8 rounded-lg">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Boost Your Business with Field Promax</h2>
-          <p className="text-gray-700 mb-4">
-            With Field Promax, HVAC businesses can streamline their operations, improving job scheduling, dispatching, and team management. More jobs completed in less time means greater growth and higher sales.
-          </p>
-          <p className="text-gray-700 mb-6">
-            Gain real-time insights into operations, make informed decisions, and keep customers happy with smooth communication and easy invoicing. The result? Increased customer loyalty and repeat business.
-          </p>
-          <p className="text-gray-900 font-semibold">
-            Try the HVAC Duct Calculator today and simplify your design process with precision, speed, and ease!
-          </p>
+        <div className="my-8 bg-gradient-to-r from-[#E98A23] to-[#F9B348] p-8 rounded-lg text-white shadow-lg">
+          <div className="max-w-3xl mx-auto text-center">
+            <h2 className="text-3xl font-bold mb-4">Simplify Your HVAC Design Today</h2>
+            <p className="text-lg mb-6 opacity-90">
+              Take the complexity out of duct sizing with our precision calculator. 
+              Save time, reduce errors, and boost your project efficiency.
+            </p>
+            <a 
+              href="/contact" 
+              className="inline-block bg-white text-[#E98A23] font-semibold px-8 py-3 rounded-full hover:bg-gray-100 transition-colors"
+            >
+              Get Started Now
+            </a>
+          </div>
         </div>
       </div>
     </ClientPageWrapper>
