@@ -237,7 +237,7 @@ const DuctCalculator = () => {
         
         <BenefitsSection />
         
-        <div className="my-8">
+        <div className="my-8 space-y-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-6">What Is an HVAC Duct Calculator?</h2>
           <p className="text-gray-600 mb-4">
             An HVAC Duct Calculator helps technicians determine the ideal size and specifications for ductwork in HVAC systems. By entering parameters like airflow, duct shape, and material, the calculator generates results that ensure optimal system performance. Proper duct sizing is crucial for energy efficiency and effective climate control in buildings.
@@ -245,6 +245,22 @@ const DuctCalculator = () => {
           <p className="text-gray-600">
             This tool simplifies complex calculations, making it easy for HVAC pros of all levels to design efficient systems that meet regulatory standards.
           </p>
+
+          <div className="bg-gradient-to-r from-[#E98A23] to-[#F9B348] p-8 rounded-lg text-white shadow-lg">
+            <div className="max-w-3xl mx-auto text-center">
+              <h2 className="text-3xl font-bold mb-4">Try Field Promax Free for 14 Days</h2>
+              <p className="text-lg mb-6 opacity-90">
+                Experience the full power of our field service management platform. 
+                No credit card required. Cancel anytime.
+              </p>
+              <a 
+                href="/booking" 
+                className="inline-block bg-white text-[#E98A23] font-semibold px-8 py-3 rounded-full hover:bg-gray-100 transition-colors"
+              >
+                Book Your Free Demo
+              </a>
+            </div>
+          </div>
         </div>
 
         <InstructionsSection />
