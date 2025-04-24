@@ -9,7 +9,7 @@ import { Wrench, Circle, Square } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import BenefitsSection from "@/components/tools/duct-calculator/BenefitsSection";
 import InstructionsSection from "@/components/tools/duct-calculator/InstructionsSection";
-import CalculationMethodSection from "@/components/tools/duct-calculator/CalculationMethodSection";
+import CalculationMethodSection;
 
 interface DuctSizeResult {
   width?: number;
@@ -137,15 +137,6 @@ const DuctCalculator = () => {
 
               {ductShape === "rectangular" && (
                 <>
-                  <div>
-                    <Label>Aspect Ratio (Width:Height)</Label>
-                    <Input
-                      type="number"
-                      value={aspectRatio || ''}
-                      onChange={(e) => setAspectRatio(Number(e.target.value))}
-                      placeholder="Enter ratio (e.g., 2 for 2:1 width:height)"
-                    />
-                  </div>
                   <div className="space-y-2">
                     <Label>Known Width?</Label>
                     <Select value={hasKnownWidth ? "yes" : "no"} onValueChange={(v) => setHasKnownWidth(v === "yes")}>
@@ -166,6 +157,17 @@ const DuctCalculator = () => {
                         value={knownWidth || ''}
                         onChange={(e) => setKnownWidth(Number(e.target.value))}
                         placeholder="Enter known width"
+                      />
+                    </div>
+                  )}
+                  {!hasKnownWidth && (
+                    <div>
+                      <Label>Aspect Ratio (Width:Height)</Label>
+                      <Input
+                        type="number"
+                        value={aspectRatio || ''}
+                        onChange={(e) => setAspectRatio(Number(e.target.value))}
+                        placeholder="Enter ratio (e.g., 2 for 2:1 width:height)"
                       />
                     </div>
                   )}
