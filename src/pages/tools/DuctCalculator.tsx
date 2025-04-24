@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import ClientPageWrapper from "@/components/layout/ClientPageWrapper";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -34,8 +33,10 @@ const DuctCalculator = () => {
   const [result, setResult] = useState<DuctCalculationResult | null>(null);
 
   const handleMaxStaticLossChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseFloat(e.target.value);
-    setMaxStaticLoss(isNaN(value) ? 0 : Number(value.toFixed(2)));
+    const value = e.target.value;
+    if (value === '' || !isNaN(parseFloat(value))) {
+      setMaxStaticLoss(value === '' ? 0 : parseFloat(value));
+    }
   };
 
   const calculateDuct = () => {
@@ -145,7 +146,7 @@ const DuctCalculator = () => {
                   min="0"
                   value={maxStaticLoss || ''}
                   onChange={handleMaxStaticLossChange}
-                  placeholder="Enter maximum static pressure loss (e.g., 0.10)"
+                  placeholder="Enter maximum static pressure loss (e.g., 0.08)"
                 />
               </div>
 
