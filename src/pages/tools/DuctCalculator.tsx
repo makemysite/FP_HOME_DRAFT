@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import ClientPageWrapper from "@/components/layout/ClientPageWrapper";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -26,7 +27,6 @@ const DuctCalculator = () => {
   const [includeFrictionLoss, setIncludeFrictionLoss] = useState<boolean>(false);
   const [ductLength, setDuctLength] = useState<number>(0);
   const [frictionLoss, setFrictionLoss] = useState<number>(0);
-  const [aspectRatio, setAspectRatio] = useState<number>(1);
   const [knownWidth, setKnownWidth] = useState<number>(0);
   const [hasKnownWidth, setHasKnownWidth] = useState<boolean>(false);
   const [result, setResult] = useState<DuctSizeResult | null>(null);
@@ -53,8 +53,9 @@ const DuctCalculator = () => {
         calculatedResult.width = Math.round(knownWidth * 12 * 100) / 100; // Convert to inches
         calculatedResult.height = Math.round(height * 12 * 100) / 100; // Convert to inches
       } else {
-        const height = Math.sqrt(area / aspectRatio);
-        const width = aspectRatio * height;
+        // Use a default 2:1 aspect ratio if no width is specified
+        const height = Math.sqrt(area / 2);
+        const width = 2 * height;
         calculatedResult.width = Math.round(width * 12 * 100) / 100; // Convert to inches
         calculatedResult.height = Math.round(height * 12 * 100) / 100; // Convert to inches
       }
@@ -283,3 +284,4 @@ const DuctCalculator = () => {
 };
 
 export default DuctCalculator;
+
