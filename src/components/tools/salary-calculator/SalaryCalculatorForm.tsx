@@ -15,13 +15,13 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 const formSchema = z.object({
-  annualSalary: z.string().transform(Number).refine((n) => n > 0, {
+  annualSalary: z.string().refine((val) => !isNaN(Number(val)) && Number(val) > 0, {
     message: "Annual salary must be greater than 0",
   }),
-  weeklyHours: z.string().transform(Number).refine((n) => n > 0 && n <= 168, {
+  weeklyHours: z.string().refine((val) => !isNaN(Number(val)) && Number(val) > 0 && Number(val) <= 168, {
     message: "Weekly hours must be between 1 and 168",
   }),
-  weeksPerYear: z.string().transform(Number).refine((n) => n > 0 && n <= 52, {
+  weeksPerYear: z.string().refine((val) => !isNaN(Number(val)) && Number(val) > 0 && Number(val) <= 52, {
     message: "Weeks per year must be between 1 and 52",
   }),
 });
