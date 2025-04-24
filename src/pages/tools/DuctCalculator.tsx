@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import ClientPageWrapper from "@/components/layout/ClientPageWrapper";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,51 +18,55 @@ interface DuctSizeResult {
   pressureLoss?: number;
 }
 
+const getVelocityForStaticLoss = (staticLoss: number, airflow: number): number => {
+  const baseVelocity = 1000;
+  const adjustmentFactor = Math.sqrt(staticLoss);
+  return baseVelocity * adjustmentFactor;
+};
+
 const DuctCalculator = () => {
   const { toast } = useToast();
   const [airflow, setAirflow] = useState<number>(0);
-  const [maxVelocity, setMaxVelocity] = useState<number>(0);
   const [ductShape, setDuctShape] = useState<"round" | "rectangular">("round");
-  const [includeFrictionLoss, setIncludeFrictionLoss] = useState<boolean>(false);
-  const [ductLength, setDuctLength] = useState<number>(0);
-  const [frictionLoss, setFrictionLoss] = useState<number>(0);
-  const [knownWidth, setKnownWidth] = useState<number>(0);
-  const [hasKnownWidth, setHasKnownWidth] = useState<boolean>(false);
+  const [maxStaticLoss, setMaxStaticLoss] = useState<number>(0.1);
+  const [ductLength, setDuctLength] = useState<number>(100);
+  const [aspectRatio, setAspectRatio] = useState<number>(2);
   const [result, setResult] = useState<DuctSizeResult | null>(null);
 
   const calculateDuctSize = () => {
-    if (!airflow || !maxVelocity) {
+    if (!airflow || !maxStaticLoss) {
       toast({
         title: "Missing Values",
-        description: "Please enter both airflow and maximum velocity.",
+        description: "Please enter airflow and maximum static pressure loss.",
         variant: "destructive",
       });
       return;
     }
 
-    const area = airflow / maxVelocity; // ft²
+    const velocity = getVelocityForStaticLoss(maxStaticLoss, airflow);
+
+    const area = airflow / velocity;
     let calculatedResult: DuctSizeResult = {};
 
     if (ductShape === "round") {
       const diameter = Math.sqrt((4 * area) / Math.PI);
-      calculatedResult.diameter = Math.round(diameter * 12 * 100) / 100; // Convert to inches
+      calculatedResult.diameter = Math.round(diameter * 12 * 100) / 100;
     } else {
-      if (hasKnownWidth && knownWidth) {
-        const height = area / knownWidth;
-        calculatedResult.width = Math.round(knownWidth * 12 * 100) / 100; // Convert to inches
-        calculatedResult.height = Math.round(height * 12 * 100) / 100; // Convert to inches
-      } else {
-        // Use a default 2:1 aspect ratio if no width is specified
-        const height = Math.sqrt(area / 2);
-        const width = 2 * height;
-        calculatedResult.width = Math.round(width * 12 * 100) / 100; // Convert to inches
-        calculatedResult.height = Math.round(height * 12 * 100) / 100; // Convert to inches
+      if (!aspectRatio) {
+        toast({
+          title: "Missing Value",
+          description: "Please enter an aspect ratio for rectangular duct.",
+          variant: "destructive",
+        });
+        return;
       }
+      const height = Math.sqrt(area / aspectRatio);
+      const width = aspectRatio * height;
+      calculatedResult.width = Math.round(width * 12 * 100) / 100;
+      calculatedResult.height = Math.round(height * 12 * 100) / 100;
     }
 
-    if (includeFrictionLoss && ductLength && frictionLoss) {
-      calculatedResult.pressureLoss = Math.round((ductLength / 100) * frictionLoss * 1000) / 1000;
-    }
+    calculatedResult.pressureLoss = Math.round((ductLength / 100) * maxStaticLoss * 1000) / 1000;
 
     setResult(calculatedResult);
   };
@@ -105,16 +108,17 @@ const DuctCalculator = () => {
                   placeholder="Enter air flow rate"
                 />
               </div>
+              
               <div>
-                <Label>Maximum Air Velocity (FPM)</Label>
+                <Label>Maximum Static Pressure Loss (inches of water per 100 ft)</Label>
                 <Input
                   type="number"
-                  value={maxVelocity || ''}
-                  onChange={(e) => setMaxVelocity(Number(e.target.value))}
-                  placeholder="Enter maximum velocity"
+                  value={maxStaticLoss || ''}
+                  onChange={(e) => setMaxStaticLoss(Number(e.target.value))}
+                  placeholder="Enter maximum static pressure loss"
                 />
               </div>
-              
+
               <div>
                 <Label>Duct Shape</Label>
                 <Select value={ductShape} onValueChange={(value: "round" | "rectangular") => setDuctShape(value)}>
@@ -137,82 +141,26 @@ const DuctCalculator = () => {
               </div>
 
               {ductShape === "rectangular" && (
-                <>
-                  <div className="space-y-2">
-                    <Label>Known Width?</Label>
-                    <Select value={hasKnownWidth ? "yes" : "no"} onValueChange={(v) => setHasKnownWidth(v === "yes")}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="yes">Yes</SelectItem>
-                        <SelectItem value="no">No</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  {hasKnownWidth && (
-                    <div>
-                      <Label>Known Width (feet)</Label>
-                      <Input
-                        type="number"
-                        value={knownWidth || ''}
-                        onChange={(e) => setKnownWidth(Number(e.target.value))}
-                        placeholder="Enter known width"
-                      />
-                    </div>
-                  )}
-                  {!hasKnownWidth && (
-                    <div>
-                      <Label>Aspect Ratio (Width:Height)</Label>
-                      <Input
-                        type="number"
-                        value={aspectRatio || ''}
-                        onChange={(e) => setAspectRatio(Number(e.target.value))}
-                        placeholder="Enter ratio (e.g., 2 for 2:1 width:height)"
-                      />
-                    </div>
-                  )}
-                </>
+                <div>
+                  <Label>Aspect Ratio (Width:Height)</Label>
+                  <Input
+                    type="number"
+                    value={aspectRatio || ''}
+                    onChange={(e) => setAspectRatio(Number(e.target.value))}
+                    placeholder="Enter ratio (e.g., 2 for 2:1 width:height)"
+                  />
+                </div>
               )}
 
-              <div className="space-y-2">
-                <Label>Include Friction Loss?</Label>
-                <Select 
-                  value={includeFrictionLoss ? "yes" : "no"} 
-                  onValueChange={(v) => setIncludeFrictionLoss(v === "yes")}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="yes">Yes</SelectItem>
-                    <SelectItem value="no">No</SelectItem>
-                  </SelectContent>
-                </Select>
+              <div>
+                <Label>Duct Length (feet)</Label>
+                <Input
+                  type="number"
+                  value={ductLength || ''}
+                  onChange={(e) => setDuctLength(Number(e.target.value) || 100)}
+                  placeholder="Enter duct length (default: 100)"
+                />
               </div>
-
-              {includeFrictionLoss && (
-                <>
-                  <div>
-                    <Label>Duct Length (feet)</Label>
-                    <Input
-                      type="number"
-                      value={ductLength || ''}
-                      onChange={(e) => setDuctLength(Number(e.target.value))}
-                      placeholder="Enter duct length"
-                    />
-                  </div>
-                  <div>
-                    <Label>Friction Loss (inches of water per 100 ft)</Label>
-                    <Input
-                      type="number"
-                      value={frictionLoss || ''}
-                      onChange={(e) => setFrictionLoss(Number(e.target.value))}
-                      placeholder="Enter friction loss"
-                    />
-                  </div>
-                </>
-              )}
 
               <Button 
                 onClick={calculateDuctSize}
@@ -229,9 +177,7 @@ const DuctCalculator = () => {
                   ) : (
                     <p>Rectangular duct size: {result.width} in × {result.height} in</p>
                   )}
-                  {result.pressureLoss !== undefined && (
-                    <p>Total pressure loss: {result.pressureLoss} inches of water</p>
-                  )}
+                  <p>Estimated Total Static Pressure Loss: {result.pressureLoss} inches of water</p>
                 </div>
               )}
             </div>
@@ -284,4 +230,3 @@ const DuctCalculator = () => {
 };
 
 export default DuctCalculator;
-
