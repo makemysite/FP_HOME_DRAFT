@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import ClientPageWrapper from "@/components/layout/ClientPageWrapper";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,6 +7,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { Wrench, Circle, Square } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import BenefitsSection from "@/components/tools/duct-calculator/BenefitsSection";
+import InstructionsSection from "@/components/tools/duct-calculator/InstructionsSection";
+import CalculationMethodSection from "@/components/tools/duct-calculator/CalculationMethodSection";
 
 interface DuctSizeResult {
   width?: number;
@@ -68,10 +70,23 @@ const DuctCalculator = () => {
   return (
     <ClientPageWrapper
       title="HVAC Duct Calculator"
-      description="Calculate the required duct size based on airflow and velocity"
+      description="Fast, Free, and Accurate Duct Size Calculations"
     >
-      <div className="max-w-2xl mx-auto">
-        <Card>
+      <div className="max-w-3xl mx-auto px-4">
+        <div className="prose max-w-none mb-8">
+          <p className="text-lg text-gray-700">
+            Simplify your HVAC design process with our easy-to-use HVAC Duct Calculator. Calculate the perfect duct size in seconds, improving both your project efficiency and customer satisfaction.
+          </p>
+          <h2 className="text-xl font-semibold mt-6 mb-4">Take the Guesswork Out of Duct Sizing</h2>
+          <p className="text-gray-700">
+            Are you tired of manually calculating duct sizes? Introducing the HVAC Duct Calculator - your all-in-one tool for precise ductwork design. This free, user-friendly tool requires zero technical expertise. Just input the necessary details - like room dimensions, airflow velocity, and duct shape - and get the correct duct size instantly.
+          </p>
+          <p className="text-gray-700">
+            No more guesswork, no more time wasted. Get accurate results and streamline your HVAC projects today!
+          </p>
+        </div>
+
+        <Card className="mb-8">
           <CardHeader>
             <div className="flex items-center space-x-3">
               <Wrench className="w-6 h-6 text-[#E98A23]" />
@@ -79,7 +94,6 @@ const DuctCalculator = () => {
             </div>
           </CardHeader>
           <CardContent className="space-y-6">
-            {/* Basic Inputs */}
             <div className="grid gap-4">
               <div>
                 <Label>Air Flow Rate (CFM)</Label>
@@ -100,7 +114,6 @@ const DuctCalculator = () => {
                 />
               </div>
               
-              {/* Duct Shape Selection */}
               <div>
                 <Label>Duct Shape</Label>
                 <Select value={ductShape} onValueChange={(value: "round" | "rectangular") => setDuctShape(value)}>
@@ -122,7 +135,6 @@ const DuctCalculator = () => {
                 </Select>
               </div>
 
-              {/* Rectangular Duct Options */}
               {ductShape === "rectangular" && (
                 <>
                   <div>
@@ -160,7 +172,6 @@ const DuctCalculator = () => {
                 </>
               )}
 
-              {/* Friction Loss Options */}
               <div className="space-y-2">
                 <Label>Include Friction Loss?</Label>
                 <Select 
@@ -207,7 +218,6 @@ const DuctCalculator = () => {
                 Calculate
               </Button>
 
-              {/* Results Display */}
               {result && (
                 <div className="space-y-4 p-4 border rounded-lg bg-gray-50">
                   <h3 className="text-lg font-semibold">Results:</h3>
@@ -224,6 +234,34 @@ const DuctCalculator = () => {
             </div>
           </CardContent>
         </Card>
+        
+        <BenefitsSection />
+        
+        <div className="my-8">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">What Is an HVAC Duct Calculator?</h2>
+          <p className="text-gray-600 mb-4">
+            An HVAC Duct Calculator helps technicians determine the ideal size and specifications for ductwork in HVAC systems. By entering parameters like airflow, duct shape, and material, the calculator generates results that ensure optimal system performance. Proper duct sizing is crucial for energy efficiency and effective climate control in buildings.
+          </p>
+          <p className="text-gray-600">
+            This tool simplifies complex calculations, making it easy for HVAC pros of all levels to design efficient systems that meet regulatory standards.
+          </p>
+        </div>
+
+        <InstructionsSection />
+        <CalculationMethodSection />
+
+        <div className="my-8 bg-blue-50 p-8 rounded-lg">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Boost Your Business with Field Promax</h2>
+          <p className="text-gray-700 mb-4">
+            With Field Promax, HVAC businesses can streamline their operations, improving job scheduling, dispatching, and team management. More jobs completed in less time means greater growth and higher sales.
+          </p>
+          <p className="text-gray-700 mb-6">
+            Gain real-time insights into operations, make informed decisions, and keep customers happy with smooth communication and easy invoicing. The result? Increased customer loyalty and repeat business.
+          </p>
+          <p className="text-gray-900 font-semibold">
+            Try the HVAC Duct Calculator today and simplify your design process with precision, speed, and ease!
+          </p>
+        </div>
       </div>
     </ClientPageWrapper>
   );
