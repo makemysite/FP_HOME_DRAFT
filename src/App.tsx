@@ -6,6 +6,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import ErrorBoundary from "./components/ErrorBoundary";
+
+// Import pages
 import Index from "./pages/Index";
 import FeaturesPage from "./pages/FeaturesPage";
 import PricingPage from "./pages/PricingPage";
@@ -16,7 +18,13 @@ import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
 import Booking from "./pages/Booking";
 import FreeTools from "./pages/FreeTools";
-import CalculatorTool from "./pages/tools/Calculator";
+
+// Import tool pages
+import DuctCalculator from "./pages/tools/DuctCalculator";
+import LoadCalculator from "./pages/tools/LoadCalculator";
+import SalaryCalculator from "./pages/tools/SalaryCalculator";
+import ProfitCalculator from "./pages/tools/ProfitCalculator";
+import GrowthCalculator from "./pages/tools/GrowthCalculator";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -44,7 +52,11 @@ const App = () => {
               <Route path="/contact" element={<Contact />} />
               <Route path="/booking" element={<Booking />} />
               <Route path="/tools" element={<FreeTools />} />
-              <Route path="/tools/calculator" element={<CalculatorTool />} />
+              <Route path="/tools/duct-calculator" element={<DuctCalculator />} />
+              <Route path="/tools/load-calculator" element={<LoadCalculator />} />
+              <Route path="/tools/salary-calculator" element={<SalaryCalculator />} />
+              <Route path="/tools/profit-calculator" element={<ProfitCalculator />} />
+              <Route path="/tools/growth-calculator" element={<GrowthCalculator />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
             <Toaster />

@@ -3,7 +3,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import ClientPageWrapper from "@/components/layout/ClientPageWrapper";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Wrench, Calculator, ChartBar, Calendar } from "lucide-react";
+import { Calculator, ChartBar, Wrench } from "lucide-react";
 
 interface Tool {
   id: string;
@@ -15,32 +15,39 @@ interface Tool {
 
 const tools: Tool[] = [
   {
-    id: "calculator",
-    title: "Field Service Calculator",
-    description: "Calculate service costs, labor hours, and project estimates with ease",
-    icon: <Calculator className="w-8 h-8 text-[#E98A23]" />,
-    path: "/tools/calculator"
-  },
-  {
-    id: "roi",
-    title: "ROI Calculator",
-    description: "Measure the return on investment for your field service operations",
-    icon: <ChartBar className="w-8 h-8 text-[#E98A23]" />,
-    path: "/tools/roi-calculator"
-  },
-  {
-    id: "scheduler",
-    title: "Service Schedule Planner",
-    description: "Plan and optimize your service schedules efficiently",
-    icon: <Calendar className="w-8 h-8 text-[#E98A23]" />,
-    path: "/tools/scheduler"
-  },
-  {
-    id: "maintenance",
-    title: "Maintenance Calculator",
-    description: "Calculate maintenance costs and schedules for equipment",
+    id: "duct-calculator",
+    title: "HVAC Duct Calculator",
+    description: "Calculate duct sizes, air flow, and pressure drops for HVAC systems",
     icon: <Wrench className="w-8 h-8 text-[#E98A23]" />,
-    path: "/tools/maintenance"
+    path: "/tools/duct-calculator"
+  },
+  {
+    id: "load-calculator",
+    title: "HVAC Load Calculator",
+    description: "Estimate heating and cooling loads for your HVAC projects",
+    icon: <Calculator className="w-8 h-8 text-[#E98A23]" />,
+    path: "/tools/load-calculator"
+  },
+  {
+    id: "salary-calculator",
+    title: "Salary to Hourly Calculator",
+    description: "Convert annual salary to hourly pay rate and calculate take-home pay",
+    icon: <Calculator className="w-8 h-8 text-[#E98A23]" />,
+    path: "/tools/salary-calculator"
+  },
+  {
+    id: "profit-calculator",
+    title: "Profit Margin Calculator",
+    description: "Calculate your profit margins and markup percentages instantly",
+    icon: <ChartBar className="w-8 h-8 text-[#E98A23]" />,
+    path: "/tools/profit-calculator"
+  },
+  {
+    id: "growth-calculator",
+    title: "Sales Growth Calculator",
+    description: "Track and forecast your sales growth and revenue trends",
+    icon: <ChartBar className="w-8 h-8 text-[#E98A23]" />,
+    path: "/tools/growth-calculator"
   }
 ];
 
