@@ -9,7 +9,7 @@ import { Wrench, Circle, Square, CircleCheck, CircleX } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import BenefitsSection from "@/components/tools/duct-calculator/BenefitsSection";
 import InstructionsSection from "@/components/tools/duct-calculator/InstructionsSection";
-import CalculationMethodSection from "@/components/tools/duct-calculator/CalculationMethodSection";
+import CalculationMethodSection;
 
 interface DuctCalculationResult {
   area: number;
@@ -31,6 +31,11 @@ const DuctCalculator = () => {
   const [width, setWidth] = useState<number>(0);
   const [height, setHeight] = useState<number>(0);
   const [result, setResult] = useState<DuctCalculationResult | null>(null);
+
+  const handleMaxStaticLossChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value);
+    setMaxStaticLoss(isNaN(value) ? 0 : Number(value.toFixed(2)));
+  };
 
   const calculateDuct = () => {
     if (!airflow || !maxVelocity || maxStaticLoss === 0) {
@@ -138,7 +143,7 @@ const DuctCalculator = () => {
                   step="0.01"
                   min="0"
                   value={maxStaticLoss || ''}
-                  onChange={(e) => setMaxStaticLoss(Number(parseFloat(e.target.value).toFixed(2)))}
+                  onChange={handleMaxStaticLossChange}
                   placeholder="Enter maximum static pressure loss (e.g., 0.10)"
                 />
               </div>
