@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import ClientPageWrapper from "@/components/layout/ClientPageWrapper";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,6 +9,8 @@ import ResultsDisplay from "@/components/tools/load-calculator/ResultsDisplay";
 import InformationSection from "@/components/tools/load-calculator/InformationSection";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
+import { calculateHVACLoad } from "@/services/hvacCalculator";
 
 const LoadCalculator = () => {
   const { toast } = useToast();
