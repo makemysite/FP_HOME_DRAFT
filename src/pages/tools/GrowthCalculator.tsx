@@ -8,10 +8,7 @@ import GrowthCalculatorForm from "@/components/tools/growth-calculator/GrowthCal
 
 const GrowthCalculator = () => {
   return (
-    <ClientPageWrapper
-      title="Sales Growth Calculator"
-      description="Track and analyze your sales growth with our easy-to-use calculator"
-    >
+    <ClientPageWrapper>
       <div className="max-w-4xl mx-auto space-y-8">
         <DescriptionSection />
         <Card className="p-6">
@@ -24,3 +21,4 @@ const GrowthCalculator = () => {
 };
 
 export default GrowthCalculator;
+
