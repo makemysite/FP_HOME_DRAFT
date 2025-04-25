@@ -35,6 +35,11 @@ const GrowthCalculator = () => {
   return (
     <ClientPageWrapper>
       <div className="container max-w-4xl mx-auto px-4 py-8 space-y-10">
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-[#170F49]">Sales Growth Calculator</h1>
+          <p className="text-gray-600 mt-4">Calculate and analyze your business sales performance</p>
+        </div>
+
         <Card className="shadow-md border-t-4 border-t-[#E98A23]">
           <CardHeader className="bg-gray-50 border-b">
             <div className="flex items-center space-x-3">
