@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -82,17 +81,17 @@ const UsageInstructions = () => {
           
           <div className="space-y-4">
             <div>
-              <h3 className="font-semibold mb-1">Optimize Field Operations</h3>
+              <h3 className="font-semibold mb-1 text-[#E98A23]">Optimize Field Operations</h3>
               <p className="text-gray-600">Streamline scheduling, dispatching, and job management to increase the number of jobs your team can handle.</p>
             </div>
             
             <div>
-              <h3 className="font-semibold mb-1">Make Informed Decisions</h3>
+              <h3 className="font-semibold mb-1 text-[#E98A23]">Make Informed Decisions</h3>
               <p className="text-gray-600">Gain real-time insights into your field operations and customer interactions to spot trends, capitalize on opportunities, and improve weak areas.</p>
             </div>
             
             <div>
-              <h3 className="font-semibold mb-1">Enhance Customer Relationships</h3>
+              <h3 className="font-semibold mb-1 text-[#E98A23]">Enhance Customer Relationships</h3>
               <p className="text-gray-600">Build customer loyalty with automated communications and seamless invoicing, encouraging repeat business and long-term growth.</p>
             </div>
           </div>
@@ -103,4 +102,3 @@ const UsageInstructions = () => {
 };
 
 export default UsageInstructions;
-
