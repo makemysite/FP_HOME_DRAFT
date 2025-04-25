@@ -13,6 +13,28 @@ import AdditionalInfo from "@/components/tools/salary-calculator/AdditionalInfo"
 const SalaryCalculator = () => {
   const [results, setResults] = useState<CalculationResults | null>(null);
 
+  const handleCalculate = (annualSalary: number, weeklyHours: number, weeksPerYear: number) => {
+    // Calculate total work hours
+    const totalWorkHours = weeklyHours * weeksPerYear;
+    
+    // Calculate hourly rate
+    const hourlyRate = annualSalary / totalWorkHours;
+    
+    // Calculate monthly pay
+    const monthlyPay = annualSalary / 12;
+    
+    // Calculate weekly pay
+    const weeklyPay = annualSalary / weeksPerYear;
+    
+    // Set the calculation results
+    setResults({
+      hourlyRate,
+      monthlyPay,
+      weeklyPay,
+      totalWorkHours
+    });
+  };
+
   return (
     <ClientPageWrapper>
       <div className="container max-w-4xl mx-auto px-4 py-8 space-y-10">
@@ -33,8 +55,20 @@ const SalaryCalculator = () => {
             </div>
           </CardHeader>
           <CardContent className="p-6">
-            <SalaryCalculatorForm onCalculate={setResults} />
-            {results && <ResultsDisplay results={results} />}
+            <SalaryCalculatorForm onCalculate={handleCalculate} />
+            {results && (
+              <ResultsDisplay 
+                results={{
+                  annualSalary: results.annualSalary || 0,
+                  weeklyHours: results.weeklyHours || 0,
+                  weeksWorked: results.weeksPerYear || 0,
+                  totalWorkHours: results.totalWorkHours,
+                  hourlyRate: results.hourlyRate,
+                  monthlyPay: results.monthlyPay,
+                  weeklyPay: results.weeklyPay
+                }} 
+              />
+            )}
           </CardContent>
         </Card>
 

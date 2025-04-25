@@ -3,10 +3,7 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
-interface SalaryCalculatorFormProps {
-  onCalculate: (annualSalary: number, weeklyHours: number, weeksPerYear: number) => void;
-}
+import { SalaryCalculatorFormProps } from "@/types/calculatorTypes";
 
 const SalaryCalculatorForm = ({ onCalculate }: SalaryCalculatorFormProps) => {
   const [annualSalary, setAnnualSalary] = useState<number>(0);

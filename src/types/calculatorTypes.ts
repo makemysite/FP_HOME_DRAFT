@@ -4,6 +4,9 @@ export interface CalculationResults {
   monthlyPay: number;
   weeklyPay: number;
   totalWorkHours: number;
+  annualSalary?: number;
+  weeklyHours?: number;
+  weeksPerYear?: number;
 }
 
 export interface SalaryCalculatorFormProps {

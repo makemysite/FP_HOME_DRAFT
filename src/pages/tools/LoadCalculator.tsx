@@ -13,8 +13,24 @@ import { useToast } from "@/hooks/use-toast";
 const LoadCalculator = () => {
   const { toast } = useToast();
   const [results, setResults] = useState<HVACLoadResult | null>(null);
+  // Initialize buildingInfo with default values
+  const [buildingInfo, setBuildingInfo] = useState<BuildingInfo>({
+    buildingLocation: "north",
+    buildingAreaSqft: 0,
+    ceilingHeightFt: 0,
+    insulationType: "average",
+    numberOfWindows: 0,
+    windowType: "double-pane",
+    numberOfExteriorDoors: 0,
+    doorType: "insulated",
+    numberOfOccupants: 0,
+    numberOfAppliances: 0,
+    lightingWattageTotal: 0,
+    outsideTemperatureF: 0,
+    desiredIndoorTemperatureF: 0,
+  });
   
-  const handleCalculate = (buildingInfo: BuildingInfo) => {
+  const handleCalculate = () => {
     try {
       const calculatedResults = calculateHVACLoad(buildingInfo);
       setResults(calculatedResults);
@@ -30,6 +46,13 @@ const LoadCalculator = () => {
         variant: "destructive",
       });
     }
+  };
+
+  const handleFieldChange = (field: keyof BuildingInfo, value: any) => {
+    setBuildingInfo(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
 
   return (
@@ -52,7 +75,11 @@ const LoadCalculator = () => {
             </div>
           </CardHeader>
           <CardContent className="p-6">
-            <BuildingInfoForm onCalculate={handleCalculate} />
+            <BuildingInfoForm 
+              buildingInfo={buildingInfo} 
+              onChange={handleFieldChange} 
+              onCalculate={handleCalculate} 
+            />
             {results && <ResultsDisplay results={results} />}
           </CardContent>
         </Card>
