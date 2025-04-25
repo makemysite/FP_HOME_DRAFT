@@ -35,18 +35,6 @@ const GrowthCalculator = () => {
   return (
     <ClientPageWrapper>
       <div className="container max-w-4xl mx-auto px-4 py-8 space-y-10">
-        <div className="prose max-w-none mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Business Growth Projection Calculator
-          </h1>
-          <p className="text-xl text-[#E98A23] font-semibold mb-2">
-            Plan Your Business Growth with Confidence
-          </p>
-          <p className="text-gray-600">
-            Forecast your business's potential growth with our intuitive projection calculator. Plan strategically and visualize your future success.
-          </p>
-        </div>
-
         <Card className="shadow-md border-t-4 border-t-[#E98A23]">
           <CardHeader className="bg-gray-50 border-b">
             <div className="flex items-center space-x-3">
