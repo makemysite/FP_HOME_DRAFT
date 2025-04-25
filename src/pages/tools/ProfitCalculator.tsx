@@ -8,10 +8,7 @@ import InstructionsSection from "@/components/tools/profit-calculator/Instructio
 
 const ProfitCalculator = () => {
   return (
-    <ClientPageWrapper
-      title="Profit Margin Calculator"
-      description="Calculate your profit margins instantly"
-    >
+    <ClientPageWrapper>
       <div className="max-w-4xl mx-auto space-y-8">
         <Card>
           <CardHeader>

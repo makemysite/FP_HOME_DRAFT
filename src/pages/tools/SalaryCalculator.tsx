@@ -53,7 +53,7 @@ const SalaryCalculator = () => {
   };
 
   return (
-    <ClientPageWrapper title="Salary to Hourly Calculator">
+    <ClientPageWrapper>
       <div className="max-w-4xl mx-auto px-4">
         <DescriptionSection />
 
