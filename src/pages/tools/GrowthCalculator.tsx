@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import ClientPageWrapper from "@/components/layout/ClientPageWrapper";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,6 +6,7 @@ import DescriptionSection from "@/components/tools/growth-calculator/Description
 import GrowthCalculatorForm from "@/components/tools/growth-calculator/GrowthCalculatorForm";
 import ResultsDisplay from "@/components/tools/growth-calculator/ResultsDisplay";
 import UsageInstructions from "@/components/tools/growth-calculator/UsageInstructions";
+import Button from "@/components/ui/button";
 
 const GrowthCalculator = () => {
   const [results, setResults] = useState<{
@@ -34,11 +34,14 @@ const GrowthCalculator = () => {
   return (
     <ClientPageWrapper>
       <div className="container max-w-4xl mx-auto px-4 py-8 space-y-10">
-        <div className="text-center">
+        <div className="prose max-w-none mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
             Business Growth Projection Calculator
           </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <p className="text-xl text-[#E98A23] font-semibold mb-2">
+            Plan Your Business Growth with Confidence
+          </p>
+          <p className="text-gray-600">
             Forecast your business's potential growth with our intuitive projection calculator. Plan strategically and visualize your future success.
           </p>
         </div>
@@ -61,21 +64,20 @@ const GrowthCalculator = () => {
           <UsageInstructions />
         </div>
 
-        <div className="bg-gradient-to-r from-[#E98A23] to-[#F5B041] p-8 rounded-lg text-white shadow-lg">
-          <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-3xl font-bold mb-4">Scale Your Business with Field Promax</h2>
-            <p className="text-lg mb-6 opacity-90">
+        <Card className="bg-gradient-to-r from-[#E98A23]/10 to-[#F9B348]/10 border-2 border-[#E98A23]/20">
+          <CardHeader className="border-b border-[#E98A23]/20">
+            <CardTitle className="text-[#E98A23]">Scale Your Business with Field Promax</CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            <p className="text-gray-700 mb-4">
               Transform your growth strategies with our comprehensive field service management platform.
               Unlock insights, optimize operations, and drive success.
             </p>
-            <a 
-              href="/booking" 
-              className="inline-block bg-white text-[#E98A23] font-semibold px-8 py-3 rounded-full hover:bg-gray-100 transition-colors"
-            >
+            <Button className="w-full md:w-auto bg-[#E98A23] hover:bg-[#E98A23]/90">
               Book Your Free Demo
-            </a>
-          </div>
-        </div>
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     </ClientPageWrapper>
   );

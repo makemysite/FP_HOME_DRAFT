@@ -40,11 +40,14 @@ const SalaryCalculator = () => {
   return (
     <ClientPageWrapper>
       <div className="container max-w-4xl mx-auto px-4 py-8 space-y-10">
-        <div className="text-center">
+        <div className="prose max-w-none mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
             Convert Salary to Hourly Pay Rate
           </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <p className="text-xl text-[#E98A23] font-semibold mb-2">
+            Quick and Accurate Salary Conversion Calculator
+          </p>
+          <p className="text-gray-600">
             Quickly convert annual salary to hourly rate with our free calculator. Perfect for comparing job offers, budgeting, or managing payroll calculations.
           </p>
         </div>
@@ -80,21 +83,19 @@ const SalaryCalculator = () => {
           <AdditionalInfo />
         </div>
 
-        <div className="bg-gradient-to-r from-[#E98A23] to-[#F5B041] p-8 rounded-lg text-white shadow-lg">
-          <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-3xl font-bold mb-4">Try Field Promax Free for 14 Days</h2>
-            <p className="text-lg mb-6 opacity-90">
-              Experience the full power of our field service management platform. 
-              No credit card required. Cancel anytime.
+        <Card className="bg-gradient-to-r from-[#E98A23]/10 to-[#F9B348]/10 border-2 border-[#E98A23]/20">
+          <CardHeader className="border-b border-[#E98A23]/20">
+            <CardTitle className="text-[#E98A23]">Transform Your Payroll Management</CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            <p className="text-gray-700 mb-4">
+              Experience the full power of our field service management platform. Streamline your payroll processes and boost efficiency.
             </p>
-            <a 
-              href="/booking" 
-              className="inline-block bg-white text-[#E98A23] font-semibold px-8 py-3 rounded-full hover:bg-gray-100 transition-colors"
-            >
+            <Button className="w-full md:w-auto bg-[#E98A23] hover:bg-[#E98A23]/90">
               Book Your Free Demo
-            </a>
-          </div>
-        </div>
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     </ClientPageWrapper>
   );
