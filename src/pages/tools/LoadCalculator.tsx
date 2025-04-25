@@ -1,11 +1,8 @@
 import React, { useState } from "react";
 import ClientPageWrapper from "@/components/layout/ClientPageWrapper";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Thermometer } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
 import { BuildingInfo, HVACLoadResult } from "@/types/hvacTypes";
-import { calculateHVACLoad } from "@/services/hvacCalculator";
 import BuildingInfoForm from "@/components/tools/load-calculator/BuildingInfoForm";
 import ResultsDisplay from "@/components/tools/load-calculator/ResultsDisplay";
 import InformationSection from "@/components/tools/load-calculator/InformationSection";
@@ -96,52 +93,35 @@ const LoadCalculator = () => {
   };
 
   return (
-    <ClientPageWrapper
-      title="HVAC Load Calculator"
-      description="Calculate heating and cooling loads for your HVAC system"
-    >
-      <div className="max-w-4xl mx-auto px-4">
-        <div className="prose max-w-none mb-8">
-          <p className="text-lg text-gray-700">
-            Our HVAC Load Calculator helps you determine the right size heating and cooling equipment 
-            for your building. Enter your building details below to get precise load calculations 
-            and equipment recommendations.
+    <ClientPageWrapper>
+      <div className="container max-w-4xl mx-auto px-4 py-8 space-y-10">
+        <div className="text-center">
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+            HVAC Load Calculator
+          </h1>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            Calculate heating and cooling loads for your HVAC system. Get precise calculations and equipment recommendations based on your building specifications.
           </p>
         </div>
 
-        <Card className="mb-8">
-          <CardHeader>
+        <Card className="shadow-md border-t-4 border-t-[#E98A23]">
+          <CardHeader className="bg-gray-50 border-b">
             <div className="flex items-center space-x-3">
               <Thermometer className="w-6 h-6 text-[#E98A23]" />
               <CardTitle>HVAC Load Calculator</CardTitle>
             </div>
           </CardHeader>
-          <CardContent>
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="grid grid-cols-3 mb-6">
-                <TabsTrigger value="input">Input Data</TabsTrigger>
-                <TabsTrigger value="results" disabled={!results}>Results</TabsTrigger>
-                <TabsTrigger value="information">Information</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="input">
-                <BuildingInfoForm 
-                  buildingInfo={buildingInfo}
-                  onChange={handleFieldChange}
-                  onCalculate={calculateLoads}
-                />
-              </TabsContent>
-              
-              <TabsContent value="results">
-                {results && <ResultsDisplay results={results} />}
-              </TabsContent>
-              
-              <TabsContent value="information">
-                <InformationSection />
-              </TabsContent>
-            </Tabs>
+          <CardContent className="p-6">
+            <BuildingInfoForm 
+              buildingInfo={buildingInfo}
+              onChange={handleFieldChange}
+              onCalculate={calculateLoads}
+            />
+            {results && <ResultsDisplay results={results} />}
           </CardContent>
         </Card>
+
+        <InformationSection />
 
         <div className="bg-gradient-to-r from-[#E98A23] to-[#F9B348] p-8 rounded-lg text-white shadow-lg">
           <div className="max-w-3xl mx-auto text-center">
