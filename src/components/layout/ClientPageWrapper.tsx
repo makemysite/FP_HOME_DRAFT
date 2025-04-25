@@ -27,10 +27,10 @@ export default function ClientPageWrapper({
 
       <main className="container mx-auto px-4 py-8 flex-grow">
         {(title || description) && (
-          <div className="text-center mb-12">
+          <div className="text-left mb-12">
             {title && <h1 className="text-4xl font-bold text-[#170F49] mb-4">{title}</h1>}
             {description && (
-              <p className="text-xl text-gray-700 max-w-3xl mx-auto">
+              <p className="text-xl text-gray-700 max-w-3xl">
                 {description}
               </p>
             )}
@@ -44,3 +44,4 @@ export default function ClientPageWrapper({
     </div>
   );
 }
+
