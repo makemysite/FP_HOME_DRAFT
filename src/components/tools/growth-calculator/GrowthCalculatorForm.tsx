@@ -7,7 +7,10 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Calculator, RotateCcw } from "lucide-react";
-import ResultsDisplay from "./ResultsDisplay";
+
+type GrowthCalculatorFormProps = {
+  onCalculate: (currentSales: number, previousSales: number) => void;
+};
 
 const formSchema = z.object({
   currentSales: z.string().refine((val) => !isNaN(Number(val)) && Number(val) >= 0, {
@@ -18,7 +21,7 @@ const formSchema = z.object({
   }),
 });
 
-const GrowthCalculatorForm = () => {
+const GrowthCalculatorForm = ({ onCalculate }: GrowthCalculatorFormProps) => {
   const [results, setResults] = React.useState<{
     currentSales: number;
     previousSales: number;
@@ -37,15 +40,9 @@ const GrowthCalculatorForm = () => {
   function onSubmit(values: z.infer<typeof formSchema>) {
     const currentSales = Number(values.currentSales);
     const previousSales = Number(values.previousSales);
-    const salesGrowth = currentSales - previousSales;
-    const growthRate = ((currentSales - previousSales) / previousSales) * 100;
-
-    setResults({
-      currentSales,
-      previousSales,
-      salesGrowth,
-      growthRate,
-    });
+    
+    // Call the parent component's onCalculate function
+    onCalculate(currentSales, previousSales);
   }
 
   const handleReset = () => {
@@ -99,8 +96,6 @@ const GrowthCalculatorForm = () => {
           </div>
         </form>
       </Form>
-
-      {results && <ResultsDisplay results={results} />}
     </div>
   );
 };

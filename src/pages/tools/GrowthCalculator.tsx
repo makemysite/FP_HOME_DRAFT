@@ -10,24 +10,24 @@ import UsageInstructions from "@/components/tools/growth-calculator/UsageInstruc
 
 const GrowthCalculator = () => {
   const [results, setResults] = useState<{
-    currentRevenue: number;
+    currentSales: number;
+    previousSales: number;
+    salesGrowth: number;
     growthRate: number;
-    projectedRevenue: number;
-    projectedYears: number;
   } | null>(null);
 
   const handleCalculate = (
-    currentRevenue: number, 
-    growthRate: number, 
-    projectedYears: number
+    currentSales: number, 
+    previousSales: number
   ) => {
-    const projectedRevenue = currentRevenue * Math.pow(1 + growthRate / 100, projectedYears);
+    const salesGrowth = currentSales - previousSales;
+    const growthRate = previousSales > 0 ? ((currentSales - previousSales) / previousSales) * 100 : 0;
     
     setResults({
-      currentRevenue,
-      growthRate,
-      projectedRevenue,
-      projectedYears
+      currentSales,
+      previousSales,
+      salesGrowth,
+      growthRate
     });
   };
 
