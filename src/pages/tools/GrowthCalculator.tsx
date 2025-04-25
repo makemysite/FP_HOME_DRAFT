@@ -43,10 +43,10 @@ const GrowthCalculator = () => {
           </p>
         </div>
 
-        <Card className="shadow-md border-t-4 border-t-[#9b87f5]">
+        <Card className="shadow-md border-t-4 border-t-[#E98A23]">
           <CardHeader className="bg-gray-50 border-b">
             <div className="flex items-center space-x-3">
-              <TrendingUp className="w-6 h-6 text-[#9b87f5]" />
+              <TrendingUp className="w-6 h-6 text-[#E98A23]" />
               <CardTitle>Business Growth Projector</CardTitle>
             </div>
           </CardHeader>
@@ -61,7 +61,7 @@ const GrowthCalculator = () => {
           <UsageInstructions />
         </div>
 
-        <div className="bg-gradient-to-r from-[#9b87f5] to-[#d1c4ff] p-8 rounded-lg text-white shadow-lg">
+        <div className="bg-gradient-to-r from-[#E98A23] to-[#F5B041] p-8 rounded-lg text-white shadow-lg">
           <div className="max-w-3xl mx-auto text-center">
             <h2 className="text-3xl font-bold mb-4">Scale Your Business with Field Promax</h2>
             <p className="text-lg mb-6 opacity-90">
@@ -70,7 +70,7 @@ const GrowthCalculator = () => {
             </p>
             <a 
               href="/booking" 
-              className="inline-block bg-white text-[#9b87f5] font-semibold px-8 py-3 rounded-full hover:bg-gray-100 transition-colors"
+              className="inline-block bg-white text-[#E98A23] font-semibold px-8 py-3 rounded-full hover:bg-gray-100 transition-colors"
             >
               Book Your Free Demo
             </a>

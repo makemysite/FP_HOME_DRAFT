@@ -22,13 +22,6 @@ const formSchema = z.object({
 });
 
 const GrowthCalculatorForm = ({ onCalculate }: GrowthCalculatorFormProps) => {
-  const [results, setResults] = React.useState<{
-    currentSales: number;
-    previousSales: number;
-    salesGrowth: number;
-    growthRate: number;
-  } | null>(null);
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -47,7 +40,6 @@ const GrowthCalculatorForm = ({ onCalculate }: GrowthCalculatorFormProps) => {
 
   const handleReset = () => {
     form.reset();
-    setResults(null);
   };
 
   return (
@@ -85,11 +77,16 @@ const GrowthCalculatorForm = ({ onCalculate }: GrowthCalculatorFormProps) => {
           </div>
 
           <div className="flex gap-4">
-            <Button type="submit" className="w-full md:w-auto">
+            <Button type="submit" className="w-full md:w-auto bg-[#E98A23] hover:bg-[#d47b1e]">
               <Calculator className="w-4 h-4 mr-2" />
               Calculate Growth
             </Button>
-            <Button type="button" variant="outline" onClick={handleReset} className="w-full md:w-auto">
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={handleReset} 
+              className="w-full md:w-auto"
+            >
               <RotateCcw className="w-4 h-4 mr-2" />
               Reset
             </Button>
