@@ -99,7 +99,11 @@ const DuctCalculator = () => {
   return (
     <ClientPageWrapper
       title="HVAC Duct Calculator"
-      description="Fast, Free, and Accurate Duct Size Calculations"
+      description={
+        <span className="text-[#E98A23] text-left block">
+          Fast, Free, and Accurate Duct Size Calculations
+        </span>
+      }
     >
       <div className="max-w-3xl mx-auto px-4">
         <div className="prose max-w-none mb-8">
@@ -304,3 +308,4 @@ const DuctCalculator = () => {
 };
 
 export default DuctCalculator;
+
