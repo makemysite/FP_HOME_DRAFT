@@ -47,7 +47,6 @@ const AdditionalInfo = () => {
 
       <Card className="bg-primary text-primary-foreground">
         <CardContent className="pt-6">
-          <h3 className="text-xl font-semibold mb-4">Ready to take control of your payroll and grow your business?</h3>
           <Button 
             variant="secondary" 
             onClick={() => navigate("/contact")}
