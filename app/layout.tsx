@@ -3,6 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClientWrapper } from "@/lib/query-client-wrapper";
+import { HelmetProvider } from "react-helmet-async";
 import { Inter } from 'next/font/google';
 import "@/styles/globals.css";
 import { Metadata } from "next";
@@ -60,9 +61,11 @@ export default function RootLayout({
       <body className={inter.className}>
         <QueryClientWrapper>
           <TooltipProvider>
-            {children}
-            <Toaster />
-            <Sonner />
+            <HelmetProvider>
+              {children}
+              <Toaster />
+              <Sonner />
+            </HelmetProvider>
           </TooltipProvider>
         </QueryClientWrapper>
       </body>
