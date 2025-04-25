@@ -61,6 +61,7 @@ const GrowthCalculator = () => {
           <UsageInstructions />
         </div>
 
+        {/* Removed the first CTA section */}
         <Card className="bg-gradient-to-r from-[#E98A23]/10 to-[#F9B348]/10 border-2 border-[#E98A23]/20">
           <CardHeader className="border-b border-[#E98A23]/20">
             <CardTitle className="text-[#E98A23]">Scale Your Business with Field Promax</CardTitle>
