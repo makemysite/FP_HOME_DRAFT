@@ -2,17 +2,18 @@
 import React, { useState } from "react";
 import ClientPageWrapper from "@/components/layout/ClientPageWrapper";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calculator } from "lucide-react";
+import { ChartBar } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
+import { calculateHVACLoad } from "@/services/hvacCalculator";
 import { BuildingInfo, HVACLoadResult } from "@/types/hvacTypes";
 import BuildingInfoForm from "@/components/tools/load-calculator/BuildingInfoForm";
 import ResultsDisplay from "@/components/tools/load-calculator/ResultsDisplay";
 import InformationSection from "@/components/tools/load-calculator/InformationSection";
-import { calculateHVACLoad } from "@/services/hvacCalculator";
-import { useToast } from "@/hooks/use-toast";
 
 const LoadCalculator = () => {
   const { toast } = useToast();
   const [results, setResults] = useState<HVACLoadResult | null>(null);
+  
   // Initialize buildingInfo with default values
   const [buildingInfo, setBuildingInfo] = useState<BuildingInfo>({
     buildingLocation: "north",
@@ -34,15 +35,10 @@ const LoadCalculator = () => {
     try {
       const calculatedResults = calculateHVACLoad(buildingInfo);
       setResults(calculatedResults);
-      toast({
-        title: "Calculation Complete",
-        description: "HVAC load calculation results are ready to view.",
-      });
     } catch (error) {
-      console.error("Calculation error:", error);
       toast({
         title: "Calculation Error",
-        description: "There was a problem calculating the HVAC loads. Please check your inputs.",
+        description: "Unable to calculate HVAC load. Please check your inputs.",
         variant: "destructive",
       });
     }
@@ -63,15 +59,15 @@ const LoadCalculator = () => {
             HVAC Load Calculator
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Calculate heating and cooling loads for your HVAC system. Get precise calculations and equipment recommendations based on your building specifications.
+            Precisely calculate the heating and cooling requirements for your space using our advanced HVAC load calculator.
           </p>
         </div>
 
-        <Card className="shadow-md border-t-4 border-t-[#E98A23]">
+        <Card className="shadow-md border-t-4 border-t-[#9b87f5]">
           <CardHeader className="bg-gray-50 border-b">
             <div className="flex items-center space-x-3">
-              <Calculator className="w-6 h-6 text-[#E98A23]" />
-              <CardTitle>HVAC Load Calculator</CardTitle>
+              <ChartBar className="w-6 h-6 text-[#9b87f5]" />
+              <CardTitle>HVAC Load Calculation</CardTitle>
             </div>
           </CardHeader>
           <CardContent className="p-6">
@@ -86,16 +82,16 @@ const LoadCalculator = () => {
 
         <InformationSection />
 
-        <div className="bg-gradient-to-r from-[#E98A23] to-[#F9B348] p-8 rounded-lg text-white shadow-lg">
+        <div className="bg-gradient-to-r from-[#9b87f5] to-[#d1c4ff] p-8 rounded-lg text-white shadow-lg">
           <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-3xl font-bold mb-4">Try Field Promax Free for 14 Days</h2>
+            <h2 className="text-3xl font-bold mb-4">Upgrade Your HVAC Planning</h2>
             <p className="text-lg mb-6 opacity-90">
-              Experience the full power of our field service management platform. 
-              No credit card required. Cancel anytime.
+              Discover how Field Promax can revolutionize your HVAC business management.
+              Get precise load calculations and streamline your operations.
             </p>
             <a 
               href="/booking" 
-              className="inline-block bg-white text-[#E98A23] font-semibold px-8 py-3 rounded-full hover:bg-gray-100 transition-colors"
+              className="inline-block bg-white text-[#9b87f5] font-semibold px-8 py-3 rounded-full hover:bg-gray-100 transition-colors"
             >
               Book Your Free Demo
             </a>
