@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -95,14 +96,6 @@ const UsageInstructions = () => {
               <p className="text-gray-600">Build customer loyalty with automated communications and seamless invoicing, encouraging repeat business and long-term growth.</p>
             </div>
           </div>
-          
-          <div className="mt-6 bg-[#E98A23] text-white p-6 rounded-lg text-center">
-            <h3 className="text-xl font-bold mb-2">Ready to take control of your business growth?</h3>
-            <p className="mb-4">Sign up for Field Promax today and experience the difference.</p>
-            <button className="bg-white text-[#E98A23] px-6 py-2 rounded-md font-medium hover:bg-gray-100 transition-colors">
-              Get Started
-            </button>
-          </div>
         </CardContent>
       </Card>
     </div>
@@ -110,3 +103,4 @@ const UsageInstructions = () => {
 };
 
 export default UsageInstructions;
+
