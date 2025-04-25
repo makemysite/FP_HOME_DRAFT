@@ -1,101 +1,65 @@
 
-import React from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
-const formSchema = z.object({
-  annualSalary: z.string().refine((val) => !isNaN(Number(val)) && Number(val) > 0, {
-    message: "Annual salary must be greater than 0",
-  }),
-  weeklyHours: z.string().refine((val) => !isNaN(Number(val)) && Number(val) > 0 && Number(val) <= 168, {
-    message: "Weekly hours must be between 1 and 168",
-  }),
-  weeksPerYear: z.string().refine((val) => !isNaN(Number(val)) && Number(val) > 0 && Number(val) <= 52, {
-    message: "Weeks per year must be between 1 and 52",
-  }),
-});
-
-type SalaryCalculatorFormProps = {
+interface SalaryCalculatorFormProps {
   onCalculate: (annualSalary: number, weeklyHours: number, weeksPerYear: number) => void;
-};
+}
 
 const SalaryCalculatorForm = ({ onCalculate }: SalaryCalculatorFormProps) => {
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      annualSalary: "",
-      weeklyHours: "40",
-      weeksPerYear: "52",
-    },
-  });
+  const [annualSalary, setAnnualSalary] = useState<number>(0);
+  const [weeklyHours, setWeeklyHours] = useState<number>(40);
+  const [weeksPerYear, setWeeksPerYear] = useState<number>(52);
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    onCalculate(
-      Number(values.annualSalary),
-      Number(values.weeklyHours),
-      Number(values.weeksPerYear)
-    );
-  }
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onCalculate(annualSalary, weeklyHours, weeksPerYear);
+  };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <FormField
-          control={form.control}
-          name="annualSalary"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Annual Salary (before taxes)</FormLabel>
-              <FormControl>
-                <Input type="number" placeholder="Enter your annual salary" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <Label htmlFor="salary">Annual Salary ($)</Label>
+        <Input
+          id="salary"
+          type="number"
+          value={annualSalary || ''}
+          onChange={(e) => setAnnualSalary(Number(e.target.value))}
+          placeholder="Enter annual salary"
+          required
         />
+      </div>
 
-        <FormField
-          control={form.control}
-          name="weeklyHours"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Hours Worked Per Week</FormLabel>
-              <FormControl>
-                <Input type="number" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+      <div>
+        <Label htmlFor="hours">Weekly Hours</Label>
+        <Input
+          id="hours"
+          type="number"
+          value={weeklyHours || ''}
+          onChange={(e) => setWeeklyHours(Number(e.target.value))}
+          placeholder="Enter weekly hours"
+          required
         />
+      </div>
 
-        <FormField
-          control={form.control}
-          name="weeksPerYear"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Weeks Worked Per Year</FormLabel>
-              <FormControl>
-                <Input type="number" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+      <div>
+        <Label htmlFor="weeks">Weeks Worked per Year</Label>
+        <Input
+          id="weeks"
+          type="number"
+          value={weeksPerYear || ''}
+          onChange={(e) => setWeeksPerYear(Number(e.target.value))}
+          placeholder="Enter weeks per year"
+          required
         />
+      </div>
 
-        <Button type="submit" className="w-full md:w-auto">Calculate</Button>
-      </form>
-    </Form>
+      <Button type="submit" className="w-full bg-[#E98A23] hover:bg-[#d47b1e]">
+        Calculate
+      </Button>
+    </form>
   );
 };
 

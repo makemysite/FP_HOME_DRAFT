@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import ClientPageWrapper from "@/components/layout/ClientPageWrapper";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,6 +13,8 @@ import { calculateHVACLoad } from "@/services/hvacCalculator";
 
 const LoadCalculator = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
+  
   const [activeTab, setActiveTab] = useState<string>("input");
   
   const [buildingInfo, setBuildingInfo] = useState<BuildingInfo>({
@@ -89,12 +90,6 @@ const LoadCalculator = () => {
     }
   };
   
-  const navigate = useNavigate();
-
-  const handleBookDemo = () => {
-    navigate("/booking");
-  };
-
   return (
     <ClientPageWrapper>
       <div className="container max-w-4xl mx-auto px-4 py-8 space-y-10">
@@ -135,7 +130,7 @@ const LoadCalculator = () => {
               The key to smarter operations and greater profits.
             </p>
             <Button 
-              onClick={handleBookDemo}
+              onClick={() => navigate("/booking")}
               className="bg-white text-[#E98A23] font-semibold px-8 py-3 rounded-full hover:bg-gray-100 transition-colors"
             >
               Book Your Free Demo

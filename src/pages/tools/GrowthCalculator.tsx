@@ -11,17 +11,15 @@ const GrowthCalculator = () => {
   return (
     <ClientPageWrapper>
       <div className="container max-w-4xl mx-auto px-4 py-8 space-y-10">
-        {/* Hero Section */}
         <div className="text-center">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
             Calculate Your Business Growth Rate
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Our Growth Rate Calculator helps you track and measure your business's progress. Get instant insights into your company's growth trajectory and make data-driven decisions.
+            Track and measure your business's progress with our Growth Rate Calculator. Get instant insights into your company's growth trajectory and make data-driven decisions.
           </p>
         </div>
 
-        {/* Main Calculator Card */}
         <Card className="shadow-md border-t-4 border-t-[#E98A23]">
           <CardHeader className="bg-gray-50 border-b">
             <div className="flex items-center space-x-3">
@@ -34,10 +32,25 @@ const GrowthCalculator = () => {
           </CardContent>
         </Card>
 
-        {/* Instructions and Additional Information */}
         <div className="space-y-8">
           <DescriptionSection />
           <UsageInstructions />
+        </div>
+
+        <div className="bg-gradient-to-r from-[#E98A23] to-[#F9B348] p-8 rounded-lg text-white shadow-lg">
+          <div className="max-w-3xl mx-auto text-center">
+            <h2 className="text-3xl font-bold mb-4">Try Field Promax Free for 14 Days</h2>
+            <p className="text-lg mb-6 opacity-90">
+              Experience the full power of our field service management platform. 
+              No credit card required. Cancel anytime.
+            </p>
+            <a 
+              href="/booking" 
+              className="inline-block bg-white text-[#E98A23] font-semibold px-8 py-3 rounded-full hover:bg-gray-100 transition-colors"
+            >
+              Book Your Free Demo
+            </a>
+          </div>
         </div>
       </div>
     </ClientPageWrapper>
