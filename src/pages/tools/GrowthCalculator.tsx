@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import ClientPageWrapper from "@/components/layout/ClientPageWrapper";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { TrendingUp } from "lucide-react";
+import { TrendingUp, ChartBar } from "lucide-react";
 import DescriptionSection from "@/components/tools/growth-calculator/DescriptionSection";
 import GrowthCalculatorForm from "@/components/tools/growth-calculator/GrowthCalculatorForm";
 import ResultsDisplay from "@/components/tools/growth-calculator/ResultsDisplay";
@@ -36,8 +36,11 @@ const GrowthCalculator = () => {
     <ClientPageWrapper>
       <div className="container max-w-4xl mx-auto px-4 py-8 space-y-10">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-[#170F49]">Sales Growth Calculator</h1>
-          <p className="text-gray-600 mt-4">Calculate and analyze your business sales performance</p>
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <ChartBar className="w-8 h-8 text-[#E98A23]" />
+            <h1 className="text-4xl font-bold text-[#170F49]">Sales Growth Calculator</h1>
+          </div>
+          <p className="text-gray-600">Calculate and analyze your business sales performance</p>
         </div>
 
         <Card className="shadow-md border-t-4 border-t-[#E98A23]">

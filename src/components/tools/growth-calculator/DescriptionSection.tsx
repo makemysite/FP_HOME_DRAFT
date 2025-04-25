@@ -9,7 +9,7 @@ const DescriptionSection = () => {
       <div className="prose max-w-none">
         <div className="flex items-center gap-3">
           <ChartBar className="w-8 h-8 text-[#E98A23]" />
-          <h1 className="text-4xl font-bold">Sales Growth Calculator</h1>
+          <h2 className="text-2xl font-bold">About Sales Growth</h2>
         </div>
       </div>
 
