@@ -11,16 +11,6 @@ const DescriptionSection = () => {
           <ChartBar className="w-8 h-8 text-[#E98A23]" />
           <h1 className="text-4xl font-bold">Sales Growth Calculator</h1>
         </div>
-        <p className="text-lg text-gray-700 mt-4">
-          Track Your Business Success in Just a Few Clicks. At Field Promax, we've designed 
-          an easy-to-use, fast, and precise Sales Growth Calculator to help you stay on top 
-          of your business's performance. Predict future revenue, set realistic growth targets, 
-          and fine-tune your sales strategies to hit your business goals faster.
-        </p>
-      </div>
-
-      <div className="bg-blue-50 p-6 rounded-lg text-center">
-        <h2 className="text-2xl font-bold text-blue-800 mb-2">FREE Sales Growth Calculator</h2>
       </div>
 
       <Card>
