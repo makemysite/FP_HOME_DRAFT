@@ -12,9 +12,10 @@ const DescriptionSection = () => {
           <h1 className="text-4xl font-bold">Sales Growth Calculator</h1>
         </div>
         <p className="text-lg text-gray-700 mt-4">
-          Track your business growth with precision using our Sales Growth Calculator. 
-          This tool helps you measure and analyze your sales performance over time, 
-          giving you the insights needed to make informed decisions.
+          Track Your Business Success in Just a Few Clicks. At Field Promax, we've designed 
+          an easy-to-use, fast, and precise Sales Growth Calculator to help you stay on top 
+          of your business's performance. Predict future revenue, set realistic growth targets, 
+          and fine-tune your sales strategies to hit your business goals faster.
         </p>
       </div>
 
@@ -24,10 +25,9 @@ const DescriptionSection = () => {
         </CardHeader>
         <CardContent>
           <p className="text-gray-700">
-            Understanding your sales growth rate is crucial for business success. 
-            Whether you're a small business owner or managing a larger operation, 
-            our calculator helps you track progress and identify trends that can 
-            inform your business strategy.
+            Whether you want to track your current success or set future growth targets, 
+            this calculator provides you with the insights needed to take your business 
+            to the next level.
           </p>
         </CardContent>
       </Card>
