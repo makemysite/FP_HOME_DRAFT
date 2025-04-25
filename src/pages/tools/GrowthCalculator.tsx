@@ -39,7 +39,7 @@ const GrowthCalculator = () => {
             <ChartBar className="w-8 h-8 text-[#E98A23]" />
             <h1 className="text-4xl font-bold text-[#170F49]">Sales Growth Calculator</h1>
           </div>
-          <p className="text-gray-600 text-[#E98A23]">Calculate and analyze your business sales performance</p>
+          <p className="text-[#E98A23]">Calculate and analyze your business sales performance</p>
         </div>
 
         <Card className="shadow-md border-t-4 border-t-[#E98A23]">
