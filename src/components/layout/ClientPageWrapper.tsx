@@ -9,6 +9,7 @@ interface PageWrapperProps {
   header?: React.ReactNode;
   title?: string;
   description?: string;
+  descriptionClassName?: string;
   hideFooter?: boolean;
 }
 
@@ -17,6 +18,7 @@ export default function ClientPageWrapper({
   header,
   title,
   description,
+  descriptionClassName = "",
   hideFooter = false
 }: PageWrapperProps) {
   return (
@@ -30,7 +32,7 @@ export default function ClientPageWrapper({
           <div className="text-left mb-12">
             {title && <h1 className="text-4xl font-bold text-[#170F49] mb-4">{title}</h1>}
             {description && (
-              <p className="text-xl text-gray-700 max-w-3xl">
+              <p className={`text-xl text-gray-700 max-w-3xl ${descriptionClassName}`}>
                 {description}
               </p>
             )}
