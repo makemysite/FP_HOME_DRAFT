@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import ClientPageWrapper from "@/components/layout/ClientPageWrapper";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,7 +7,7 @@ import DescriptionSection from "@/components/tools/growth-calculator/Description
 import GrowthCalculatorForm from "@/components/tools/growth-calculator/GrowthCalculatorForm";
 import ResultsDisplay from "@/components/tools/growth-calculator/ResultsDisplay";
 import UsageInstructions from "@/components/tools/growth-calculator/UsageInstructions";
-import Button from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 
 const GrowthCalculator = () => {
   const [results, setResults] = useState<{

@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import ClientPageWrapper from "@/components/layout/ClientPageWrapper";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,6 +9,7 @@ import ResultsDisplay from "@/components/tools/salary-calculator/ResultsDisplay"
 import DescriptionSection from "@/components/tools/salary-calculator/DescriptionSection";
 import UsageInstructions from "@/components/tools/salary-calculator/UsageInstructions";
 import AdditionalInfo from "@/components/tools/salary-calculator/AdditionalInfo";
+import { Button } from "@/components/ui/button";
 
 const SalaryCalculator = () => {
   const [results, setResults] = useState<CalculationResults | null>(null);

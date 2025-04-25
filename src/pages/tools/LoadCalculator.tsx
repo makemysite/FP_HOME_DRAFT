@@ -9,6 +9,7 @@ import { BuildingInfo, HVACLoadResult } from "@/types/hvacTypes";
 import BuildingInfoForm from "@/components/tools/load-calculator/BuildingInfoForm";
 import ResultsDisplay from "@/components/tools/load-calculator/ResultsDisplay";
 import InformationSection from "@/components/tools/load-calculator/InformationSection";
+import { Button } from "@/components/ui/button";
 
 const LoadCalculator = () => {
   const { toast } = useToast();
