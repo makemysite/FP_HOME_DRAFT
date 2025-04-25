@@ -1,4 +1,3 @@
-
 import React from "react";
 import ClientPageWrapper from "@/components/layout/ClientPageWrapper";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,7 +7,13 @@ import InstructionsSection from "@/components/tools/profit-calculator/Instructio
 
 const ProfitCalculator = () => {
   return (
-    <ClientPageWrapper>
+    <ClientPageWrapper
+      title="Instantly Calculate Your Profit Margins"
+      description="Accurate Profit Margin Calculations for Your Business"
+      descriptionClassName="text-[#E98A23]"
+      metaTitle="Free Profit Margin Calculator for Field Service Businesses"
+      metaDescription="Instantly calculate your profit margins and optimize your field service business. Try our free profit margin calculator now!"
+    >
       <div className="container max-w-4xl mx-auto px-4 py-8 space-y-10">
         {/* Hero Section */}
         <div className="text-left">

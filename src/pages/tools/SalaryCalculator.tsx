@@ -39,7 +39,13 @@ const SalaryCalculator = () => {
   };
 
   return (
-    <ClientPageWrapper>
+    <ClientPageWrapper
+      title="Convert Salary to Hourly Pay Rate"
+      description="Quick and Accurate Salary Conversion Calculator"
+      descriptionClassName="text-[#E98A23]"
+      metaTitle="Free Salary to Hourly Paycheck Calculator for Service Businesses"
+      metaDescription="Convert salaries to hourly paychecks with our free, easy-to-use calculator. Start simplifying payroll today!"
+    >
       <div className="container max-w-4xl mx-auto px-4 py-8 space-y-10">
         <div className="prose max-w-none mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">

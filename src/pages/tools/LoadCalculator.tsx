@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import ClientPageWrapper from "@/components/layout/ClientPageWrapper";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -52,7 +51,13 @@ const LoadCalculator = () => {
   };
 
   return (
-    <ClientPageWrapper>
+    <ClientPageWrapper
+      title="HVAC Load Calculator"
+      description="Precise HVAC Load Calculations Made Simple"
+      descriptionClassName="text-[#E98A23]"
+      metaTitle="Free HVAC Load Calculator - Accurate & Fast Manual J Calculation"
+      metaDescription="Get precise HVAC load calculations with our free Manual J calculator. Save time and avoid errors with Field Promax's easy-to-use tool"
+    >
       <div className="container max-w-4xl mx-auto px-4 py-8 space-y-10">
         <div className="prose max-w-none mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">

@@ -101,6 +101,8 @@ const DuctCalculator = () => {
       title="HVAC Duct Calculator"
       description="Fast, Free, and Accurate Duct Size Calculations"
       descriptionClassName="text-[#E98A23]"
+      metaTitle="Free HVAC Duct Calculator for Accurate Duct Size Calculations"
+      metaDescription="Get precise duct size calculations quickly with our free HVAC Duct Calculator. Simplify your HVAC designs today!"
     >
       <div className="max-w-3xl mx-auto px-4">
         <div className="prose max-w-none mb-8">
@@ -305,4 +307,3 @@ const DuctCalculator = () => {
 };
 
 export default DuctCalculator;
-

@@ -32,7 +32,13 @@ const GrowthCalculator = () => {
   };
 
   return (
-    <ClientPageWrapper>
+    <ClientPageWrapper
+      title="Sales Growth Calculator"
+      description="Calculate and analyze your business sales performance"
+      descriptionClassName="text-[#E98A23]"
+      metaTitle="Sales Growth Calculator for Field Service Businesses | Field Promax"
+      metaDescription="Forecast revenue & set growth targets with Field Promax's easy-to-use Sales Growth Calculator."
+    >
       <div className="container max-w-4xl mx-auto px-4 py-8 space-y-10">
         <div className="text-left mb-8">
           <div className="flex items-center gap-3 mb-4">
