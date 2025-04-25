@@ -9,7 +9,8 @@ import InstructionsSection from "@/components/tools/profit-calculator/Instructio
 const ProfitCalculator = () => {
   return (
     <ClientPageWrapper>
-      <div className="max-w-4xl mx-auto space-y-8">
+      <div className="container max-w-4xl mx-auto px-4 py-8 space-y-10">
+        {/* Hero Section */}
         <div className="text-center">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
             Instantly Calculate Your Profit Margins
@@ -19,18 +20,20 @@ const ProfitCalculator = () => {
           </p>
         </div>
 
-        <Card>
-          <CardHeader>
+        {/* Main Calculator Card */}
+        <Card className="shadow-md border-t-4 border-t-[#E98A23]">
+          <CardHeader className="bg-gray-50 border-b">
             <div className="flex items-center space-x-3">
               <ChartBar className="w-6 h-6 text-[#E98A23]" />
               <CardTitle>Profit Margin Calculator</CardTitle>
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-6">
             <ProfitCalculatorForm />
           </CardContent>
         </Card>
 
+        {/* Instructions and Additional Information */}
         <InstructionsSection />
       </div>
     </ClientPageWrapper>
