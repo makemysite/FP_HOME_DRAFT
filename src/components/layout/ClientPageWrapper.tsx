@@ -8,7 +8,7 @@ interface PageWrapperProps {
   children: React.ReactNode;
   header?: React.ReactNode;
   title?: string;
-  description?: string;
+  description?: React.ReactNode;
   descriptionClassName?: string;
   hideFooter?: boolean;
   metaTitle?: string;
