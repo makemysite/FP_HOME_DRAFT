@@ -11,11 +11,11 @@ const ProfitCalculator = () => {
     <ClientPageWrapper>
       <div className="container max-w-4xl mx-auto px-4 py-8 space-y-10">
         {/* Hero Section */}
-        <div className="text-center">
+        <div className="text-left">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
             Instantly Calculate Your Profit Margins
           </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <p className="text-xl text-gray-600 max-w-3xl">
             Make sure every project brings in profit. Our free Profit Margin Calculator gives you accurate numbers in seconds, making it easy to keep track of your profits and optimize your business strategy.
           </p>
         </div>

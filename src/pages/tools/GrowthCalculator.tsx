@@ -35,8 +35,8 @@ const GrowthCalculator = () => {
   return (
     <ClientPageWrapper>
       <div className="container max-w-4xl mx-auto px-4 py-8 space-y-10">
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-3 mb-4">
+        <div className="text-left mb-8">
+          <div className="flex items-center gap-3 mb-4">
             <ChartBar className="w-8 h-8 text-[#E98A23]" />
             <h1 className="text-4xl font-bold text-[#170F49]">Sales Growth Calculator</h1>
           </div>
