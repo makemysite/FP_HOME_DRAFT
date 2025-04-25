@@ -1,12 +1,8 @@
 
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
 
 const AdditionalInfo = () => {
-  const navigate = useNavigate();
-
   return (
     <div className="space-y-8">
       <Card>
@@ -42,18 +38,6 @@ const AdditionalInfo = () => {
             <li>Experienced technicians in specialized sectors like HVAC, telecommunications, and healthcare: $25 - $35/hour</li>
           </ul>
           <p className="text-gray-700 mt-4">Rates may vary based on region and the specific services offered.</p>
-        </CardContent>
-      </Card>
-
-      <Card className="bg-primary text-primary-foreground">
-        <CardContent className="pt-6">
-          <Button 
-            variant="secondary" 
-            onClick={() => navigate("/contact")}
-            className="w-full sm:w-auto"
-          >
-            Sign up for Field Promax today
-          </Button>
         </CardContent>
       </Card>
     </div>
