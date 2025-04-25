@@ -20,19 +20,19 @@ const DescriptionSection = () => {
         <CardContent>
           <div className="grid gap-4">
             <div>
-              <p className="font-medium">Previous Period Sales:</p>
+              <p className="font-medium text-[#E98A23]">Previous Period Sales:</p>
               <p className="text-gray-700">The total revenue earned during the last accounting period. This helps you establish a baseline for comparing growth.</p>
             </div>
             <div>
-              <p className="font-medium">Current Period Sales:</p>
+              <p className="font-medium text-[#E98A23]">Current Period Sales:</p>
               <p className="text-gray-700">Revenue generated in the current time period. This is the number you're forecasting growth from.</p>
             </div>
             <div>
-              <p className="font-medium">Total Sales Growth:</p>
+              <p className="font-medium text-[#E98A23]">Total Sales Growth:</p>
               <p className="text-gray-700">The numerical change in sales between the previous and current period, showing whether your business is growing or contracting.</p>
             </div>
             <div>
-              <p className="font-medium">Sales Growth Rate:</p>
+              <p className="font-medium text-[#E98A23]">Sales Growth Rate:</p>
               <p className="text-gray-700">A percentage that reveals the rate of change in your sales over a specific period, showing how your business is performing.</p>
             </div>
           </div>
