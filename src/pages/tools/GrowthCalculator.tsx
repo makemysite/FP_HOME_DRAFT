@@ -39,7 +39,7 @@ const GrowthCalculator = () => {
           <CardHeader className="bg-gray-50 border-b">
             <div className="flex items-center space-x-3">
               <TrendingUp className="w-6 h-6 text-[#E98A23]" />
-              <CardTitle>Business Growth Projector</CardTitle>
+              <CardTitle>Sales Growth Calculator</CardTitle>
             </div>
           </CardHeader>
           <CardContent className="p-6">
