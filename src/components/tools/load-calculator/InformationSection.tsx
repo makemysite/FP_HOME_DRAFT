@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
@@ -35,36 +34,36 @@ const InformationSection: React.FC = () => {
           hurt your business.
         </p>
 
-        <h3 className="text-xl font-semibold mt-6 mb-3">How to Use our Free HVAC Load Calculator</h3>
+        <h3 className="text-xl font-semibold text-[#E98A23] mt-6 mb-3">How to Use our Free HVAC Load Calculator</h3>
         <ul className="list-disc pl-5 space-y-2 text-gray-700">
           <li>Fill in the fields with the necessary information (no specific order required).</li>
           <li>Click "Calculate" to instantly generate results.</li>
           <li>Need to update? Hit "Reset" to adjust your entries and recalculate.</li>
         </ul>
 
-        <h3 className="text-xl font-semibold mt-6 mb-3">How to Calculate HVAC Load for Any Project</h3>
+        <h3 className="text-xl font-semibold text-[#E98A23] mt-6 mb-3">How to Calculate HVAC Load for Any Project</h3>
         <ol className="list-decimal pl-5 space-y-3 text-gray-700">
           <li>
-            <strong>Gather Building Information:</strong>
+            <strong className="text-[#E98A23]">Gather Building Information:</strong>
             <p>This includes the building's location, size, insulation, window types, and occupancy details.</p>
           </li>
           <li>
-            <strong>Calculate Heat Loss:</strong>
+            <strong className="text-[#E98A23]">Calculate Heat Loss:</strong>
             <p>Heat Loss = U-Value × Area × Temperature Difference</p>
             <p>This looks at building materials, surface area, and temperature differences.</p>
           </li>
           <li>
-            <strong>Calculate Heat Gain:</strong>
+            <strong className="text-[#E98A23]">Calculate Heat Gain:</strong>
             <p>Heat Gain = Solar Heat Gain + Internal Heat Gain</p>
             <p>Solar heat gain considers sunlight entering through windows, and internal heat gain accounts 
             for heat from occupants, appliances, and lighting.</p>
           </li>
           <li>
-            <strong>Summarize Loads:</strong>
+            <strong className="text-[#E98A23]">Summarize Loads:</strong>
             <p>Total the heat loss and heat gain for the entire building.</p>
           </li>
           <li>
-            <strong>Select HVAC Equipment:</strong>
+            <strong className="text-[#E98A23]">Select HVAC Equipment:</strong>
             <p>Based on these calculations, pick HVAC equipment (like air conditioners, heaters, etc.) 
             that's appropriately sized to meet the building's needs.</p>
           </li>

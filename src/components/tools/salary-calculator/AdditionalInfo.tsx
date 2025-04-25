@@ -15,15 +15,15 @@ const AdditionalInfo = () => {
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <h3 className="font-semibold">Salary (Annual/Monthly/Weekly):</h3>
+            <h3 className="font-semibold text-[#E98A23]">Salary (Annual/Monthly/Weekly):</h3>
             <p className="text-gray-700">The total income before taxes, entered based on the period you choose.</p>
           </div>
           <div>
-            <h3 className="font-semibold">Weekly Hours:</h3>
+            <h3 className="font-semibold text-[#E98A23]">Weekly Hours:</h3>
             <p className="text-gray-700">The number of hours worked each week, on average.</p>
           </div>
           <div>
-            <h3 className="font-semibold">Equivalent Hourly Rate:</h3>
+            <h3 className="font-semibold text-[#E98A23]">Equivalent Hourly Rate:</h3>
             <p className="text-gray-700">Your calculated hourly wage, derived from the entered salary and work hours.</p>
           </div>
         </CardContent>
