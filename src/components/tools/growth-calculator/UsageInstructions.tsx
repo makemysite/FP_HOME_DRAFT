@@ -56,6 +56,56 @@ const UsageInstructions = () => {
           </div>
         </CardContent>
       </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>What's a Good Sales Growth Rate for a Field Service Business?</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-gray-700 mb-4">
+            For most businesses, a 15-25% growth rate is a solid target. However, smaller businesses or startups might see higher rates - sometimes reaching 75-100% in their early stages. Larger, well-established businesses tend to aim for a more sustainable growth rate of 5-10% annually.
+          </p>
+          <p className="text-gray-700">
+            If you want to keep your sales on track, consider using this calculator regularly to track your progress and adjust your goals as needed.
+          </p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Supercharge Your Sales Growth with Field Promax</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-gray-700 mb-4">
+            Field Promax can help your business achieve sustained growth by improving operational efficiency. With our software, you can:
+          </p>
+          
+          <div className="space-y-4">
+            <div>
+              <h3 className="font-semibold mb-1">Optimize Field Operations</h3>
+              <p className="text-gray-600">Streamline scheduling, dispatching, and job management to increase the number of jobs your team can handle.</p>
+            </div>
+            
+            <div>
+              <h3 className="font-semibold mb-1">Make Informed Decisions</h3>
+              <p className="text-gray-600">Gain real-time insights into your field operations and customer interactions to spot trends, capitalize on opportunities, and improve weak areas.</p>
+            </div>
+            
+            <div>
+              <h3 className="font-semibold mb-1">Enhance Customer Relationships</h3>
+              <p className="text-gray-600">Build customer loyalty with automated communications and seamless invoicing, encouraging repeat business and long-term growth.</p>
+            </div>
+          </div>
+          
+          <div className="mt-6 bg-[#E98A23] text-white p-6 rounded-lg text-center">
+            <h3 className="text-xl font-bold mb-2">Ready to take control of your business growth?</h3>
+            <p className="mb-4">Sign up for Field Promax today and experience the difference.</p>
+            <button className="bg-white text-[#E98A23] px-6 py-2 rounded-md font-medium hover:bg-gray-100 transition-colors">
+              Get Started
+            </button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
