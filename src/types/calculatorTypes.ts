@@ -1,10 +1,11 @@
 
 export interface CalculationResults {
-  annualSalary: number;
-  weeklyHours: number;
-  weeksWorked: number;
-  totalWorkHours: number;
   hourlyRate: number;
   monthlyPay: number;
   weeklyPay: number;
+  totalWorkHours: number;
+}
+
+export interface SalaryCalculatorFormProps {
+  onCalculate: (annualSalary: number, weeklyHours: number, weeksPerYear: number) => void;
 }
