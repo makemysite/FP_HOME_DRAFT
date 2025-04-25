@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import ClientPageWrapper from "@/components/layout/ClientPageWrapper";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -99,11 +98,7 @@ const DuctCalculator = () => {
   return (
     <ClientPageWrapper
       title="HVAC Duct Calculator"
-      description={
-        <span className="text-[#E98A23] text-left block">
-          Fast, Free, and Accurate Duct Size Calculations
-        </span>
-      }
+      description="Fast, Free, and Accurate Duct Size Calculations"
     >
       <div className="max-w-3xl mx-auto px-4">
         <div className="prose max-w-none mb-8">
@@ -308,4 +303,3 @@ const DuctCalculator = () => {
 };
 
 export default DuctCalculator;
-
