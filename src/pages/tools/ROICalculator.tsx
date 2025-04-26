@@ -3,8 +3,22 @@ import React, { useState } from "react";
 import ClientPageWrapper from "@/components/layout/ClientPageWrapper";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartBar } from "lucide-react";
+import ROICalculatorForm from "@/components/tools/roi-calculator/ROICalculatorForm";
+import ROIResultsDisplay from "@/components/tools/roi-calculator/ROIResultsDisplay";
+import { calculateROI, ROIResults } from "@/utils/roiCalculations";
 
 const ROICalculator = () => {
+  const [results, setResults] = useState<ROIResults | null>(null);
+
+  const handleCalculate = (
+    previousSales: number,
+    currentSales: number,
+    investmentYears: number
+  ) => {
+    const roiResults = calculateROI(previousSales, currentSales, investmentYears);
+    setResults(roiResults);
+  };
+
   return (
     <ClientPageWrapper
       title="ROI Calculator"
@@ -21,8 +35,9 @@ const ROICalculator = () => {
               <CardTitle>ROI Calculator</CardTitle>
             </div>
           </CardHeader>
-          <CardContent className="p-6">
-            <p>ROI Calculator coming soon...</p>
+          <CardContent className="p-6 space-y-8">
+            <ROICalculatorForm onCalculate={handleCalculate} />
+            {results && <ROIResultsDisplay results={results} />}
           </CardContent>
         </Card>
       </div>
