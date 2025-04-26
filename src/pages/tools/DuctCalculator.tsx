@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import ClientPageWrapper from "@/components/layout/ClientPageWrapper";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -98,9 +97,6 @@ const DuctCalculator = () => {
 
   return (
     <ClientPageWrapper
-      title="HVAC Duct Calculator"
-      description="Fast, Free, and Accurate Duct Size Calculations"
-      descriptionClassName="text-[#E98A23]"
       metaTitle="Free HVAC Duct Calculator for Accurate Duct Size Calculations"
       metaDescription="Get precise duct size calculations quickly with our free HVAC Duct Calculator. Simplify your HVAC designs today!"
     >
