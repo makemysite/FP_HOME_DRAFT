@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import ClientPageWrapper from "@/components/layout/ClientPageWrapper";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,8 +24,6 @@ const ROICalculator = () => {
 
   return (
     <ClientPageWrapper
-      title="ROI Calculator"
-      // Removed the description and descriptionClassName props
       metaTitle="Free ROI Calculator for Field Service Businesses"
       metaDescription="Calculate your ROI instantly. Know what you earn from every investment. Try our free ROI calculator today."
     >
