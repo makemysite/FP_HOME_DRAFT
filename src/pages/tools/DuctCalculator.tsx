@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Wrench, Circle, Square, CircleCheck, CircleX } from "lucide-react";
+import { ChartBar } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import BenefitsSection from "@/components/tools/duct-calculator/BenefitsSection";
 import InstructionsSection from "@/components/tools/duct-calculator/InstructionsSection";
@@ -100,197 +100,183 @@ const DuctCalculator = () => {
       metaTitle="Free HVAC Duct Calculator for Accurate Duct Size Calculations"
       metaDescription="Get precise duct size calculations quickly with our free HVAC Duct Calculator. Simplify your HVAC designs today!"
     >
-      <div className="max-w-3xl mx-auto px-4">
-        <Card className="prose max-w-none mb-8 bg-white">
-          <CardContent className="p-6">
-            <p className="text-lg text-gray-700">
-              Simplify your HVAC design process with our easy-to-use HVAC Duct Calculator. Calculate the perfect duct size in seconds, improving both your project efficiency and customer satisfaction.
-            </p>
-            <h2 className="text-xl font-semibold mt-6 mb-4">Take the Guesswork Out of Duct Sizing</h2>
-            <p className="text-gray-700">
-              Are you tired of manually calculating duct sizes? Introducing the HVAC Duct Calculator - your all-in-one tool for precise ductwork design. This free, user-friendly tool requires zero technical expertise. Just input the necessary details - like room dimensions, airflow velocity, and duct shape - and get the correct duct size instantly.
-            </p>
-            <p className="text-gray-700">
-              No more guesswork, no more time wasted. Get accurate results and streamline your HVAC projects today!
-            </p>
+      <div className="container max-w-4xl mx-auto px-4 py-8 space-y-10">
+        <Card className="shadow-md border-t-4 border-t-[#E98A23]">
+          <CardHeader className="bg-gray-50 border-b">
+            <div className="flex items-center space-x-3">
+              <ChartBar className="w-6 h-6 text-[#E98A23]" />
+              <CardTitle>Duct Calculator Overview</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent className="p-6 space-y-4">
+            <div>
+              <h2 className="text-2xl font-bold text-[#E98A23] mb-4">Duct Size Calculator</h2>
+              <p className="text-lg text-gray-700 mb-4">
+                Get instant, accurate duct sizing calculations for your HVAC system. Our calculator helps you determine the optimal duct dimensions based on airflow requirements and system specifications.
+              </p>
+            </div>
           </CardContent>
         </Card>
 
-        <div className="prose max-w-none mb-8">
-          <div className="grid gap-4">
-            <div>
-              <Label>Air Flow Rate (CFM)</Label>
-              <Input
-                type="number"
-                value={airflow || ''}
-                onChange={(e) => setAirflow(Number(e.target.value))}
-                placeholder="Enter air flow rate"
-              />
+        <Card className="shadow-md border-t-4 border-t-[#E98A23]">
+          <CardHeader className="bg-gray-50 border-b">
+            <div className="flex items-center space-x-3">
+              <ChartBar className="w-6 h-6 text-[#E98A23]" />
+              <CardTitle>Calculate Duct Size</CardTitle>
             </div>
-            
-            <div>
-              <Label>Maximum Velocity (FPM)</Label>
-              <Input
-                type="number"
-                value={maxVelocity || ''}
-                onChange={(e) => setMaxVelocity(Number(e.target.value))}
-                placeholder="Enter maximum velocity"
-              />
-            </div>
-
-            <div>
-              <Label>Maximum Static Pressure Loss (inches of water per 100 ft)</Label>
-              <Input
-                type="number"
-                step="0.01"
-                min="0"
-                value={maxStaticLoss || ''}
-                onChange={handleMaxStaticLossChange}
-                placeholder="Enter maximum static pressure loss (e.g., 0.08)"
-              />
-            </div>
-
-            <div>
-              <Label>Duct Shape</Label>
-              <Select value={ductShape} onValueChange={(value: "round" | "rectangular") => setDuctShape(value)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="round">
-                    <div className="flex items-center gap-2">
-                      <Circle className="w-4 h-4" /> Round
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="rectangular">
-                    <div className="flex items-center gap-2">
-                      <Square className="w-4 h-4" /> Rectangular
-                    </div>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {ductShape === "round" ? (
+          </CardHeader>
+          <CardContent className="p-6 space-y-6">
+            <div className="grid gap-4">
               <div>
-                <Label>Diameter (inches)</Label>
+                <Label>Air Flow Rate (CFM)</Label>
                 <Input
                   type="number"
-                  value={diameter || ''}
-                  onChange={(e) => setDiameter(Number(e.target.value))}
-                  placeholder="Enter duct diameter"
+                  value={airflow || ''}
+                  onChange={(e) => setAirflow(Number(e.target.value))}
+                  placeholder="Enter air flow rate"
+                  className="mt-1"
                 />
               </div>
-            ) : (
-              <>
-                <div>
-                  <Label>Width (inches)</Label>
-                  <Input
-                    type="number"
-                    value={width || ''}
-                    onChange={(e) => setWidth(Number(e.target.value))}
-                    placeholder="Enter duct width"
-                  />
-                </div>
-                <div>
-                  <Label>Height (inches)</Label>
-                  <Input
-                    type="number"
-                    value={height || ''}
-                    onChange={(e) => setHeight(Number(e.target.value))}
-                    placeholder="Enter duct height"
-                  />
-                </div>
-              </>
-            )}
-
-            <div>
-              <Label>Duct Length (feet)</Label>
-              <Input
-                type="number"
-                value={ductLength || ''}
-                onChange={(e) => setDuctLength(Number(e.target.value) || 100)}
-                placeholder="Enter duct length (default: 100)"
-              />
-            </div>
-
-            <Button 
-              onClick={calculateDuct}
-              className="bg-[#E98A23] hover:bg-[#d47b1e]"
-            >
-              Calculate
-            </Button>
-
-            {result && (
-              <div className="space-y-4 p-4 border rounded-lg bg-gray-50">
-                <h3 className="text-lg font-semibold">Results:</h3>
-                <div className="space-y-2">
-                  <p>Airflow Rate: {airflow} CFM</p>
-                  <p>Duct Area: {result.area.toFixed(2)} ft²</p>
-                  <div className="flex items-center gap-2">
-                    <p>Velocity: {result.actualVelocity.toFixed(2)} FPM</p>
-                    {result.velocityStatus === "within" ? (
-                      <CircleCheck className="text-green-500 w-5 h-5" />
-                    ) : (
-                      <CircleX className="text-red-500 w-5 h-5" />
-                    )}
-                  </div>
-                  <p>Static Loss per 100ft: {result.staticLossPerHundred.toFixed(3)} inWG</p>
-                  <p>Total Static Loss: {result.totalStaticLoss.toFixed(3)} inWG</p>
-                  <div className="flex items-center gap-2">
-                    <p>Friction Status:</p>
-                    {result.frictionStatus === "within" ? (
-                      <span className="text-green-500 font-medium">Within acceptable range</span>
-                    ) : (
-                      <span className="text-red-500 font-medium">Exceeds static loss allowance</span>
-                    )}
-                  </div>
-                </div>
+              
+              <div>
+                <Label>Maximum Velocity (FPM)</Label>
+                <Input
+                  type="number"
+                  value={maxVelocity || ''}
+                  onChange={(e) => setMaxVelocity(Number(e.target.value))}
+                  placeholder="Enter maximum velocity"
+                  className="mt-1"
+                />
               </div>
-            )}
-          </div>
-        </div>
+
+              <div>
+                <Label>Maximum Static Pressure Loss (inches of water per 100 ft)</Label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={maxStaticLoss || ''}
+                  onChange={handleMaxStaticLossChange}
+                  placeholder="Enter maximum static pressure loss (e.g., 0.08)"
+                  className="mt-1"
+                />
+              </div>
+
+              <div>
+                <Label>Duct Shape</Label>
+                <Select value={ductShape} onValueChange={(value: "round" | "rectangular") => setDuctShape(value)}>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="round">Round</SelectItem>
+                    <SelectItem value="rectangular">Rectangular</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {ductShape === "round" ? (
+                <div>
+                  <Label>Diameter (inches)</Label>
+                  <Input
+                    type="number"
+                    value={diameter || ''}
+                    onChange={(e) => setDiameter(Number(e.target.value))}
+                    placeholder="Enter duct diameter"
+                    className="mt-1"
+                  />
+                </div>
+              ) : (
+                <>
+                  <div>
+                    <Label>Width (inches)</Label>
+                    <Input
+                      type="number"
+                      value={width || ''}
+                      onChange={(e) => setWidth(Number(e.target.value))}
+                      placeholder="Enter duct width"
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label>Height (inches)</Label>
+                    <Input
+                      type="number"
+                      value={height || ''}
+                      onChange={(e) => setHeight(Number(e.target.value))}
+                      placeholder="Enter duct height"
+                      className="mt-1"
+                    />
+                  </div>
+                </>
+              )}
+
+              <div>
+                <Label>Duct Length (feet)</Label>
+                <Input
+                  type="number"
+                  value={ductLength || ''}
+                  onChange={(e) => setDuctLength(Number(e.target.value) || 100)}
+                  placeholder="Enter duct length (default: 100)"
+                  className="mt-1"
+                />
+              </div>
+
+              <Button 
+                onClick={calculateDuct}
+                className="w-full md:w-auto bg-[#E98A23] hover:bg-[#E98A23]/90 mt-4"
+              >
+                Calculate
+              </Button>
+
+              {result && (
+                <div className="mt-6 p-4 border rounded-lg bg-gray-50 space-y-2">
+                  <h3 className="text-lg font-semibold text-gray-900">Results:</h3>
+                  <div className="grid gap-2 text-gray-700">
+                    <p>Airflow Rate: {airflow} CFM</p>
+                    <p>Duct Area: {result.area.toFixed(2)} ft²</p>
+                    <div className="flex items-center gap-2">
+                      <p>
+                        Velocity: {result.actualVelocity.toFixed(2)} FPM
+                        <span className={result.velocityStatus === "within" ? "text-green-500 ml-2" : "text-red-500 ml-2"}>
+                          ({result.velocityStatus === "within" ? "Within range" : "Exceeds limit"})
+                        </span>
+                      </p>
+                    </div>
+                    <p>Static Loss per 100ft: {result.staticLossPerHundred.toFixed(3)} inWG</p>
+                    <p>Total Static Loss: {result.totalStaticLoss.toFixed(3)} inWG</p>
+                    <div className="flex items-center gap-2">
+                      <p>
+                        Friction Status:
+                        <span className={result.frictionStatus === "within" ? "text-green-500 ml-2" : "text-red-500 ml-2"}>
+                          {result.frictionStatus === "within" ? "Within acceptable range" : "Exceeds static loss allowance"}
+                        </span>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
 
         <BenefitsSection />
-        
-        <div className="my-8 space-y-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">What Is an HVAC Duct Calculator?</h2>
-          <p className="text-gray-600 mb-4">
-            An HVAC Duct Calculator helps technicians determine the ideal size and specifications for ductwork in HVAC systems. By entering parameters like airflow, duct shape, and material, the calculator generates results that ensure optimal system performance. Proper duct sizing is crucial for energy efficiency and effective climate control in buildings.
-          </p>
-          <p className="text-gray-600">
-            This tool simplifies complex calculations, making it easy for HVAC pros of all levels to design efficient systems that meet regulatory standards.
-          </p>
-
-          <div className="bg-gradient-to-r from-[#E98A23] to-[#F9B348] p-8 rounded-lg text-white shadow-lg">
-            <div className="max-w-3xl mx-auto text-center">
-              <h2 className="text-3xl font-bold mb-4">Try Field Promax Free for 14 Days</h2>
-              <p className="text-lg mb-6 opacity-90">
-                Experience the full power of our field service management platform. 
-                No credit card required. Cancel anytime.
-              </p>
-              <a 
-                href="/booking" 
-                className="inline-block bg-white text-[#E98A23] font-semibold px-8 py-3 rounded-full hover:bg-gray-100 transition-colors"
-              >
-                Book Your Free Demo
-              </a>
-            </div>
-          </div>
-        </div>
-
         <InstructionsSection />
         <CalculationMethodSection />
 
-        <div className="my-8 bg-gradient-to-r from-[#E98A23] to-[#F9B348] p-8 rounded-lg text-white shadow-lg">
-          <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-3xl font-bold mb-4">Enhance Your HVAC Design Process</h2>
-            <p className="text-lg mb-0 opacity-90">
-              Our Duct Calculator provides precise, easy-to-use tools for professionals and DIY enthusiasts. 
-              Streamline your ductwork design with accurate, real-time calculations.
+        <Card className="bg-gradient-to-r from-[#E98A23]/10 to-[#F9B348]/10 border-2 border-[#E98A23]/20">
+          <CardHeader className="border-b border-[#E98A23]/20">
+            <CardTitle className="text-[#E98A23]">Upgrade Your HVAC Planning</CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            <p className="text-gray-700 mb-4">
+              Field Promax can revolutionize your HVAC business management. Get precise duct calculations and streamline your operations.
             </p>
-          </div>
-        </div>
+            <Button className="w-full md:w-auto bg-[#E98A23] hover:bg-[#E98A23]/90">
+              Book Your Free Demo
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     </ClientPageWrapper>
   );
