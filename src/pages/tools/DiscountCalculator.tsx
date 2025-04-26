@@ -7,11 +7,12 @@ import DiscountCalculatorForm from "@/components/tools/discount-calculator/Disco
 import DiscountResultsDisplay from "@/components/tools/discount-calculator/DiscountResultsDisplay";
 import DetailedDescription from "@/components/tools/discount-calculator/DetailedDescription";
 import { Button } from "@/components/ui/button";
+import { DiscountCalculationResults } from "@/types/calculatorTypes";
 
 const DiscountCalculator = () => {
-  const [results, setResults] = useState<CalculationResults | null>(null);
+  const [results, setResults] = useState<DiscountCalculationResults | null>(null);
 
-  const handleCalculate = (calculationResults: CalculationResults) => {
+  const handleCalculate = (calculationResults: DiscountCalculationResults) => {
     setResults(calculationResults);
   };
 

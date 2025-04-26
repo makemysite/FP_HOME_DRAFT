@@ -1,11 +1,12 @@
 
 import React from "react";
+import { CalculationResults } from "@/types/calculatorTypes";
 
 type ResultsDisplayProps = {
   results: {
     annualSalary: number;
     weeklyHours: number;
-    weeksWorked: number;
+    weeksPerYear: number;
     totalWorkHours: number;
     hourlyRate: number;
     monthlyPay: number;
@@ -58,7 +59,7 @@ const ResultsDisplay = ({ results }: ResultsDisplayProps) => {
           </div>
           <div>
             <p className="text-sm text-gray-600">Weeks Worked Per Year</p>
-            <p className="text-base">{results.weeksWorked} weeks</p>
+            <p className="text-base">{results.weeksPerYear} weeks</p>
           </div>
           <div>
             <p className="text-sm text-gray-600">Total Annual Work Hours</p>

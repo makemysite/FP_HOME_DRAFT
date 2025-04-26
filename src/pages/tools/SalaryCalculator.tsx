@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import ClientPageWrapper from "@/components/layout/ClientPageWrapper";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -70,7 +71,15 @@ const SalaryCalculator = () => {
           </CardHeader>
           <CardContent className="p-6">
             <SalaryCalculatorForm onCalculate={handleCalculate} />
-            {results && <ResultsDisplay results={results} />}
+            {results && <ResultsDisplay results={{
+              annualSalary: results.annualSalary || 0,
+              weeklyHours: results.weeklyHours || 0,
+              weeksPerYear: results.weeksPerYear || 0,
+              totalWorkHours: results.totalWorkHours,
+              hourlyRate: results.hourlyRate,
+              monthlyPay: results.monthlyPay,
+              weeklyPay: results.weeklyPay
+            }} />}
           </CardContent>
         </Card>
 
