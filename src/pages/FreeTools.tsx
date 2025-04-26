@@ -1,9 +1,8 @@
-
 import React from "react";
 import { Link } from "react-router-dom";
 import ClientPageWrapper from "@/components/layout/ClientPageWrapper";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Calculator, ChartBar, Wrench } from "lucide-react";
+import { Calculator, ChartBar, Wrench, DollarSign, Clock } from "lucide-react";
 
 interface Tool {
   id: string;
@@ -48,6 +47,34 @@ const tools: Tool[] = [
     description: "Track and forecast your sales growth and revenue trends",
     icon: <ChartBar className="w-8 h-8 text-[#E98A23]" />,
     path: "/tools/growth-calculator"
+  },
+  {
+    id: "roi-calculator",
+    title: "ROI Calculator",
+    description: "Calculate Return on Investment for your business decisions",
+    icon: <ChartBar className="w-8 h-8 text-[#E98A23]" />,
+    path: "/tools/roi-calculator"
+  },
+  {
+    id: "break-even-calculator",
+    title: "Break-Even Calculator",
+    description: "Find out when your business will become profitable",
+    icon: <DollarSign className="w-8 h-8 text-[#E98A23]" />,
+    path: "/tools/break-even-calculator"
+  },
+  {
+    id: "discount-calculator",
+    title: "Discount Calculator",
+    description: "Calculate discounts and final prices for your services",
+    icon: <Calculator className="w-8 h-8 text-[#E98A23]" />,
+    path: "/tools/discount-calculator"
+  },
+  {
+    id: "overtime-calculator",
+    title: "Overtime Calculator",
+    description: "Calculate overtime pay and hours for your field service team",
+    icon: <Clock className="w-8 h-8 text-[#E98A23]" />,
+    path: "/tools/overtime-calculator"
   }
 ];
 

@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -25,6 +24,10 @@ import LoadCalculator from "./pages/tools/LoadCalculator";
 import SalaryCalculator from "./pages/tools/SalaryCalculator";
 import ProfitCalculator from "./pages/tools/ProfitCalculator";
 import GrowthCalculator from "./pages/tools/GrowthCalculator";
+import ROICalculator from "./pages/tools/ROICalculator";
+import BreakEvenCalculator from "./pages/tools/BreakEvenCalculator";
+import DiscountCalculator from "./pages/tools/DiscountCalculator";
+import OvertimeCalculator from "./pages/tools/OvertimeCalculator";
 
 // Create a new QueryClient instance outside of the App component
 // to ensure it's only created once
@@ -59,6 +62,10 @@ const App = () => {
               <Route path="/tools/salary-calculator" element={<SalaryCalculator />} />
               <Route path="/tools/profit-calculator" element={<ProfitCalculator />} />
               <Route path="/tools/growth-calculator" element={<GrowthCalculator />} />
+              <Route path="/tools/roi-calculator" element={<ROICalculator />} />
+              <Route path="/tools/break-even-calculator" element={<BreakEvenCalculator />} />
+              <Route path="/tools/discount-calculator" element={<DiscountCalculator />} />
+              <Route path="/tools/overtime-calculator" element={<OvertimeCalculator />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
             <Toaster />
