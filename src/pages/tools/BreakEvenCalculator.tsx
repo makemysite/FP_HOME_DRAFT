@@ -18,27 +18,41 @@ const BreakEvenCalculator = () => {
 
   return (
     <ClientPageWrapper
-      title="Break-Even Calculator"
-      description="Use this Free Break Even Point Calculator to find out how close you are to profitability."
-      descriptionClassName="text-[#E98A23]"
       metaTitle="Free Break Even Point Calculator for Service Businesses"
       metaDescription="Find out how many jobs you need to break even. Use this free Break Even Point Calculator and grow your business faster"
     >
-      <div className="max-w-3xl mx-auto px-4">
-        <div className="prose max-w-none mb-8">
-          <p className="text-lg text-gray-700">
-            Use our break-even calculator to find out exactly how many units you need to sell to cover your costs and start making a profit.
-          </p>
-        </div>
+      <div className="container max-w-4xl mx-auto px-4 py-8 space-y-10">
+        <Card className="shadow-md border-t-4 border-t-[#E98A23]">
+          <CardHeader className="bg-gray-50 border-b">
+            <div className="flex items-center space-x-3">
+              <DollarSign className="w-6 h-6 text-[#E98A23]" />
+              <CardTitle>Break-Even Calculator Overview</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent className="p-6 space-y-4">
+            <div>
+              <h2 className="text-2xl font-bold text-[#E98A23] mb-4">Break-Even Calculator</h2>
+              <p className="text-lg text-gray-700 mb-4">
+                Use our break-even calculator to find out exactly how many units you need to sell to cover your costs and start making a profit.
+              </p>
+              <p className="text-lg text-gray-700 mb-4">
+                Understanding your break-even point is crucial for business growth. Our calculator helps you identify the precise number of jobs or sales needed to offset your expenses and generate meaningful revenue.
+              </p>
+              <p className="text-lg text-gray-700">
+                Say goodbye to financial uncertainty and hello to strategic planning! Whether you're a small business owner or an entrepreneur, our free break-even calculator provides the insights you need to make informed decisions and drive your business forward.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
 
-        <Card className="mb-8">
-          <CardHeader>
+        <Card className="shadow-md border-t-4 border-t-[#E98A23]">
+          <CardHeader className="bg-gray-50 border-b">
             <div className="flex items-center space-x-3">
               <DollarSign className="w-6 h-6 text-[#E98A23]" />
               <CardTitle>Break-Even Calculator</CardTitle>
             </div>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="p-6">
             <BreakEvenCalculatorForm onCalculate={handleCalculate} />
             {results && <BreakEvenResultsDisplay results={results} />}
           </CardContent>
@@ -67,3 +81,4 @@ const BreakEvenCalculator = () => {
 };
 
 export default BreakEvenCalculator;
+
