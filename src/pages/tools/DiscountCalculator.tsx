@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import ClientPageWrapper from "@/components/layout/ClientPageWrapper";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -26,7 +27,7 @@ const DiscountCalculator = () => {
       description="Calculate discounts and final prices for your services"
       descriptionClassName="text-[#E98A23]"
       metaTitle="Free Discount Calculator for Service Businesses"
-      metaDescription="Calculate service discounts and final prices instantly with our free calculator."
+      metaDescription="Plan the right deal and protect profits. Use our free Discount Calculator to set smart prices and close more jobs."
     >
       <div className="max-w-3xl mx-auto px-4">
         <Card className="mb-8">
