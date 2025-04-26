@@ -1,28 +1,51 @@
 
-import React from "react";
+import React, { useState } from "react";
 import ClientPageWrapper from "@/components/layout/ClientPageWrapper";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calculator } from "lucide-react";
+import { Percent } from "lucide-react";
+import DiscountCalculatorForm from "@/components/tools/discount-calculator/DiscountCalculatorForm";
+import DiscountResultsDisplay from "@/components/tools/discount-calculator/DiscountResultsDisplay";
+
+interface CalculationResults {
+  priceAfterDiscount: number;
+  discountPercentage: number;
+  originalPrice: number;
+  discountAmount: number;
+}
 
 const DiscountCalculator = () => {
+  const [results, setResults] = useState<CalculationResults | null>(null);
+
+  const handleCalculate = (calculationResults: CalculationResults) => {
+    setResults(calculationResults);
+  };
+
   return (
     <ClientPageWrapper
       title="Discount Calculator"
       description="Calculate discounts and final prices for your services"
       descriptionClassName="text-[#E98A23]"
-      metaTitle="Free Discount Calculator for Field Service Businesses | Field Promax"
-      metaDescription="Calculate service discounts and final prices with our free calculator."
+      metaTitle="Free Discount Calculator for Service Businesses"
+      metaDescription="Calculate service discounts and final prices instantly with our free calculator."
     >
-      <div className="container max-w-4xl mx-auto px-4 py-8 space-y-10">
-        <Card className="shadow-md border-t-4 border-t-[#E98A23]">
-          <CardHeader className="bg-gray-50 border-b">
+      <div className="max-w-3xl mx-auto px-4">
+        <div className="prose max-w-none mb-8">
+          <p className="text-lg text-gray-700">
+            Use our discount calculator to quickly determine discounted prices and savings for your services.
+            Simply enter the original price and your desired discount to see the final price and total savings.
+          </p>
+        </div>
+
+        <Card className="mb-8">
+          <CardHeader>
             <div className="flex items-center space-x-3">
-              <Calculator className="w-6 h-6 text-[#E98A23]" />
+              <Percent className="w-6 h-6 text-[#E98A23]" />
               <CardTitle>Discount Calculator</CardTitle>
             </div>
           </CardHeader>
-          <CardContent className="p-6">
-            <p>Discount Calculator coming soon...</p>
+          <CardContent className="space-y-6">
+            <DiscountCalculatorForm onCalculate={handleCalculate} />
+            {results && <DiscountResultsDisplay results={results} />}
           </CardContent>
         </Card>
       </div>
