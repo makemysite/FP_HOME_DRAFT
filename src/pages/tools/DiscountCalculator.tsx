@@ -6,6 +6,7 @@ import { Percent } from "lucide-react";
 import DiscountCalculatorForm from "@/components/tools/discount-calculator/DiscountCalculatorForm";
 import DiscountResultsDisplay from "@/components/tools/discount-calculator/DiscountResultsDisplay";
 import DetailedDescription from "@/components/tools/discount-calculator/DetailedDescription";
+import CTASection from "@/components/features/CTASection";
 
 interface CalculationResults {
   priceAfterDiscount: number;
@@ -45,6 +46,8 @@ const DiscountCalculator = () => {
         
         <DetailedDescription />
       </div>
+      
+      <CTASection className="mt-16 mb-12" />
     </ClientPageWrapper>
   );
 };
