@@ -75,25 +75,25 @@ const DetailedDescription = () => {
         <div className="grid gap-4 md:grid-cols-2">
           <Card>
             <CardContent className="p-4">
-              <h4 className="font-medium mb-2">Fixed Costs</h4>
+              <h4 className="font-medium mb-2 text-[#E98A23]">Fixed Costs</h4>
               <p className="text-sm text-gray-600">Stuff you pay every month no matter what - like rent, insurance, salaries.</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-4">
-              <h4 className="font-medium mb-2">Variable Cost Per Unit</h4>
+              <h4 className="font-medium mb-2 text-[#E98A23]">Variable Cost Per Unit</h4>
               <p className="text-sm text-gray-600">The cost that changes based on each job - like materials or fuel.</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-4">
-              <h4 className="font-medium mb-2">Selling Price Per Unit</h4>
+              <h4 className="font-medium mb-2 text-[#E98A23]">Selling Price Per Unit</h4>
               <p className="text-sm text-gray-600">What your customer pays for each service or product.</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-4">
-              <h4 className="font-medium mb-2">Break-Even Point</h4>
+              <h4 className="font-medium mb-2 text-[#E98A23]">Break-Even Point</h4>
               <p className="text-sm text-gray-600">The number of jobs or units you must complete to cover all costs.</p>
             </CardContent>
           </Card>
@@ -120,3 +120,4 @@ const DetailedDescription = () => {
 };
 
 export default DetailedDescription;
+
