@@ -21,8 +21,8 @@ const BreakEvenCalculator = () => {
       title="Break-Even Calculator"
       description="Use this Free Break Even Point Calculator to find out how close you are to profitability."
       descriptionClassName="text-[#E98A23]"
-      metaTitle="Free Break-Even Calculator for Field Service Businesses"
-      metaDescription="Calculate your ROI instantly. Know what you earn from every investment. Try our free ROI calculator today."
+      metaTitle="Free Break Even Point Calculator for Service Businesses"
+      metaDescription="Find out how many jobs you need to break even. Use this free Break Even Point Calculator and grow your business faster"
     >
       <div className="max-w-3xl mx-auto px-4">
         <div className="prose max-w-none mb-8">
