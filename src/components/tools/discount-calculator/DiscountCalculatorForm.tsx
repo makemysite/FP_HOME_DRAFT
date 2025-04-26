@@ -10,8 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 const formSchema = z.object({
   mode: z.enum(["Percent Off", "Fixed Amount Off"]),
-  priceBeforeDiscount: z.string().transform((val) => Number(val)),
-  discountValue: z.string().transform((val) => Number(val)),
+  priceBeforeDiscount: z.coerce.number().min(0),
+  discountValue: z.coerce.number().min(0),
 });
 
 type DiscountFormValues = z.infer<typeof formSchema>;
@@ -30,8 +30,8 @@ const DiscountCalculatorForm = ({ onCalculate }: DiscountCalculatorFormProps) =>
     resolver: zodResolver(formSchema),
     defaultValues: {
       mode: "Percent Off",
-      priceBeforeDiscount: "",
-      discountValue: "",
+      priceBeforeDiscount: 0,
+      discountValue: 0,
     },
   });
 

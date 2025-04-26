@@ -1,10 +1,10 @@
-
 import React, { useState } from "react";
 import ClientPageWrapper from "@/components/layout/ClientPageWrapper";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Percent } from "lucide-react";
 import DiscountCalculatorForm from "@/components/tools/discount-calculator/DiscountCalculatorForm";
 import DiscountResultsDisplay from "@/components/tools/discount-calculator/DiscountResultsDisplay";
+import DetailedDescription from "@/components/tools/discount-calculator/DetailedDescription";
 
 interface CalculationResults {
   priceAfterDiscount: number;
@@ -29,13 +29,6 @@ const DiscountCalculator = () => {
       metaDescription="Calculate service discounts and final prices instantly with our free calculator."
     >
       <div className="max-w-3xl mx-auto px-4">
-        <div className="prose max-w-none mb-8">
-          <p className="text-lg text-gray-700">
-            Use our discount calculator to quickly determine discounted prices and savings for your services.
-            Simply enter the original price and your desired discount to see the final price and total savings.
-          </p>
-        </div>
-
         <Card className="mb-8">
           <CardHeader>
             <div className="flex items-center space-x-3">
@@ -48,6 +41,8 @@ const DiscountCalculator = () => {
             {results && <DiscountResultsDisplay results={results} />}
           </CardContent>
         </Card>
+        
+        <DetailedDescription />
       </div>
     </ClientPageWrapper>
   );
