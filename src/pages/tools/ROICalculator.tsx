@@ -6,6 +6,9 @@ import { ChartBar } from "lucide-react";
 import ROICalculatorForm from "@/components/tools/roi-calculator/ROICalculatorForm";
 import ROIResultsDisplay from "@/components/tools/roi-calculator/ROIResultsDisplay";
 import { calculateROI, ROIResults } from "@/utils/roiCalculations";
+import { UsageInstructions } from "@/components/tools/roi-calculator/UsageInstructions";
+import { DescriptionSection } from "@/components/tools/roi-calculator/DescriptionSection";
+import { GrowthRatesSection } from "@/components/tools/roi-calculator/GrowthRatesSection";
 
 const ROICalculator = () => {
   const [results, setResults] = useState<ROIResults | null>(null);
@@ -28,6 +31,8 @@ const ROICalculator = () => {
       metaDescription="Calculate ROI for your field service business investments with our free calculator."
     >
       <div className="container max-w-4xl mx-auto px-4 py-8 space-y-10">
+        <DescriptionSection />
+        
         <Card className="shadow-md border-t-4 border-t-[#E98A23]">
           <CardHeader className="bg-gray-50 border-b">
             <div className="flex items-center space-x-3">
@@ -40,6 +45,9 @@ const ROICalculator = () => {
             {results && <ROIResultsDisplay results={results} />}
           </CardContent>
         </Card>
+
+        <UsageInstructions />
+        <GrowthRatesSection />
       </div>
     </ClientPageWrapper>
   );
