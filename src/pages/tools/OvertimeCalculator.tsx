@@ -45,6 +45,21 @@ const OvertimeCalculator = () => {
       metaDescription="Calculate overtime pay and hours for your field service team with our free calculator."
     >
       <div className="container max-w-4xl mx-auto px-4 py-8 space-y-10">
+        <div className="text-center bg-[#E98A23]/10 p-6 rounded-lg border border-[#E98A23]/20">
+          <h2 className="text-3xl font-bold text-[#E98A23] mb-4">Overtime Calculator</h2>
+          <div className="space-y-4">
+            <p className="text-lg text-gray-700">
+              Don't worry about paying your technicians less (or worse, more!) for the additional time they have worked for you. Know the exact amount to pay with our efficient overtime calculator.
+            </p>
+            <p className="text-lg text-gray-700">
+              Time is money, and we're here to make sure you're getting every penny you deserve! Introducing our game-changing overtime calculator—the must-have tool for service business owners looking to master their payroll.
+            </p>
+            <p className="text-lg text-gray-700">
+              Say goodbye to manual calculations and hello to effortless accuracy! Whether you're managing a bustling team of technicians or keeping tabs on overtime hours, our free calculator streamlines the process, ensuring fair compensation while saving you valuable time. Get ready to revolutionize your payroll management and empower your business to thrive like never before!
+            </p>
+          </div>
+        </div>
+
         <Card className="shadow-md border-t-4 border-t-[#E98A23]">
           <CardHeader className="bg-gray-50 border-b">
             <div className="flex items-center space-x-3">
