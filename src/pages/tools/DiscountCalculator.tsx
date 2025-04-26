@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import ClientPageWrapper from "@/components/layout/ClientPageWrapper";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,7 +5,7 @@ import { Percent } from "lucide-react";
 import DiscountCalculatorForm from "@/components/tools/discount-calculator/DiscountCalculatorForm";
 import DiscountResultsDisplay from "@/components/tools/discount-calculator/DiscountResultsDisplay";
 import DetailedDescription from "@/components/tools/discount-calculator/DetailedDescription";
-import CTASection from "@/components/features/CTASection";
+import DemoForm from "@/components/features/DemoForm";
 
 interface CalculationResults {
   priceAfterDiscount: number;
@@ -47,7 +46,15 @@ const DiscountCalculator = () => {
         <DetailedDescription />
       </div>
       
-      <CTASection className="mt-16 mb-12" />
+      <section className="bg-[rgba(245,246,251,1)] py-16 mt-16">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-3xl font-bold mb-6">Ready to Streamline Your Pricing Strategy?</h2>
+          <p className="text-lg text-gray-700 mb-8">
+            Schedule a demo and see how our tools can transform your business.
+          </p>
+          <DemoForm className="justify-center" />
+        </div>
+      </section>
     </ClientPageWrapper>
   );
 };
