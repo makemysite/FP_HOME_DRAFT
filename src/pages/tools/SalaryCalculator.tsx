@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import ClientPageWrapper from "@/components/layout/ClientPageWrapper";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calculator } from "lucide-react";
+import { DollarSign } from "lucide-react";
 import { CalculationResults } from "@/types/calculatorTypes";
 import SalaryCalculatorForm from "@/components/tools/salary-calculator/SalaryCalculatorForm";
 import ResultsDisplay from "@/components/tools/salary-calculator/ResultsDisplay";
@@ -40,47 +40,37 @@ const SalaryCalculator = () => {
 
   return (
     <ClientPageWrapper
-      title="Convert Salary to Hourly Pay Rate"
-      description="Quick and Accurate Salary Conversion Calculator"
-      descriptionClassName="text-[#E98A23]"
       metaTitle="Free Salary to Hourly Paycheck Calculator for Service Businesses"
       metaDescription="Convert salaries to hourly paychecks with our free, easy-to-use calculator. Start simplifying payroll today!"
     >
       <div className="container max-w-4xl mx-auto px-4 py-8 space-y-10">
-        <div className="prose max-w-none mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Convert Salary to Hourly Pay Rate
-          </h1>
-          <p className="text-xl text-[#E98A23] font-semibold mb-2">
-            Quick and Accurate Salary Conversion Calculator
-          </p>
-          <p className="text-gray-600">
-            Quickly convert annual salary to hourly rate with our free calculator. Perfect for comparing job offers, budgeting, or managing payroll calculations.
-          </p>
-        </div>
+        <Card className="shadow-md border-t-4 border-t-[#E98A23]">
+          <CardHeader className="bg-gray-50 border-b">
+            <div className="flex items-center space-x-3">
+              <DollarSign className="w-6 h-6 text-[#E98A23]" />
+              <CardTitle>Salary Calculator Overview</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent className="p-6 space-y-4">
+            <div>
+              <h2 className="text-2xl font-bold text-[#E98A23] mb-4">Salary to Hourly Pay Rate Calculator</h2>
+              <p className="text-lg text-gray-700 mb-4">
+                Quickly convert annual salary to hourly rate with our free calculator. Perfect for comparing job offers, budgeting, or managing payroll calculations.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
 
         <Card className="shadow-md border-t-4 border-t-[#E98A23]">
           <CardHeader className="bg-gray-50 border-b">
             <div className="flex items-center space-x-3">
-              <Calculator className="w-6 h-6 text-[#E98A23]" />
-              <CardTitle>Salary to Hourly Calculator</CardTitle>
+              <DollarSign className="w-6 h-6 text-[#E98A23]" />
+              <CardTitle>Salary Calculator</CardTitle>
             </div>
           </CardHeader>
           <CardContent className="p-6">
             <SalaryCalculatorForm onCalculate={handleCalculate} />
-            {results && (
-              <ResultsDisplay 
-                results={{
-                  annualSalary: results.annualSalary || 0,
-                  weeklyHours: results.weeklyHours || 0,
-                  weeksWorked: results.weeksPerYear || 0,
-                  totalWorkHours: results.totalWorkHours,
-                  hourlyRate: results.hourlyRate,
-                  monthlyPay: results.monthlyPay,
-                  weeklyPay: results.weeklyPay
-                }} 
-              />
-            )}
+            {results && <ResultsDisplay results={results} />}
           </CardContent>
         </Card>
 

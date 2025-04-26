@@ -1,3 +1,4 @@
+
 import React from "react";
 import ClientPageWrapper from "@/components/layout/ClientPageWrapper";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,24 +9,27 @@ import InstructionsSection from "@/components/tools/profit-calculator/Instructio
 const ProfitCalculator = () => {
   return (
     <ClientPageWrapper
-      title="Instantly Calculate Your Profit Margins"
-      description="Accurate Profit Margin Calculations for Your Business"
-      descriptionClassName="text-[#E98A23]"
       metaTitle="Free Profit Margin Calculator for Field Service Businesses"
       metaDescription="Instantly calculate your profit margins and optimize your field service business. Try our free profit margin calculator now!"
     >
       <div className="container max-w-4xl mx-auto px-4 py-8 space-y-10">
-        {/* Hero Section */}
-        <div className="text-left">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Instantly Calculate Your Profit Margins
-          </h1>
-          <p className="text-xl text-gray-600 max-w-3xl">
-            Make sure every project brings in profit. Our free Profit Margin Calculator gives you accurate numbers in seconds, making it easy to keep track of your profits and optimize your business strategy.
-          </p>
-        </div>
+        <Card className="shadow-md border-t-4 border-t-[#E98A23]">
+          <CardHeader className="bg-gray-50 border-b">
+            <div className="flex items-center space-x-3">
+              <ChartBar className="w-6 h-6 text-[#E98A23]" />
+              <CardTitle>Profit Calculator Overview</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent className="p-6 space-y-4">
+            <div>
+              <h2 className="text-2xl font-bold text-[#E98A23] mb-4">Profit Margin Calculator</h2>
+              <p className="text-lg text-gray-700 mb-4">
+                Make sure every project brings in profit. Our free Profit Margin Calculator gives you accurate numbers in seconds, making it easy to keep track of your profits and optimize your business strategy.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
 
-        {/* Main Calculator Card */}
         <Card className="shadow-md border-t-4 border-t-[#E98A23]">
           <CardHeader className="bg-gray-50 border-b">
             <div className="flex items-center space-x-3">
@@ -38,7 +42,6 @@ const ProfitCalculator = () => {
           </CardContent>
         </Card>
 
-        {/* Instructions and Additional Information */}
         <InstructionsSection />
       </div>
     </ClientPageWrapper>

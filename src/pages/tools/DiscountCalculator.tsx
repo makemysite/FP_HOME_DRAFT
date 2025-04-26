@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import ClientPageWrapper from "@/components/layout/ClientPageWrapper";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,13 +7,6 @@ import DiscountCalculatorForm from "@/components/tools/discount-calculator/Disco
 import DiscountResultsDisplay from "@/components/tools/discount-calculator/DiscountResultsDisplay";
 import DetailedDescription from "@/components/tools/discount-calculator/DetailedDescription";
 import { Button } from "@/components/ui/button";
-
-interface CalculationResults {
-  priceAfterDiscount: number;
-  discountPercentage: number;
-  originalPrice: number;
-  discountAmount: number;
-}
 
 const DiscountCalculator = () => {
   const [results, setResults] = useState<CalculationResults | null>(null);
@@ -23,21 +17,35 @@ const DiscountCalculator = () => {
 
   return (
     <ClientPageWrapper
-      title="Discount Calculator"
-      description="Calculate discounts and final prices for your services"
-      descriptionClassName="text-[#E98A23]"
       metaTitle="Free Discount Calculator for Service Businesses"
       metaDescription="Plan the right deal and protect profits. Use our free Discount Calculator to set smart prices and close more jobs."
     >
-      <div className="max-w-3xl mx-auto px-4">
-        <Card className="mb-8">
-          <CardHeader>
+      <div className="container max-w-4xl mx-auto px-4 py-8 space-y-10">
+        <Card className="shadow-md border-t-4 border-t-[#E98A23]">
+          <CardHeader className="bg-gray-50 border-b">
+            <div className="flex items-center space-x-3">
+              <Percent className="w-6 h-6 text-[#E98A23]" />
+              <CardTitle>Discount Calculator Overview</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent className="p-6 space-y-4">
+            <div>
+              <h2 className="text-2xl font-bold text-[#E98A23] mb-4">Discount Calculator</h2>
+              <p className="text-lg text-gray-700 mb-4">
+                Calculate discounts and final prices for your services instantly. Our calculator helps you make informed decisions about pricing and ensure your discounts remain profitable.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-md border-t-4 border-t-[#E98A23]">
+          <CardHeader className="bg-gray-50 border-b">
             <div className="flex items-center space-x-3">
               <Percent className="w-6 h-6 text-[#E98A23]" />
               <CardTitle>Discount Calculator</CardTitle>
             </div>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="p-6">
             <DiscountCalculatorForm onCalculate={handleCalculate} />
             {results && <DiscountResultsDisplay results={results} />}
           </CardContent>

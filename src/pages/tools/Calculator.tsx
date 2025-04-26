@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import ClientPageWrapper from "@/components/layout/ClientPageWrapper";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -32,18 +31,35 @@ const CalculatorTool = () => {
 
   return (
     <ClientPageWrapper
-      title="Field Service Calculator"
-      description="Calculate service costs, labor hours, and more"
+      metaTitle="Field Service Calculator"
+      metaDescription="Calculate service costs, labor hours, and more with our free calculator"
     >
-      <div className="max-w-2xl mx-auto">
-        <Card>
-          <CardHeader>
+      <div className="container max-w-4xl mx-auto px-4 py-8 space-y-10">
+        <Card className="shadow-md border-t-4 border-t-[#E98A23]">
+          <CardHeader className="bg-gray-50 border-b">
+            <div className="flex items-center space-x-3">
+              <Calculator className="w-6 h-6 text-[#E98A23]" />
+              <CardTitle>Service Calculator Overview</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent className="p-6 space-y-4">
+            <div>
+              <h2 className="text-2xl font-bold text-[#E98A23] mb-4">Service Calculator</h2>
+              <p className="text-lg text-gray-700 mb-4">
+                A simple yet powerful calculator for all your service business calculations. Perfect for quick estimates and basic calculations on the go.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-md border-t-4 border-t-[#E98A23]">
+          <CardHeader className="bg-gray-50 border-b">
             <div className="flex items-center space-x-3">
               <Calculator className="w-6 h-6 text-[#E98A23]" />
               <CardTitle>Service Calculator</CardTitle>
             </div>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="p-6 space-y-4">
             <div className="grid gap-4">
               <input
                 type="number"

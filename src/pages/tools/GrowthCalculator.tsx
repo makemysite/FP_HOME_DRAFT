@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import ClientPageWrapper from "@/components/layout/ClientPageWrapper";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { TrendingUp, ChartBar } from "lucide-react";
+import { TrendingUp } from "lucide-react";
 import DescriptionSection from "@/components/tools/growth-calculator/DescriptionSection";
 import GrowthCalculatorForm from "@/components/tools/growth-calculator/GrowthCalculatorForm";
 import ResultsDisplay from "@/components/tools/growth-calculator/ResultsDisplay";
@@ -33,20 +33,26 @@ const GrowthCalculator = () => {
 
   return (
     <ClientPageWrapper
-      title="Sales Growth Calculator"
-      description="Calculate and analyze your business sales performance"
-      descriptionClassName="text-[#E98A23]"
       metaTitle="Sales Growth Calculator for Field Service Businesses | Field Promax"
       metaDescription="Forecast revenue & set growth targets with Field Promax's easy-to-use Sales Growth Calculator."
     >
       <div className="container max-w-4xl mx-auto px-4 py-8 space-y-10">
-        <div className="text-left mb-8">
-          <div className="flex items-center gap-3 mb-4">
-            <ChartBar className="w-8 h-8 text-[#E98A23]" />
-            <h1 className="text-4xl font-bold text-[#170F49]">Sales Growth Calculator</h1>
-          </div>
-          <p className="text-[#E98A23]">Calculate and analyze your business sales performance</p>
-        </div>
+        <Card className="shadow-md border-t-4 border-t-[#E98A23]">
+          <CardHeader className="bg-gray-50 border-b">
+            <div className="flex items-center space-x-3">
+              <TrendingUp className="w-6 h-6 text-[#E98A23]" />
+              <CardTitle>Growth Calculator Overview</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent className="p-6 space-y-4">
+            <div>
+              <h2 className="text-2xl font-bold text-[#E98A23] mb-4">Sales Growth Calculator</h2>
+              <p className="text-lg text-gray-700 mb-4">
+                Calculate and analyze your business sales performance with precision. Our calculator helps you track growth, set targets, and make data-driven decisions for your business.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
 
         <Card className="shadow-md border-t-4 border-t-[#E98A23]">
           <CardHeader className="bg-gray-50 border-b">

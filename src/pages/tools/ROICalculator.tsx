@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import ClientPageWrapper from "@/components/layout/ClientPageWrapper";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,21 +30,32 @@ const ROICalculator = () => {
       metaTitle="Free ROI Calculator for Field Service Businesses"
       metaDescription="Calculate your ROI instantly. Know what you earn from every investment. Try our free ROI calculator today."
     >
-      <div className="max-w-3xl mx-auto px-4">
-        <div className="prose max-w-none mb-8">
-          <p className="text-lg text-gray-700">
-            Simplify your business decision-making process with our easy-to-use ROI Calculator. Calculate your return on investment in seconds, improving both your financial planning and business growth strategy.
-          </p>
-        </div>
+      <div className="container max-w-4xl mx-auto px-4 py-8 space-y-10">
+        <Card className="shadow-md border-t-4 border-t-[#E98A23]">
+          <CardHeader className="bg-gray-50 border-b">
+            <div className="flex items-center space-x-3">
+              <ChartBar className="w-6 h-6 text-[#E98A23]" />
+              <CardTitle>ROI Calculator Overview</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent className="p-6 space-y-4">
+            <div>
+              <h2 className="text-2xl font-bold text-[#E98A23] mb-4">ROI Calculator</h2>
+              <p className="text-lg text-gray-700 mb-4">
+                Simplify your business decision-making process with our easy-to-use ROI Calculator. Calculate your return on investment in seconds, improving both your financial planning and business growth strategy.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
 
-        <Card className="mb-8">
-          <CardHeader>
+        <Card className="shadow-md border-t-4 border-t-[#E98A23]">
+          <CardHeader className="bg-gray-50 border-b">
             <div className="flex items-center space-x-3">
               <ChartBar className="w-6 h-6 text-[#E98A23]" />
               <CardTitle>ROI Calculator</CardTitle>
             </div>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="p-6 space-y-6">
             <ROICalculatorForm onCalculate={handleCalculate} />
             {results && <ROIResultsDisplay results={results} />}
           </CardContent>
@@ -55,7 +65,6 @@ const ROICalculator = () => {
         <UsageInstructions />
         <GrowthRatesSection />
 
-        {/* Updated CTA Banner */}
         <Card className="bg-gradient-to-r from-[#E98A23]/10 to-[#F9B348]/10 border-2 border-[#E98A23]/20 my-8">
           <CardHeader className="border-b border-[#E98A23]/20">
             <CardTitle className="text-[#E98A23]">Upgrade Your Business Planning</CardTitle>
@@ -75,4 +84,3 @@ const ROICalculator = () => {
 };
 
 export default ROICalculator;
-
