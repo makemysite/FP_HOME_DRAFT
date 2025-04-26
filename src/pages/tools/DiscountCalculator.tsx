@@ -5,7 +5,7 @@ import { Percent } from "lucide-react";
 import DiscountCalculatorForm from "@/components/tools/discount-calculator/DiscountCalculatorForm";
 import DiscountResultsDisplay from "@/components/tools/discount-calculator/DiscountResultsDisplay";
 import DetailedDescription from "@/components/tools/discount-calculator/DetailedDescription";
-import DemoForm from "@/components/features/DemoForm";
+import { Button } from "@/components/ui/button";
 
 interface CalculationResults {
   priceAfterDiscount: number;
@@ -42,19 +42,25 @@ const DiscountCalculator = () => {
             {results && <DiscountResultsDisplay results={results} />}
           </CardContent>
         </Card>
-        
+
         <DetailedDescription />
+
+        <Card className="bg-gradient-to-r from-[#E98A23]/10 to-[#F9B348]/10 border-2 border-[#E98A23]/20 my-8">
+          <CardHeader className="border-b border-[#E98A23]/20">
+            <CardTitle className="text-[#E98A23]">Get Smarter Pricing with Field Promax</CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            <p className="text-gray-700 mb-4">
+              Our software helps you optimize your pricing strategy, track discounts, 
+              manage job profitability, and get paid faster with easier invoicing. 
+              Take control of your business finances and maximize your profits.
+            </p>
+            <Button className="w-full md:w-auto bg-[#E98A23] hover:bg-[#E98A23]/90">
+              Book Your Free Demo
+            </Button>
+          </CardContent>
+        </Card>
       </div>
-      
-      <section className="bg-[rgba(245,246,251,1)] py-16 mt-16">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold mb-6">Ready to Streamline Your Pricing Strategy?</h2>
-          <p className="text-lg text-gray-700 mb-8">
-            Schedule a demo and see how our tools can transform your business.
-          </p>
-          <DemoForm className="justify-center" />
-        </div>
-      </section>
     </ClientPageWrapper>
   );
 };
