@@ -10,10 +10,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 const formSchema = z.object({
   hoursWorked: z.coerce.number().min(0, "Hours worked must be positive"),
-  regularHours: z.coerce.number().min(0, "Regular hours must be positive"),
   basePay: z.coerce.number().min(0, "Base pay must be positive"),
   payRateType: z.enum(["Hourly", "Daily", "Weekly", "Monthly", "Annual"]),
-  standardHoursForPeriod: z.coerce.number().min(0, "Standard hours must be positive"),
+  expectedHours: z.coerce.number().min(0, "Expected hours must be positive"),
   overtimeRateMultiplier: z.coerce.number().min(1, "Overtime rate must be at least 1x"),
 });
 
@@ -33,10 +32,9 @@ const OvertimeCalculatorForm = ({ onCalculate }: OvertimeCalculatorFormProps) =>
     resolver: zodResolver(formSchema),
     defaultValues: {
       hoursWorked: 0,
-      regularHours: 40,
       basePay: 0,
       payRateType: "Hourly",
-      standardHoursForPeriod: 40,
+      expectedHours: 40, // Default to standard 40-hour work week
       overtimeRateMultiplier: 1.5,
     },
   });
@@ -44,17 +42,19 @@ const OvertimeCalculatorForm = ({ onCalculate }: OvertimeCalculatorFormProps) =>
   const calculateOvertime = (data: OvertimeFormValues) => {
     const {
       hoursWorked,
-      regularHours,
       basePay,
       payRateType,
-      standardHoursForPeriod,
+      expectedHours,
       overtimeRateMultiplier,
     } = data;
 
-    // Calculate hourly rate based on pay type
-    let hourlyRate = payRateType === "Hourly" 
+    // Convert base pay to hourly rate
+    const hourlyRate = payRateType === "Hourly" 
       ? basePay 
-      : basePay / standardHoursForPeriod;
+      : basePay / expectedHours;
+
+    // Use expectedHours as regularHours
+    const regularHours = expectedHours;
 
     let totalPay = 0;
     let overtimeHours = 0;
@@ -135,24 +135,10 @@ const OvertimeCalculatorForm = ({ onCalculate }: OvertimeCalculatorFormProps) =>
 
         <FormField
           control={form.control}
-          name="regularHours"
+          name="expectedHours"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Regular Hours (before overtime)</FormLabel>
-              <FormControl>
-                <Input type="number" step="0.5" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="standardHoursForPeriod"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Standard Hours for Pay Period</FormLabel>
+              <FormLabel>Expected Hours (per pay period)</FormLabel>
               <FormControl>
                 <Input type="number" step="0.5" {...field} />
               </FormControl>
