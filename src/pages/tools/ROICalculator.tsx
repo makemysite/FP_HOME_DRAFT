@@ -28,8 +28,8 @@ const ROICalculator = () => {
       title="ROI Calculator"
       description="Fast, Free, and Accurate ROI Calculations"
       descriptionClassName="text-[#E98A23]"
-      metaTitle="Free ROI Calculator for Field Service Businesses | Field Promax"
-      metaDescription="Calculate ROI for your field service business investments with our free calculator."
+      metaTitle="Free ROI Calculator for Field Service Businesses"
+      metaDescription="Calculate your ROI instantly. Know what you earn from every investment. Try our free ROI calculator today."
     >
       <div className="max-w-3xl mx-auto px-4">
         <div className="prose max-w-none mb-8">
@@ -75,3 +75,4 @@ const ROICalculator = () => {
 };
 
 export default ROICalculator;
+
