@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import ClientPageWrapper from "@/components/layout/ClientPageWrapper";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -24,7 +23,6 @@ const OvertimeCalculator = () => {
 
   return (
     <ClientPageWrapper
-      title="Overtime Calculator"
       metaTitle="Free Overtime Calculator for Field Service Businesses | Field Promax"
       metaDescription="Calculate overtime pay and hours for your field service team with our free calculator."
     >
