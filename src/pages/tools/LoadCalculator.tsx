@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import ClientPageWrapper from "@/components/layout/ClientPageWrapper";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartBar } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { calculateHVACLoad } from "@/services/hvacCalculator";
 import { BuildingInfo, HVACLoadResult } from "@/types/hvacTypes";
 import BuildingInfoForm from "@/components/tools/load-calculator/BuildingInfoForm";
@@ -56,17 +56,19 @@ const LoadCalculator = () => {
       metaDescription="Get precise HVAC load calculations with our free Manual J calculator. Save time and avoid errors with Field Promax's easy-to-use tool"
     >
       <div className="container max-w-4xl mx-auto px-4 py-8 space-y-10">
-        <div className="prose max-w-none mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            HVAC Load Calculator
-          </h1>
-          <p className="text-xl text-[#E98A23] font-semibold mb-2">
-            Fast, Free, and Accurate Duct Size Calculations
-          </p>
-          <p className="text-gray-600">
-            Precisely calculate the heating and cooling requirements for your space using our advanced HVAC load calculator.
-          </p>
-        </div>
+        <Card className="prose max-w-none mb-8 bg-white">
+          <CardContent className="p-6">
+            <h1 className="text-4xl font-bold text-gray-900 mb-4">
+              HVAC Load Calculator
+            </h1>
+            <p className="text-xl text-[#E98A23] font-semibold mb-2">
+              Fast, Free, and Accurate Duct Size Calculations
+            </p>
+            <p className="text-gray-600">
+              Precisely calculate the heating and cooling requirements for your space using our advanced HVAC load calculator.
+            </p>
+          </CardContent>
+        </Card>
 
         <Card className="shadow-md border-t-4 border-t-[#E98A23]">
           <CardHeader className="bg-gray-50 border-b">
@@ -87,7 +89,6 @@ const LoadCalculator = () => {
 
         <InformationSection />
 
-        {/* Updated CTA Banner */}
         <Card className="bg-gradient-to-r from-[#E98A23]/10 to-[#F9B348]/10 border-2 border-[#E98A23]/20">
           <CardHeader className="border-b border-[#E98A23]/20">
             <CardTitle className="text-[#E98A23]">Upgrade Your HVAC Planning</CardTitle>
