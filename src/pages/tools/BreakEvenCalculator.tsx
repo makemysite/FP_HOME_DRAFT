@@ -6,7 +6,7 @@ import { DollarSign } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import BreakEvenCalculatorForm from "@/components/tools/break-even-calculator/BreakEvenCalculatorForm";
 import BreakEvenResultsDisplay from "@/components/tools/break-even-calculator/BreakEvenResultsDisplay";
-import { DescriptionSection } from "@/components/tools/break-even-calculator/DescriptionSection";
+import DetailedDescription from "@/components/tools/break-even-calculator/DetailedDescription";
 import type { BreakEvenResults } from "@/utils/breakEvenCalculations";
 
 const BreakEvenCalculator = () => {
@@ -19,10 +19,10 @@ const BreakEvenCalculator = () => {
   return (
     <ClientPageWrapper
       title="Break-Even Calculator"
-      description="Find out when your business will become profitable"
+      description="Use this Free Break Even Point Calculator to find out how close you are to profitability."
       descriptionClassName="text-[#E98A23]"
       metaTitle="Free Break-Even Calculator for Field Service Businesses"
-      metaDescription="Calculate your break-even point and plan your business growth with our free calculator."
+      metaDescription="Calculate your ROI instantly. Know what you earn from every investment. Try our free ROI calculator today."
     >
       <div className="max-w-3xl mx-auto px-4">
         <div className="prose max-w-none mb-8">
@@ -44,15 +44,17 @@ const BreakEvenCalculator = () => {
           </CardContent>
         </Card>
 
-        <DescriptionSection />
+        <DetailedDescription />
 
         <Card className="bg-gradient-to-r from-[#E98A23]/10 to-[#F9B348]/10 border-2 border-[#E98A23]/20 my-8">
           <CardHeader className="border-b border-[#E98A23]/20">
-            <CardTitle className="text-[#E98A23]">Optimize Your Business Planning</CardTitle>
+            <CardTitle className="text-[#E98A23]">Get Past Break-Even Faster with Field Promax</CardTitle>
           </CardHeader>
           <CardContent className="p-6">
             <p className="text-gray-700 mb-4">
-              Field Promax helps you track costs, revenue, and profitability in real-time. Make data-driven decisions to grow your business.
+              Our software helps you cut delays with smart scheduling, get more jobs done daily,
+              reduce errors and unnecessary expenses, and get paid faster with easier invoicing.
+              All of which pushes your business beyond the break-even line and into profit territory.
             </p>
             <Button className="w-full md:w-auto bg-[#E98A23] hover:bg-[#E98A23]/90">
               Book Your Free Demo
