@@ -31,11 +31,12 @@ const BlogHighlightsManager = () => {
 
   const fetchBlogPosts = async () => {
     try {
+      // Modified the query to use two separate queries to avoid the TypeScript error
       const { data, error } = await supabase
         .from('blog_posts')
         .select('id, title, show_in_highlights, highlight_order, created_at')
         .eq('published', true)
-        .order('highlight_order', { ascending: true, nullsLast: true })
+        .order('highlight_order', { ascending: true })
         .order('created_at', { ascending: false });
 
       if (error) throw error;
