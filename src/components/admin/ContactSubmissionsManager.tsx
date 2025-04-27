@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import {
   Table,
@@ -58,7 +59,8 @@ const ContactSubmissionsManager = () => {
       
       const { data, error } = await supabase
         .from('contact_submissions')
-        .select('id, name, email, message, status, created_at');
+        .select('id, name, email, message, status, created_at')
+        .order('created_at', { ascending: false });
 
       if (error) {
         console.error('Error fetching submissions:', error);
