@@ -39,6 +39,12 @@ const ContactSubmissionsManager = () => {
     setError(null);
     
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        throw new Error('Not authenticated');
+      }
+
       // Use a simple query without any joins or complex filters
       // Only select the exact columns we need from contact_submissions
       const { data, error } = await supabase
