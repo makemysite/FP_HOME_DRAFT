@@ -8,6 +8,10 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import AdminLogin from "./components/admin/AdminLogin";
 import AdminDashboard from "./components/admin/AdminDashboard";
 import AdminRoute from "./components/admin/AdminRoute";
+import AdminLayout from "./components/admin/AdminLayout";
+import AdminHome from "./components/admin/AdminHome";
+import BlogHighlightsPage from "./components/admin/BlogHighlightsPage";
+import ContactSubmissionsPage from "./components/admin/ContactSubmissionsPage";
 
 // Import all page components
 import Index from "./pages/Index";
@@ -70,10 +74,14 @@ const App = () => {
                 path="/admin"
                 element={
                   <AdminRoute>
-                    <AdminDashboard />
+                    <AdminLayout />
                   </AdminRoute>
                 }
-              />
+              >
+                <Route index element={<AdminHome />} />
+                <Route path="blog-highlights" element={<BlogHighlightsPage />} />
+                <Route path="contact-submissions" element={<ContactSubmissionsPage />} />
+              </Route>
               <Route path="*" element={<NotFound />} />
             </Routes>
             <Toaster />
