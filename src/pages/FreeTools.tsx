@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Link } from "react-router-dom";
 import ClientPageWrapper from "@/components/layout/ClientPageWrapper";
@@ -81,12 +80,8 @@ const tools: Tool[] = [
 
 const FreeTools = () => {
   return (
-    <ClientPageWrapper
-      title="Free Field Service Tools"
-      description="Access our collection of free tools designed to help you manage and optimize your field service operations"
-      descriptionClassName="text-center" // Add text-center class to center the description
-    >
-      <div className="text-center mb-12"> {/* Center the title and add some bottom margin */}
+    <ClientPageWrapper>
+      <div className="text-center mb-12">
         <h1 className="text-4xl font-bold text-[#170F49] mb-4">Free Field Service Tools</h1>
         <p className="text-xl text-gray-700 max-w-3xl mx-auto">
           Access our collection of free tools designed to help you manage and optimize your field service operations
