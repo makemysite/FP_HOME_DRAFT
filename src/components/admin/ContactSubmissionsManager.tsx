@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import {
   Table,
@@ -16,10 +17,10 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, RefreshCw } from "lucide-react";
+import { Loader2, RefreshCw, AlertCircle, ShieldAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { AlertCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface ContactSubmission {
   id: string;
@@ -34,34 +35,46 @@ const ContactSubmissionsManager = () => {
   const [submissions, setSubmissions] = useState<ContactSubmission[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isAuthorized, setIsAuthorized] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchSubmissions();
+    checkAuthAndFetchSubmissions();
   }, []);
 
-  const fetchSubmissions = async () => {
+  const checkAuthAndFetchSubmissions = async () => {
+    setLoading(true);
+    setError(null);
+    
     try {
-      setLoading(true);
-      setError(null);
-      
+      // First check if user is logged in
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
+        console.log("No active session, redirecting to login");
         navigate('/admin/login');
         return;
       }
       
       console.log("Fetching contact submissions...");
       
+      // Attempt to fetch submissions
       const { data, error } = await supabase
         .from('contact_submissions')
         .select('*')
         .order('created_at', { ascending: false });
 
+      // Handle permission errors
       if (error) {
         console.error('Error fetching submissions:', error);
-        throw error;
+        
+        if (error.code === '42501' || error.message.includes('permission denied')) {
+          setIsAuthorized(false);
+          setError('You do not have permission to view contact submissions. Please contact an administrator.');
+        } else {
+          setError(`Failed to load submissions: ${error.message}`);
+        }
+        return;
       }
       
       console.log("Submissions fetched successfully:", data);
@@ -73,8 +86,8 @@ const ContactSubmissionsManager = () => {
       
       setSubmissions(typedData);
     } catch (error: any) {
-      console.error('Error fetching submissions:', error);
-      setError('Failed to load contact submissions. Please make sure you have the right permissions.');
+      console.error('Error in submission manager:', error);
+      setError('An unexpected error occurred. Please try again.');
       toast.error('Failed to load contact submissions');
     } finally {
       setLoading(false);
@@ -88,7 +101,13 @@ const ContactSubmissionsManager = () => {
         .update({ status: newStatus })
         .eq('id', submissionId);
 
-      if (error) throw error;
+      if (error) {
+        if (error.code === '42501' || error.message.includes('permission denied')) {
+          toast.error('You do not have permission to update submissions');
+          return;
+        }
+        throw error;
+      }
       
       toast.success('Status updated successfully');
       
@@ -114,6 +133,28 @@ const ContactSubmissionsManager = () => {
     );
   }
 
+  if (!isAuthorized) {
+    return (
+      <Alert className="bg-red-50 border-red-200">
+        <ShieldAlert className="h-5 w-5 text-red-600" />
+        <AlertDescription className="text-red-800">
+          <h3 className="font-semibold mb-2">Permission Denied</h3>
+          <p>You do not have permission to access contact submissions.</p>
+          <p className="text-sm mt-2">
+            This may be because your account doesn't have admin privileges or the database permissions are not configured correctly.
+          </p>
+          <Button 
+            onClick={() => navigate('/admin/login')} 
+            variant="outline" 
+            className="mt-4 bg-white"
+          >
+            Back to Login
+          </Button>
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -124,7 +165,7 @@ const ContactSubmissionsManager = () => {
           </p>
         </div>
         <Button 
-          onClick={fetchSubmissions} 
+          onClick={checkAuthAndFetchSubmissions} 
           variant="outline" 
           size="sm" 
           className="flex items-center gap-1"
@@ -143,7 +184,7 @@ const ContactSubmissionsManager = () => {
           </div>
           <p className="mt-2 text-red-700">{error}</p>
           <Button 
-            onClick={fetchSubmissions} 
+            onClick={checkAuthAndFetchSubmissions} 
             className="mt-4 bg-red-100 text-red-800 hover:bg-red-200"
             variant="outline"
           >
