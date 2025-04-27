@@ -3,6 +3,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import AdminNavbar from './AdminNavbar';
 import BlogHighlightsManager from './BlogHighlightsManager';
+import ContactSubmissionsManager from './ContactSubmissionsManager';
 
 const AdminDashboard = () => {
   return (
@@ -16,6 +17,15 @@ const AdminDashboard = () => {
             </CardHeader>
             <CardContent>
               <BlogHighlightsManager />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Contact Form Submissions</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ContactSubmissionsManager />
             </CardContent>
           </Card>
         </div>
