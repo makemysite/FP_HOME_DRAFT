@@ -17,10 +17,9 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, RefreshCw, AlertCircle, ShieldAlert } from "lucide-react";
+import { Loader2, RefreshCw, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface ContactSubmission {
   id: string;
@@ -35,66 +34,34 @@ const ContactSubmissionsManager = () => {
   const [submissions, setSubmissions] = useState<ContactSubmission[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isAuthorized, setIsAuthorized] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
-    checkAuthAndFetchSubmissions();
+    fetchSubmissions();
   }, []);
 
-  const checkAuthAndFetchSubmissions = async () => {
+  const fetchSubmissions = async () => {
     setLoading(true);
     setError(null);
     
     try {
-      // First refresh the session to ensure we have the latest permissions
-      await supabase.auth.refreshSession();
-      
-      // Then check if user is logged in
+      // Check if user is logged in
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
-        console.log("No active session, redirecting to login");
-        navigate('/admin/login');
+        navigate('/login');
         return;
       }
       
-      // Double-check admin status with RPC
-      const { data: isAdmin, error: adminError } = await supabase
-        .rpc('is_admin', { user_email: session.user.email });
-      
-      if (adminError || !isAdmin) {
-        console.error("Admin check failed:", adminError);
-        setIsAuthorized(false);
-        setError('You do not have admin privileges. Please contact an administrator.');
-        setLoading(false);
-        return;
-      }
-      
-      console.log("Fetching contact submissions...");
-      
-      // Attempt to fetch submissions
+      // Fetch all submissions for authenticated users
       const { data, error } = await supabase
         .from('contact_submissions')
         .select('*')
         .order('created_at', { ascending: false });
 
-      // Handle permission errors
       if (error) {
-        console.error('Error fetching submissions:', error);
-        
-        if (error.code === '42501' || error.message.includes('permission denied')) {
-          setIsAuthorized(false);
-          setError('You do not have permission to view contact submissions. Please contact an administrator.');
-        } else {
-          setError(`Failed to load submissions: ${error.message}`);
-        }
-        setLoading(false);
-        return;
+        throw error;
       }
-      
-      console.log("Submissions fetched successfully:", data);
-      setIsAuthorized(true);
       
       const typedData = (data || []).map(item => ({
         ...item,
@@ -102,12 +69,12 @@ const ContactSubmissionsManager = () => {
       }));
       
       setSubmissions(typedData);
-      setLoading(false);
     } catch (error: any) {
       console.error('Error in submission manager:', error);
-      setError('An unexpected error occurred. Please try again.');
-      setLoading(false);
+      setError(error.message || 'Failed to load contact submissions');
       toast.error('Failed to load contact submissions');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -118,13 +85,7 @@ const ContactSubmissionsManager = () => {
         .update({ status: newStatus })
         .eq('id', submissionId);
 
-      if (error) {
-        if (error.code === '42501' || error.message.includes('permission denied')) {
-          toast.error('You do not have permission to update submissions');
-          return;
-        }
-        throw error;
-      }
+      if (error) throw error;
       
       toast.success('Status updated successfully');
       
@@ -141,11 +102,6 @@ const ContactSubmissionsManager = () => {
     }
   };
 
-  const handleLogoutAndRetry = async () => {
-    await supabase.auth.signOut();
-    navigate('/admin/login');
-  };
-
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -155,34 +111,22 @@ const ContactSubmissionsManager = () => {
     );
   }
 
-  if (!isAuthorized) {
+  if (error) {
     return (
-      <Alert className="bg-red-50 border-red-200">
-        <ShieldAlert className="h-5 w-5 text-red-600" />
-        <AlertDescription className="text-red-800">
-          <h3 className="font-semibold mb-2">Permission Denied</h3>
-          <p>You do not have permission to access contact submissions.</p>
-          <p className="text-sm mt-2">
-            This may be because your account doesn't have admin privileges or the database permissions are not configured correctly.
-          </p>
-          <div className="mt-4 space-x-2">
-            <Button 
-              onClick={handleLogoutAndRetry} 
-              variant="outline" 
-              className="bg-white"
-            >
-              Sign Out & Return to Login
-            </Button>
-            <Button 
-              onClick={checkAuthAndFetchSubmissions} 
-              variant="outline" 
-              className="bg-white"
-            >
-              Try Again
-            </Button>
-          </div>
-        </AlertDescription>
-      </Alert>
+      <div className="p-6 bg-red-50 border border-red-200 rounded-md">
+        <div className="flex items-center gap-2">
+          <AlertCircle className="h-5 w-5 text-red-600" />
+          <h3 className="text-lg font-medium text-red-800">Error loading submissions</h3>
+        </div>
+        <p className="mt-2 text-red-700">{error}</p>
+        <Button 
+          onClick={fetchSubmissions} 
+          className="mt-4 bg-red-100 text-red-800 hover:bg-red-200"
+          variant="outline"
+        >
+          Try Again
+        </Button>
+      </div>
     );
   }
 
@@ -192,11 +136,11 @@ const ContactSubmissionsManager = () => {
         <div className="space-y-1">
           <h2 className="text-2xl font-semibold">Contact Submissions</h2>
           <p className="text-sm text-gray-500">
-            Manage and track contact form submissions from users.
+            Manage and track contact form submissions.
           </p>
         </div>
         <Button 
-          onClick={checkAuthAndFetchSubmissions} 
+          onClick={fetchSubmissions} 
           variant="outline" 
           size="sm" 
           className="flex items-center gap-1"
@@ -207,28 +151,11 @@ const ContactSubmissionsManager = () => {
         </Button>
       </div>
 
-      {error && (
-        <div className="p-6 bg-red-50 border border-red-200 rounded-md">
-          <div className="flex items-center gap-2">
-            <AlertCircle className="h-5 w-5 text-red-600" />
-            <h3 className="text-lg font-medium text-red-800">Error loading submissions</h3>
-          </div>
-          <p className="mt-2 text-red-700">{error}</p>
-          <Button 
-            onClick={checkAuthAndFetchSubmissions} 
-            className="mt-4 bg-red-100 text-red-800 hover:bg-red-200"
-            variant="outline"
-          >
-            Try Again
-          </Button>
-        </div>
-      )}
-
-      {!error && submissions.length === 0 ? (
+      {submissions.length === 0 ? (
         <div className="text-center p-8 bg-gray-50 rounded-md">
           <p className="text-gray-500">No submissions found</p>
         </div>
-      ) : !error && (
+      ) : (
         <div className="border rounded-md overflow-hidden">
           <Table>
             <TableHeader>
