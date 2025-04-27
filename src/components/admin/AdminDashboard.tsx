@@ -2,6 +2,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import AdminNavbar from './AdminNavbar';
+import BlogHighlightsManager from './BlogHighlightsManager';
 
 const AdminDashboard = () => {
   return (
@@ -11,10 +12,10 @@ const AdminDashboard = () => {
         <div className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Quick Actions</CardTitle>
+              <CardTitle>Manage Blog Highlights</CardTitle>
             </CardHeader>
             <CardContent>
-              <p>Welcome to the admin dashboard. Manage your application from here.</p>
+              <BlogHighlightsManager />
             </CardContent>
           </Card>
         </div>
