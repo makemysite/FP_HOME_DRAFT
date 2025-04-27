@@ -51,13 +51,17 @@ const handler = async (req: Request): Promise<Response> => {
       toEmail = [payload.recipientEmail];
     }
 
+    // Using Resend's default verified domain (onboarding@resend.dev) instead of a custom domain
     const emailResponse = await resend.emails.send({
-      from: "FieldProMax <support@fieldpromax.com>",
+      from: "FieldProMax Team <onboarding@resend.dev>",
       to: toEmail,
       subject: payload.subject,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           ${emailContent.replace(/\n/g, '<br>')}
+          <p style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee; font-size: 12px; color: #666;">
+            This is an automated response from the FieldProMax team.
+          </p>
         </div>
       `,
     });

@@ -8,7 +8,7 @@ import {
   SheetDescription,
 } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { MessageSquare, Send } from "lucide-react";
+import { MessageSquare, Send, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
@@ -111,7 +111,10 @@ const MessageDetails = ({ isOpen, onClose, submission }: MessageDetailsProps) =>
                 className="w-full"
               >
                 {isSending ? (
-                  "Sending..."
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Sending...
+                  </>
                 ) : (
                   <>
                     <Send className="w-4 h-4 mr-2" />
