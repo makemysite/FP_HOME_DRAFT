@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -6,12 +7,11 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import ErrorBoundary from "./components/ErrorBoundary";
 import AdminLogin from "./components/admin/AdminLogin";
-import AdminDashboard from "./components/admin/AdminDashboard";
 import AdminRoute from "./components/admin/AdminRoute";
 import AdminLayout from "./components/admin/AdminLayout";
-import AdminHome from "./components/admin/AdminHome";
-import BlogHighlightsPage from "./components/admin/BlogHighlightsPage";
-import ContactSubmissionsPage from "./components/admin/ContactSubmissionsPage";
+import AdminHome from "./components/admin/pages/AdminHome";
+import BlogHighlightsPage from "./components/admin/pages/BlogHighlightsPage";
+import ContactSubmissionsPage from "./components/admin/pages/ContactSubmissionsPage";
 
 // Import all page components
 import Index from "./pages/Index";
