@@ -22,12 +22,9 @@ const AdminRoute = ({ children }: AdminRouteProps) => {
           return;
         }
 
-        // Check if the user has admin role in Supabase
+        // Use RPC call to check if user is admin
         const { data, error } = await supabase
-          .from('admin_users')
-          .select('id')
-          .eq('user_id', user.id)
-          .single();
+          .rpc('is_admin', { user_email: user.email });
 
         if (error) {
           console.error("Error checking admin status:", error);

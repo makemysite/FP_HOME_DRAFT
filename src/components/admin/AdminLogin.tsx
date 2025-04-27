@@ -24,13 +24,10 @@ const AdminLogin = () => {
       if (data.user) {
         setCurrentUser(data.user);
         // Check if the user is an admin
-        const { data: adminData, error: adminError } = await supabase
-          .from('admin_users')
-          .select('id')
-          .eq('user_id', data.user.id)
-          .single();
+        const { data: isAdminData, error: adminError } = await supabase
+          .rpc('is_admin', { user_email: data.user.email });
 
-        if (adminError || !adminData) {
+        if (!isAdminData || adminError) {
           setErrorMessage(`You're logged in as ${data.user.email}, but don't have admin privileges.`);
         } else {
           // User is already authenticated and an admin, redirect to admin dashboard
@@ -61,14 +58,11 @@ const AdminLogin = () => {
         throw new Error("Authentication failed");
       }
 
-      // Check if the user is an admin
-      const { data: adminData, error: adminError } = await supabase
-        .from('admin_users')
-        .select('id')
-        .eq('user_id', data.user.id)
-        .single();
+      // Check if the user is an admin using RPC
+      const { data: isAdmin, error: adminError } = await supabase
+        .rpc('is_admin', { user_email: data.user.email });
 
-      if (adminError || !adminData) {
+      if (!isAdmin || adminError) {
         await supabase.auth.signOut();
         throw new Error('Unauthorized access. Admin privileges required.');
       }
@@ -113,23 +107,12 @@ const AdminLogin = () => {
             )}
             
             {currentUser ? (
-              <div className="space-y-4">
-                <div className="rounded-md bg-neutral-50 p-4 text-sm">
-                  <p className="mb-2 font-medium">Instructions to grant admin access:</p>
-                  <ol className="list-decimal pl-5 space-y-1">
-                    <li>Go to your Supabase dashboard</li>
-                    <li>Open the Table Editor and select the "admin_users" table</li>
-                    <li>Click "Insert Row" and add your user ID: <code className="bg-neutral-100 p-1 rounded">{currentUser.id}</code></li>
-                    <li>Then return here and refresh the page</li>
-                  </ol>
-                </div>
-                <Button 
-                  onClick={handleSignOut}
-                  className="w-full"
-                >
-                  Sign Out
-                </Button>
-              </div>
+              <Button 
+                onClick={handleSignOut}
+                className="w-full"
+              >
+                Sign Out
+              </Button>
             ) : (
               <form onSubmit={handleLogin} className="space-y-4">
                 <div className="space-y-2">
