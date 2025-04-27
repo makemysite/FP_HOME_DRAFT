@@ -9,6 +9,27 @@ import AdminLogin from "./components/admin/AdminLogin";
 import AdminDashboard from "./components/admin/AdminDashboard";
 import AdminRoute from "./components/admin/AdminRoute";
 
+// Import all page components
+import Index from "./pages/Index";
+import FeaturesPage from "./pages/FeaturesPage";
+import PricingPage from "./pages/PricingPage";
+import Industries from "./pages/Industries";
+import Blog from "./pages/Blog";
+import BlogPost from "./pages/BlogPost";
+import Contact from "./pages/Contact";
+import Booking from "./pages/Booking";
+import FreeTools from "./pages/FreeTools";
+import DuctCalculator from "./pages/tools/DuctCalculator";
+import LoadCalculator from "./pages/tools/LoadCalculator";
+import SalaryCalculator from "./pages/tools/SalaryCalculator";
+import ProfitCalculator from "./pages/tools/ProfitCalculator";
+import GrowthCalculator from "./pages/tools/GrowthCalculator";
+import ROICalculator from "./pages/tools/ROICalculator";
+import BreakEvenCalculator from "./pages/tools/BreakEvenCalculator";
+import DiscountCalculator from "./pages/tools/DiscountCalculator";
+import OvertimeCalculator from "./pages/tools/OvertimeCalculator";
+import NotFound from "./pages/NotFound";
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
