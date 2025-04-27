@@ -17,7 +17,8 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2 } from "lucide-react";
+import { Loader2, RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface ContactSubmission {
   id: string;
@@ -37,7 +38,7 @@ const ContactSubmissionsManager = () => {
     fetchSubmissions();
   }, []);
 
-  const fetchSubmissions = async (retryCount = 0) => {
+  const fetchSubmissions = async () => {
     try {
       setLoading(true);
       setError(null);
@@ -49,15 +50,6 @@ const ContactSubmissionsManager = () => {
 
       if (error) {
         console.error('Error fetching submissions:', error);
-        
-        // If we're getting permission errors and haven't retried too many times, try again
-        if (error.code === '42501' && retryCount < 3) {
-          console.log(`Retrying fetch attempt ${retryCount + 1}...`);
-          // Add a delay before retrying to avoid rapid requests
-          setTimeout(() => fetchSubmissions(retryCount + 1), 1500);
-          return;
-        }
-        
         throw error;
       }
       
@@ -111,21 +103,6 @@ const ContactSubmissionsManager = () => {
     );
   }
 
-  if (error) {
-    return (
-      <div className="p-6 bg-red-50 border border-red-200 rounded-md">
-        <h3 className="text-lg font-medium text-red-800 mb-2">Error loading submissions</h3>
-        <p className="text-red-700">{error}</p>
-        <button 
-          onClick={() => fetchSubmissions()} 
-          className="mt-4 px-4 py-2 bg-red-100 text-red-800 rounded hover:bg-red-200 transition-colors"
-        >
-          Try Again
-        </button>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -135,55 +112,81 @@ const ContactSubmissionsManager = () => {
             Manage and track contact form submissions from users.
           </p>
         </div>
+        <Button 
+          onClick={fetchSubmissions} 
+          variant="outline" 
+          size="sm" 
+          className="flex items-center gap-1"
+          disabled={loading}
+        >
+          <RefreshCw className="h-4 w-4" />
+          Refresh
+        </Button>
       </div>
 
-      {submissions.length === 0 ? (
+      {error && (
+        <div className="p-6 bg-red-50 border border-red-200 rounded-md">
+          <h3 className="text-lg font-medium text-red-800 mb-2">Error loading submissions</h3>
+          <p className="text-red-700">{error}</p>
+          <Button 
+            onClick={fetchSubmissions} 
+            className="mt-4 bg-red-100 text-red-800 hover:bg-red-200"
+            variant="outline"
+          >
+            Try Again
+          </Button>
+        </div>
+      )}
+
+      {!error && submissions.length === 0 ? (
         <div className="text-center p-8 bg-gray-50 rounded-md">
           <p className="text-gray-500">No submissions found</p>
         </div>
-      ) : (
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Date</TableHead>
-              <TableHead>Name</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Message</TableHead>
-              <TableHead>Status</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {submissions.map((submission) => (
-              <TableRow key={submission.id}>
-                <TableCell>
-                  {new Date(submission.created_at).toLocaleDateString()}
-                </TableCell>
-                <TableCell>{submission.name}</TableCell>
-                <TableCell>{submission.email}</TableCell>
-                <TableCell className="max-w-md truncate">
-                  {submission.message}
-                </TableCell>
-                <TableCell>
-                  <Select
-                    value={submission.status}
-                    onValueChange={(value: ContactSubmission['status']) => 
-                      updateStatus(submission.id, value)
-                    }
-                  >
-                    <SelectTrigger className="w-32">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="pending">Pending</SelectItem>
-                      <SelectItem value="in-progress">In Progress</SelectItem>
-                      <SelectItem value="resolved">Resolved</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </TableCell>
+      ) : !error && (
+        <div className="border rounded-md overflow-hidden">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Date</TableHead>
+                <TableHead>Name</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Message</TableHead>
+                <TableHead>Status</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {submissions.map((submission) => (
+                <TableRow key={submission.id}>
+                  <TableCell>
+                    {new Date(submission.created_at).toLocaleDateString()}
+                  </TableCell>
+                  <TableCell>{submission.name}</TableCell>
+                  <TableCell>{submission.email}</TableCell>
+                  <TableCell className="max-w-md truncate">
+                    {submission.message}
+                  </TableCell>
+                  <TableCell>
+                    <Select
+                      value={submission.status}
+                      onValueChange={(value: ContactSubmission['status']) => 
+                        updateStatus(submission.id, value)
+                      }
+                    >
+                      <SelectTrigger className="w-32">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="pending">Pending</SelectItem>
+                        <SelectItem value="in-progress">In Progress</SelectItem>
+                        <SelectItem value="resolved">Resolved</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       )}
     </div>
   );
