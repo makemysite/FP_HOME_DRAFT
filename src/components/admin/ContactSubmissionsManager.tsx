@@ -64,7 +64,7 @@ const ContactSubmissionsManager = () => {
       
       console.log("Fetching contact submissions...");
       
-      // Simplified query that doesn't rely on any joins with auth.users
+      // Direct query that avoids any joins or references to the users table
       const { data, error } = await supabase
         .from('contact_submissions')
         .select('*')
@@ -117,6 +117,7 @@ const ContactSubmissionsManager = () => {
       
       toast.success('Status updated successfully');
       
+      // Update local state to avoid a refetch
       setSubmissions(prevSubmissions => 
         prevSubmissions.map(submission => 
           submission.id === submissionId 
