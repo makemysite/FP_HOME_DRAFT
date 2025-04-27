@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import {
   Table,
@@ -88,10 +89,12 @@ const ContactSubmissionsManager = () => {
         } else {
           setError(`Failed to load submissions: ${error.message}`);
         }
+        setLoading(false);
         return;
       }
       
       console.log("Submissions fetched successfully:", data);
+      setIsAuthorized(true);
       
       const typedData = (data || []).map(item => ({
         ...item,
@@ -99,12 +102,12 @@ const ContactSubmissionsManager = () => {
       }));
       
       setSubmissions(typedData);
+      setLoading(false);
     } catch (error: any) {
       console.error('Error in submission manager:', error);
       setError('An unexpected error occurred. Please try again.');
-      toast.error('Failed to load contact submissions');
-    } finally {
       setLoading(false);
+      toast.error('Failed to load contact submissions');
     }
   };
 
