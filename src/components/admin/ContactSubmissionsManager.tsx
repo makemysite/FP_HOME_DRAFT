@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import {
   Table,
@@ -43,7 +44,10 @@ const ContactSubmissionsManager = () => {
         .select('id, name, email, message, status, created_at')
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching submissions:', error);
+        throw new Error(error.message || 'Failed to load contact submissions');
+      }
       
       const typedSubmissions = (data || []).map(item => ({
         ...item,
@@ -71,7 +75,10 @@ const ContactSubmissionsManager = () => {
         .update({ status: newStatus })
         .eq('id', submissionId);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error updating status:', error);
+        throw new Error(error.message || 'Failed to update status');
+      }
       
       toast.success('Status updated successfully');
       
