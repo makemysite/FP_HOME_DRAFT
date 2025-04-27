@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import {
   Table,
@@ -20,6 +19,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Loader2, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AlertCircle } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface ContactSubmission {
   id: string;
@@ -34,10 +34,20 @@ const ContactSubmissionsManager = () => {
   const [submissions, setSubmissions] = useState<ContactSubmission[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    fetchSubmissions();
-  }, []);
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        navigate('/admin/login');
+        return;
+      }
+      fetchSubmissions();
+    };
+
+    checkSession();
+  }, [navigate]);
 
   const fetchSubmissions = async () => {
     try {
@@ -46,13 +56,9 @@ const ContactSubmissionsManager = () => {
       
       console.log("Fetching contact submissions...");
       
-      // Using the most direct query possible to avoid any auth/RLS issues
       const { data, error } = await supabase
         .from('contact_submissions')
-        .select('id, name, email, message, status, created_at')
-        .order('created_at', { ascending: false })
-        // Add `.limit(100)` to avoid large result sets if needed
-        ;
+        .select('id, name, email, message, status, created_at');
 
       if (error) {
         console.error('Error fetching submissions:', error);
@@ -61,7 +67,6 @@ const ContactSubmissionsManager = () => {
       
       console.log("Submissions fetched successfully:", data);
       
-      // Cast the data to ensure status is one of our allowed types
       const typedData = (data || []).map(item => ({
         ...item,
         status: (item.status as 'pending' | 'in-progress' | 'resolved') || 'pending'
@@ -71,6 +76,12 @@ const ContactSubmissionsManager = () => {
     } catch (error: any) {
       console.error('Error fetching submissions:', error);
       setError(error.message || 'Failed to load contact submissions');
+      
+      if (error.code === '401' || error.message?.includes('auth')) {
+        navigate('/admin/login');
+        return;
+      }
+      
       toast.error('Failed to load contact submissions');
     } finally {
       setLoading(false);
@@ -88,7 +99,6 @@ const ContactSubmissionsManager = () => {
       
       toast.success('Status updated successfully');
       
-      // Update local state to avoid a refetch
       setSubmissions(prevSubmissions => 
         prevSubmissions.map(submission => 
           submission.id === submissionId 
@@ -98,6 +108,12 @@ const ContactSubmissionsManager = () => {
       );
     } catch (error: any) {
       console.error('Error updating status:', error);
+      
+      if (error.code === '401' || error.message?.includes('auth')) {
+        navigate('/admin/login');
+        return;
+      }
+      
       toast.error('Failed to update status');
     }
   };
