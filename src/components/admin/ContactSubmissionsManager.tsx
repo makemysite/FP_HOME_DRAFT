@@ -38,8 +38,11 @@ const ContactSubmissionsManager = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // First check if user is authenticated
-    const checkAuthAndFetch = async () => {
+    checkAuthAndFetchSubmissions();
+  }, []);
+
+  const checkAuthAndFetchSubmissions = async () => {
+    try {
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
@@ -47,12 +50,12 @@ const ContactSubmissionsManager = () => {
         return;
       }
       
-      // Only fetch submissions if the user is authenticated
       fetchSubmissions();
-    };
-
-    checkAuthAndFetch();
-  }, [navigate]);
+    } catch (err) {
+      console.error("Authentication error:", err);
+      navigate('/admin/login');
+    }
+  };
 
   const fetchSubmissions = async () => {
     try {
@@ -61,6 +64,7 @@ const ContactSubmissionsManager = () => {
       
       console.log("Fetching contact submissions...");
       
+      // Simplified query that doesn't rely on any joins with auth.users
       const { data, error } = await supabase
         .from('contact_submissions')
         .select('*')
@@ -69,8 +73,7 @@ const ContactSubmissionsManager = () => {
       if (error) {
         console.error('Error fetching submissions:', error);
         
-        // Check if authentication error
-        if (error.code === '401' || error.message?.includes('auth')) {
+        if (error.code === '401') {
           toast.error('Authentication error. Please log in again.');
           navigate('/admin/login');
           return;
@@ -98,30 +101,17 @@ const ContactSubmissionsManager = () => {
 
   const updateStatus = async (submissionId: string, newStatus: ContactSubmission['status']) => {
     try {
-      // Check authentication first
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        toast.error('Authentication error. Please log in again.');
-        navigate('/admin/login');
-        return;
-      }
-      
       const { error } = await supabase
         .from('contact_submissions')
         .update({ status: newStatus })
         .eq('id', submissionId);
 
       if (error) {
-        console.error('Error updating status:', error);
-        
-        // Check if authentication error
-        if (error.code === '401' || error.message?.includes('auth')) {
+        if (error.code === '401') {
           toast.error('Authentication error. Please log in again.');
           navigate('/admin/login');
           return;
         }
-        
         throw error;
       }
       
