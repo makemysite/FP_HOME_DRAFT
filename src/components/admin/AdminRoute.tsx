@@ -14,20 +14,32 @@ const AdminRoute = ({ children }: AdminRouteProps) => {
 
   useEffect(() => {
     const checkAdminStatus = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        if (!user) {
+          setIsAdmin(false);
+          return;
+        }
+
+        // Check if the user has admin role in Supabase
+        const { data, error } = await supabase
+          .from('admin_users')
+          .select('id')
+          .eq('user_id', user.id)
+          .single();
+
+        if (error) {
+          console.error("Error checking admin status:", error);
+          setIsAdmin(false);
+          return;
+        }
+
+        setIsAdmin(!!data);
+      } catch (error) {
+        console.error("Error in admin authentication:", error);
         setIsAdmin(false);
-        return;
       }
-
-      const { data, error } = await supabase
-        .from('admin_users')
-        .select('id')
-        .eq('user_id', user.id)
-        .single();
-
-      setIsAdmin(!!data && !error);
     };
 
     checkAdminStatus();

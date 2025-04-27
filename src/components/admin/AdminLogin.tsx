@@ -31,7 +31,7 @@ const AdminLogin = () => {
           .single();
 
         if (adminError || !adminData) {
-          setErrorMessage(`You're logged in as ${data.user.email} (${data.user.id}), but don't have admin privileges.`);
+          setErrorMessage(`You're logged in as ${data.user.email}, but don't have admin privileges.`);
         } else {
           // User is already authenticated and an admin, redirect to admin dashboard
           navigate('/admin');
@@ -57,11 +57,15 @@ const AdminLogin = () => {
         throw error;
       }
 
+      if (!data.user) {
+        throw new Error("Authentication failed");
+      }
+
       // Check if the user is an admin
       const { data: adminData, error: adminError } = await supabase
         .from('admin_users')
         .select('id')
-        .eq('user_id', data.user?.id)
+        .eq('user_id', data.user.id)
         .single();
 
       if (adminError || !adminData) {
