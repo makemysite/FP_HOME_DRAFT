@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import {
   Table,
@@ -39,14 +38,6 @@ const ContactSubmissionsManager = () => {
     setError(null);
     
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        throw new Error('Not authenticated');
-      }
-
-      // Use a simple query without any joins or complex filters
-      // Only select the exact columns we need from contact_submissions
       const { data, error } = await supabase
         .from('contact_submissions')
         .select('id, name, email, message, status, created_at')
@@ -54,7 +45,6 @@ const ContactSubmissionsManager = () => {
 
       if (error) throw error;
       
-      // Cast the data to ensure it matches our interface types
       const typedSubmissions = (data || []).map(item => ({
         ...item,
         status: item.status as 'pending' | 'in-progress' | 'resolved'
