@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import {
   Table,
@@ -17,8 +16,9 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, RefreshCw, AlertCircle } from "lucide-react";
+import { Loader2, RefreshCw, AlertCircle, MessageSquare, List } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import MessageDetails from './MessageDetails';
 
 interface ContactSubmission {
   id: string;
@@ -33,6 +33,8 @@ const ContactSubmissionsManager = () => {
   const [submissions, setSubmissions] = useState<ContactSubmission[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedSubmission, setSelectedSubmission] = useState<ContactSubmission | undefined>();
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
   const fetchSubmissions = async () => {
     setLoading(true);
@@ -64,10 +66,6 @@ const ContactSubmissionsManager = () => {
     }
   };
 
-  useEffect(() => {
-    fetchSubmissions();
-  }, []);
-
   const updateStatus = async (submissionId: string, newStatus: ContactSubmission['status']) => {
     try {
       const { error } = await supabase
@@ -94,6 +92,10 @@ const ContactSubmissionsManager = () => {
       toast.error('Failed to update status');
     }
   };
+
+  useEffect(() => {
+    fetchSubmissions();
+  }, []);
 
   if (loading) {
     return (
@@ -123,13 +125,18 @@ const ContactSubmissionsManager = () => {
     );
   }
 
+  const handleViewMessage = (submission: ContactSubmission) => {
+    setSelectedSubmission(submission);
+    setIsDetailsOpen(true);
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div className="space-y-1">
           <h2 className="text-2xl font-semibold">Contact Submissions</h2>
           <p className="text-sm text-gray-500">
-            Manage and track contact form submissions.
+            Manage and track contact form submissions
           </p>
         </div>
         <Button 
@@ -156,20 +163,21 @@ const ContactSubmissionsManager = () => {
                 <TableHead>Date</TableHead>
                 <TableHead>Name</TableHead>
                 <TableHead>Email</TableHead>
-                <TableHead>Message</TableHead>
+                <TableHead>Preview</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {submissions.map((submission) => (
                 <TableRow key={submission.id}>
-                  <TableCell>
+                  <TableCell className="font-medium">
                     {new Date(submission.created_at).toLocaleDateString()}
                   </TableCell>
                   <TableCell>{submission.name}</TableCell>
                   <TableCell>{submission.email}</TableCell>
-                  <TableCell className="max-w-md truncate">
-                    {submission.message}
+                  <TableCell className="max-w-xs">
+                    <p className="truncate text-gray-600">{submission.message}</p>
                   </TableCell>
                   <TableCell>
                     <Select
@@ -188,12 +196,29 @@ const ContactSubmissionsManager = () => {
                       </SelectContent>
                     </Select>
                   </TableCell>
+                  <TableCell>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleViewMessage(submission)}
+                      className="flex items-center gap-1"
+                    >
+                      <MessageSquare className="h-4 w-4" />
+                      View
+                    </Button>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </div>
       )}
+
+      <MessageDetails
+        isOpen={isDetailsOpen}
+        onClose={() => setIsDetailsOpen(false)}
+        submission={selectedSubmission}
+      />
     </div>
   );
 };
