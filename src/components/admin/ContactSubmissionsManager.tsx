@@ -39,9 +39,11 @@ const ContactSubmissionsManager = () => {
     setError(null);
     
     try {
+      // Use a simple query without any joins or complex filters
+      // Only select the exact columns we need from contact_submissions
       const { data, error } = await supabase
         .from('contact_submissions')
-        .select('*')
+        .select('id, name, email, message, status, created_at')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
