@@ -5,32 +5,10 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import ErrorBoundary from "./components/ErrorBoundary";
+import AdminLogin from "./components/admin/AdminLogin";
+import AdminDashboard from "./components/admin/AdminDashboard";
+import AdminRoute from "./components/admin/AdminRoute";
 
-// Import pages
-import Index from "./pages/Index";
-import FeaturesPage from "./pages/FeaturesPage";
-import PricingPage from "./pages/PricingPage";
-import Industries from "./pages/Industries";
-import Blog from "./pages/Blog";
-import BlogPost from "./pages/BlogPost";
-import Contact from "./pages/Contact";
-import NotFound from "./pages/NotFound";
-import Booking from "./pages/Booking";
-import FreeTools from "./pages/FreeTools";
-
-// Import tool pages
-import DuctCalculator from "./pages/tools/DuctCalculator";
-import LoadCalculator from "./pages/tools/LoadCalculator";
-import SalaryCalculator from "./pages/tools/SalaryCalculator";
-import ProfitCalculator from "./pages/tools/ProfitCalculator";
-import GrowthCalculator from "./pages/tools/GrowthCalculator";
-import ROICalculator from "./pages/tools/ROICalculator";
-import BreakEvenCalculator from "./pages/tools/BreakEvenCalculator";
-import DiscountCalculator from "./pages/tools/DiscountCalculator";
-import OvertimeCalculator from "./pages/tools/OvertimeCalculator";
-
-// Create a new QueryClient instance outside of the App component
-// to ensure it's only created once
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -66,6 +44,15 @@ const App = () => {
               <Route path="/tools/break-even-calculator" element={<BreakEvenCalculator />} />
               <Route path="/tools/discount-calculator" element={<DiscountCalculator />} />
               <Route path="/tools/overtime-calculator" element={<OvertimeCalculator />} />
+              <Route path="/admin/login" element={<AdminLogin />} />
+              <Route
+                path="/admin"
+                element={
+                  <AdminRoute>
+                    <AdminDashboard />
+                  </AdminRoute>
+                }
+              />
               <Route path="*" element={<NotFound />} />
             </Routes>
             <Toaster />
