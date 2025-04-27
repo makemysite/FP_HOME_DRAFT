@@ -11,12 +11,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { CheckIcon, ListIcon } from "lucide-react";
+import { CheckIcon, ListIcon, MoveUp, MoveDown } from "lucide-react";
 
 interface BlogPost {
   id: string;
   title: string;
   show_in_highlights: boolean;
+  highlight_order: number | null;
   created_at: string;
 }
 
@@ -32,8 +33,9 @@ const BlogHighlightsManager = () => {
     try {
       const { data, error } = await supabase
         .from('blog_posts')
-        .select('id, title, show_in_highlights, created_at')
+        .select('id, title, show_in_highlights, highlight_order, created_at')
         .eq('published', true)
+        .order('highlight_order', { ascending: true, nullsLast: true })
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -55,11 +57,7 @@ const BlogHighlightsManager = () => {
 
       if (error) throw error;
 
-      setBlogPosts(blogPosts.map(post => 
-        post.id === postId 
-          ? { ...post, show_in_highlights: !currentValue }
-          : post
-      ));
+      await fetchBlogPosts(); // Refetch to get updated order
 
       toast.success(
         currentValue 
@@ -69,6 +67,43 @@ const BlogHighlightsManager = () => {
     } catch (error) {
       console.error('Error updating blog post:', error);
       toast.error('Failed to update blog highlight status');
+    }
+  };
+
+  const moveHighlight = async (postId: string, direction: 'up' | 'down') => {
+    const currentPost = blogPosts.find(post => post.id === postId);
+    if (!currentPost?.show_in_highlights || currentPost.highlight_order === null) return;
+
+    const highlightedPosts = blogPosts.filter(post => post.show_in_highlights);
+    const currentIndex = highlightedPosts.findIndex(post => post.id === postId);
+    
+    if (
+      (direction === 'up' && currentIndex === 0) || 
+      (direction === 'down' && currentIndex === highlightedPosts.length - 1)
+    ) return;
+
+    const swapWithPost = direction === 'up' 
+      ? highlightedPosts[currentIndex - 1] 
+      : highlightedPosts[currentIndex + 1];
+
+    try {
+      const { error: error1 } = await supabase
+        .from('blog_posts')
+        .update({ highlight_order: swapWithPost.highlight_order })
+        .eq('id', currentPost.id);
+
+      const { error: error2 } = await supabase
+        .from('blog_posts')
+        .update({ highlight_order: currentPost.highlight_order })
+        .eq('id', swapWithPost.id);
+
+      if (error1 || error2) throw error1 || error2;
+
+      await fetchBlogPosts();
+      toast.success('Post order updated successfully');
+    } catch (error) {
+      console.error('Error reordering posts:', error);
+      toast.error('Failed to update post order');
     }
   };
 
@@ -82,7 +117,7 @@ const BlogHighlightsManager = () => {
         <div className="space-y-1">
           <h2 className="text-2xl font-semibold">Blog Highlights</h2>
           <p className="text-sm text-gray-500">
-            Manage which blog posts appear in the landing page highlights section.
+            Manage which blog posts appear in the landing page highlights section and their display order.
           </p>
         </div>
       </div>
@@ -93,6 +128,7 @@ const BlogHighlightsManager = () => {
             <TableHead>Title</TableHead>
             <TableHead>Created At</TableHead>
             <TableHead>Status</TableHead>
+            <TableHead>Order</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -114,6 +150,31 @@ const BlogHighlightsManager = () => {
                     <ListIcon className="w-4 h-4 mr-1" />
                     Regular
                   </span>
+                )}
+              </TableCell>
+              <TableCell>
+                {post.show_in_highlights && (
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => moveHighlight(post.id, 'up')}
+                      disabled={!post.highlight_order || post.highlight_order === 1}
+                    >
+                      <MoveUp className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => moveHighlight(post.id, 'down')}
+                      disabled={!post.highlight_order || post.highlight_order === blogPosts.filter(p => p.show_in_highlights).length}
+                    >
+                      <MoveDown className="h-4 w-4" />
+                    </Button>
+                    <span className="text-sm text-gray-500">
+                      {post.highlight_order || '-'}
+                    </span>
+                  </div>
                 )}
               </TableCell>
               <TableCell className="text-right">

@@ -26,7 +26,8 @@ const BlogHighlights: React.FC = () => {
           .from('blog_posts')
           .select('id, slug, title, hero_image, created_at')
           .eq('published', true)
-          .order('created_at', { ascending: false })
+          .eq('show_in_highlights', true)
+          .order('highlight_order', { ascending: true })
           .limit(5);
         
         if (error) {
