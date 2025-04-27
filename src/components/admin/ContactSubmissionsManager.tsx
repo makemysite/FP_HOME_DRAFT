@@ -56,6 +56,24 @@ const ContactSubmissionsManager = () => {
         status: item.status as 'pending' | 'in-progress' | 'resolved'
       }));
       
+      const newSubmissions = data?.filter(submission => submission.status === 'pending');
+      
+      for (const submission of newSubmissions || []) {
+        try {
+          await supabase.functions.invoke('contact-email', {
+            body: {
+              type: 'forward',
+              recipientEmail: 'info@fieldpromax.com',
+              subject: 'New Contact Form Submission',
+              originalMessage: submission,
+            },
+          });
+          console.log('Forwarded new submission:', submission.id);
+        } catch (error) {
+          console.error('Error forwarding submission:', error);
+        }
+      }
+      
       setSubmissions(typedSubmissions);
     } catch (error: any) {
       console.error('Error in submission manager:', error);

@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Sheet,
   SheetContent,
@@ -8,7 +8,11 @@ import {
   SheetDescription,
 } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { MessageSquare } from "lucide-react";
+import { MessageSquare, Send } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 interface MessageDetailsProps {
   isOpen: boolean;
@@ -23,7 +27,40 @@ interface MessageDetailsProps {
 }
 
 const MessageDetails = ({ isOpen, onClose, submission }: MessageDetailsProps) => {
+  const [replyMessage, setReplyMessage] = useState("");
+  const [isSending, setIsSending] = useState(false);
+
   if (!submission) return null;
+
+  const handleSendReply = async () => {
+    if (!replyMessage.trim()) {
+      toast.error("Please enter a reply message");
+      return;
+    }
+
+    setIsSending(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('contact-email', {
+        body: {
+          type: 'reply',
+          recipientEmail: submission.email,
+          subject: `Re: Your message to FieldProMax`,
+          message: replyMessage,
+        },
+      });
+
+      if (error) throw error;
+
+      toast.success("Reply sent successfully!");
+      setReplyMessage("");
+    } catch (error) {
+      console.error('Error sending reply:', error);
+      toast.error("Failed to send reply. Please try again.");
+    } finally {
+      setIsSending(false);
+    }
+  };
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
@@ -59,6 +96,29 @@ const MessageDetails = ({ isOpen, onClose, submission }: MessageDetailsProps) =>
               <div className="mt-2 rounded-lg border p-4 bg-gray-50">
                 <p className="text-sm whitespace-pre-wrap">{submission.message}</p>
               </div>
+            </div>
+            <div className="border-t pt-6">
+              <h3 className="text-sm font-medium text-gray-500 mb-2">Reply to {submission.name}</h3>
+              <Textarea
+                placeholder="Type your reply..."
+                value={replyMessage}
+                onChange={(e) => setReplyMessage(e.target.value)}
+                className="min-h-[120px] mb-4"
+              />
+              <Button
+                onClick={handleSendReply}
+                disabled={isSending || !replyMessage.trim()}
+                className="w-full"
+              >
+                {isSending ? (
+                  "Sending..."
+                ) : (
+                  <>
+                    <Send className="w-4 h-4 mr-2" />
+                    Send Reply
+                  </>
+                )}
+              </Button>
             </div>
           </div>
         </ScrollArea>
