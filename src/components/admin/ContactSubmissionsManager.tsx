@@ -45,7 +45,7 @@ const ContactSubmissionsManager = () => {
     setError(null);
     
     try {
-      // Check if user is logged in
+      // Check if user is authenticated (not if they're an admin)
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
@@ -53,7 +53,7 @@ const ContactSubmissionsManager = () => {
         return;
       }
       
-      // Fetch all submissions for authenticated users
+      // Fetch all submissions - RLS will handle permissions
       const { data, error } = await supabase
         .from('contact_submissions')
         .select('*')
