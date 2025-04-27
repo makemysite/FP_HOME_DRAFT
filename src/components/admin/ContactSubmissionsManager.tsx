@@ -19,6 +19,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { AlertCircle } from "lucide-react";
 
 interface ContactSubmission {
   id: string;
@@ -43,6 +44,7 @@ const ContactSubmissionsManager = () => {
       setLoading(true);
       setError(null);
       
+      // Simplified query that doesn't join with users table
       const { data, error } = await supabase
         .from('contact_submissions')
         .select('*')
@@ -126,8 +128,11 @@ const ContactSubmissionsManager = () => {
 
       {error && (
         <div className="p-6 bg-red-50 border border-red-200 rounded-md">
-          <h3 className="text-lg font-medium text-red-800 mb-2">Error loading submissions</h3>
-          <p className="text-red-700">{error}</p>
+          <div className="flex items-center gap-2">
+            <AlertCircle className="h-5 w-5 text-red-600" />
+            <h3 className="text-lg font-medium text-red-800">Error loading submissions</h3>
+          </div>
+          <p className="mt-2 text-red-700">{error}</p>
           <Button 
             onClick={fetchSubmissions} 
             className="mt-4 bg-red-100 text-red-800 hover:bg-red-200"
