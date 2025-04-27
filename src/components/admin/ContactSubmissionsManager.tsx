@@ -44,16 +44,20 @@ const ContactSubmissionsManager = () => {
       setLoading(true);
       setError(null);
       
-      // Simplified query that doesn't join with users table
+      console.log("Fetching contact submissions...");
+      
+      // Explicitly specify only the fields we need to avoid any unintended joins
       const { data, error } = await supabase
         .from('contact_submissions')
-        .select('*')
+        .select('id, name, email, message, status, created_at')
         .order('created_at', { ascending: false });
 
       if (error) {
         console.error('Error fetching submissions:', error);
         throw error;
       }
+      
+      console.log("Submissions fetched successfully:", data);
       
       // Cast the data to ensure status is one of our allowed types
       const typedData = (data || []).map(item => ({
