@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import {
   Table,
@@ -38,11 +37,14 @@ const ContactSubmissionsManager = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    checkAuthAndFetchSubmissions();
+    fetchSubmissions();
   }, []);
 
-  const checkAuthAndFetchSubmissions = async () => {
+  const fetchSubmissions = async () => {
     try {
+      setLoading(true);
+      setError(null);
+      
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
@@ -50,21 +52,8 @@ const ContactSubmissionsManager = () => {
         return;
       }
       
-      fetchSubmissions();
-    } catch (err) {
-      console.error("Authentication error:", err);
-      navigate('/admin/login');
-    }
-  };
-
-  const fetchSubmissions = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      
       console.log("Fetching contact submissions...");
       
-      // Direct query that avoids any joins or references to the users table
       const { data, error } = await supabase
         .from('contact_submissions')
         .select('*')
@@ -72,13 +61,6 @@ const ContactSubmissionsManager = () => {
 
       if (error) {
         console.error('Error fetching submissions:', error);
-        
-        if (error.code === '401') {
-          toast.error('Authentication error. Please log in again.');
-          navigate('/admin/login');
-          return;
-        }
-        
         throw error;
       }
       
@@ -92,7 +74,7 @@ const ContactSubmissionsManager = () => {
       setSubmissions(typedData);
     } catch (error: any) {
       console.error('Error fetching submissions:', error);
-      setError(error.message || 'Failed to load contact submissions');
+      setError('Failed to load contact submissions. Please make sure you have the right permissions.');
       toast.error('Failed to load contact submissions');
     } finally {
       setLoading(false);
@@ -106,18 +88,10 @@ const ContactSubmissionsManager = () => {
         .update({ status: newStatus })
         .eq('id', submissionId);
 
-      if (error) {
-        if (error.code === '401') {
-          toast.error('Authentication error. Please log in again.');
-          navigate('/admin/login');
-          return;
-        }
-        throw error;
-      }
+      if (error) throw error;
       
       toast.success('Status updated successfully');
       
-      // Update local state to avoid a refetch
       setSubmissions(prevSubmissions => 
         prevSubmissions.map(submission => 
           submission.id === submissionId 
