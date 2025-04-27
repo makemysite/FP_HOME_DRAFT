@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import {
   Table,
@@ -47,12 +46,27 @@ const ContactSubmissionsManager = () => {
     setError(null);
     
     try {
-      // First check if user is logged in
+      // First refresh the session to ensure we have the latest permissions
+      await supabase.auth.refreshSession();
+      
+      // Then check if user is logged in
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
         console.log("No active session, redirecting to login");
         navigate('/admin/login');
+        return;
+      }
+      
+      // Double-check admin status with RPC
+      const { data: isAdmin, error: adminError } = await supabase
+        .rpc('is_admin', { user_email: session.user.email });
+      
+      if (adminError || !isAdmin) {
+        console.error("Admin check failed:", adminError);
+        setIsAuthorized(false);
+        setError('You do not have admin privileges. Please contact an administrator.');
+        setLoading(false);
         return;
       }
       
@@ -124,6 +138,11 @@ const ContactSubmissionsManager = () => {
     }
   };
 
+  const handleLogoutAndRetry = async () => {
+    await supabase.auth.signOut();
+    navigate('/admin/login');
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -143,13 +162,22 @@ const ContactSubmissionsManager = () => {
           <p className="text-sm mt-2">
             This may be because your account doesn't have admin privileges or the database permissions are not configured correctly.
           </p>
-          <Button 
-            onClick={() => navigate('/admin/login')} 
-            variant="outline" 
-            className="mt-4 bg-white"
-          >
-            Back to Login
-          </Button>
+          <div className="mt-4 space-x-2">
+            <Button 
+              onClick={handleLogoutAndRetry} 
+              variant="outline" 
+              className="bg-white"
+            >
+              Sign Out & Return to Login
+            </Button>
+            <Button 
+              onClick={checkAuthAndFetchSubmissions} 
+              variant="outline" 
+              className="bg-white"
+            >
+              Try Again
+            </Button>
+          </div>
         </AlertDescription>
       </Alert>
     );
