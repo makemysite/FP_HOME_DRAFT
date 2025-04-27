@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import {
   Table,
@@ -45,7 +46,13 @@ const ContactSubmissionsManager = () => {
 
       if (error) throw error;
       
-      setSubmissions(data || []);
+      // Cast the data to ensure it matches our interface types
+      const typedSubmissions = (data || []).map(item => ({
+        ...item,
+        status: item.status as 'pending' | 'in-progress' | 'resolved'
+      }));
+      
+      setSubmissions(typedSubmissions);
     } catch (error: any) {
       console.error('Error in submission manager:', error);
       setError(error.message || 'Failed to load contact submissions');
