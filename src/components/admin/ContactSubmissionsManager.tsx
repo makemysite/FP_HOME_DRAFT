@@ -46,11 +46,13 @@ const ContactSubmissionsManager = () => {
       
       console.log("Fetching contact submissions...");
       
-      // Explicitly specify only the fields we need to avoid any unintended joins
+      // Using the most direct query possible to avoid any auth/RLS issues
       const { data, error } = await supabase
         .from('contact_submissions')
         .select('id, name, email, message, status, created_at')
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        // Add `.limit(100)` to avoid large result sets if needed
+        ;
 
       if (error) {
         console.error('Error fetching submissions:', error);
