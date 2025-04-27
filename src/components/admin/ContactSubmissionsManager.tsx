@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import {
   Table,
@@ -19,7 +18,6 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, RefreshCw, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
 
 interface ContactSubmission {
   id: string;
@@ -34,41 +32,20 @@ const ContactSubmissionsManager = () => {
   const [submissions, setSubmissions] = useState<ContactSubmission[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    fetchSubmissions();
-  }, []);
 
   const fetchSubmissions = async () => {
     setLoading(true);
     setError(null);
     
     try {
-      // Simply check for session - RLS will handle permission checks
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        navigate('/login');
-        return;
-      }
-      
-      // Fetch submissions relying on RLS policies
       const { data, error } = await supabase
         .from('contact_submissions')
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
       
-      const typedData = (data || []).map(item => ({
-        ...item,
-        status: (item.status as 'pending' | 'in-progress' | 'resolved') || 'pending'
-      }));
-      
-      setSubmissions(typedData);
+      setSubmissions(data || []);
     } catch (error: any) {
       console.error('Error in submission manager:', error);
       setError(error.message || 'Failed to load contact submissions');
@@ -77,6 +54,10 @@ const ContactSubmissionsManager = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchSubmissions();
+  }, []);
 
   const updateStatus = async (submissionId: string, newStatus: ContactSubmission['status']) => {
     try {
