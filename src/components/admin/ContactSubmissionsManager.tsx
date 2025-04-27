@@ -43,7 +43,14 @@ const ContactSubmissionsManager = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setSubmissions(data || []);
+      
+      // Cast the data to ensure status is one of our allowed types
+      const typedData = (data || []).map(item => ({
+        ...item,
+        status: (item.status as 'pending' | 'in-progress' | 'resolved') || 'pending'
+      }));
+      
+      setSubmissions(typedData);
     } catch (error) {
       console.error('Error fetching submissions:', error);
       toast.error('Failed to load contact submissions');
