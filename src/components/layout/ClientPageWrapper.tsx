@@ -38,7 +38,7 @@ export default function ClientPageWrapper({
         {header || <Navbar />}
       </header>
 
-      <main className="container mx-auto px-4 py-8 flex-grow">
+      <main className="container mx-auto px-4 py-12 flex-grow">  {/* Increased py from 8 to 12 */}
         {(title || description) && (
           <div className="text-left mb-12">
             {title && <h1 className="text-4xl font-bold text-[#170F49] mb-4">{title}</h1>}
