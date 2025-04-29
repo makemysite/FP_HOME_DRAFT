@@ -57,11 +57,14 @@ const ProductUpdatesManager = () => {
         .order('quarter', { ascending: false });
       
       if (statusFilter !== 'all') {
-        query = query.eq('status', statusFilter);
+        // Convert string to the actual enum type
+        const status = statusFilter as 'draft' | 'published' | 'archived';
+        query = query.eq('status', status);
       }
       
       if (yearFilter !== 'all') {
-        query = query.eq('year', yearFilter);
+        // Convert string to number for year filtering
+        query = query.eq('year', parseInt(yearFilter, 10));
       }
       
       const { data, error } = await query;
@@ -82,7 +85,10 @@ const ProductUpdatesManager = () => {
 
   const updateStatus = async (updateId: string, newStatus: ProductUpdate['status']) => {
     try {
-      let updateData: { status: string; published_at?: string | null } = { 
+      const updateData: { 
+        status: 'draft' | 'published' | 'archived'; 
+        published_at?: string | null 
+      } = { 
         status: newStatus 
       };
       
