@@ -2,13 +2,16 @@
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
+// Define the status type to match the Supabase enum
+type ProductUpdateStatus = "published" | "draft" | "archived";
+
 const dummyProductUpdate = {
   title: "Q1 2025 Product Update",
   slug: "q1-2025-product-update",
   description: "Our first quarter update of 2025 brings several exciting new features and improvements to the FieldProMax platform that enhance user experience and workflow efficiency.",
   quarter: "1",
   year: 2025,
-  status: "published",
+  status: "published" as ProductUpdateStatus, // Explicit type casting to match the Supabase enum
   published_at: new Date().toISOString(),
   image_url: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=2070&auto=format&fit=crop",
 };
@@ -53,10 +56,20 @@ const dummyFeatures = [
 
 export async function createDummyProductUpdate() {
   try {
+    // Generate a unique slug by adding a timestamp
+    const timestamp = new Date().getTime();
+    const uniqueSlug = `${dummyProductUpdate.slug}-${timestamp}`;
+    
+    // Create a copy of the product update with the unique slug
+    const productUpdateData = {
+      ...dummyProductUpdate,
+      slug: uniqueSlug
+    };
+    
     // Insert the product update
     const { data: productUpdate, error: updateError } = await supabase
       .from('product_updates')
-      .insert(dummyProductUpdate)
+      .insert(productUpdateData)
       .select('id')
       .single();
 
