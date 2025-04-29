@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Sparkles } from 'lucide-react';
+import { Sparkles, AlertCircle } from 'lucide-react';
 
 interface AiSuggestionsProps {
   suggestions: string[];
@@ -34,7 +34,13 @@ const AiSuggestions: React.FC<AiSuggestionsProps> = ({
           </div>
         ) : error ? (
           <div className="bg-red-50 border border-red-200 rounded-md p-4">
-            <p className="text-red-800 text-sm">{error}</p>
+            <div className="flex items-start gap-2">
+              <AlertCircle className="h-5 w-5 text-red-500 mt-0.5" />
+              <div>
+                <p className="text-red-800 text-sm font-medium">Error generating suggestions</p>
+                <p className="text-red-700 text-sm mt-1">{error}</p>
+              </div>
+            </div>
           </div>
         ) : suggestions.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
