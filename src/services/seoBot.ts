@@ -238,15 +238,15 @@ export const analyzePage = async (url: string): Promise<SeoReport> => {
 // Save report to database
 export const saveReport = async (report: SeoReport): Promise<void> => {
   try {
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from('seo_reports')
-      .insert([{
+      .insert({
         url: report.url,
         scan_date: report.date,
         overall_score: report.overallScore,
         factors: report.factors,
         ai_suggestions: report.aiSuggestions,
-      }]);
+      });
       
     if (error) {
       throw error;

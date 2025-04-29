@@ -33,12 +33,12 @@ const SeoFactorsList: React.FC<SeoFactorsListProps> = ({ factors }) => {
     }
   };
 
-  const getAlertVariant = (status: 'good' | 'warning' | 'error') => {
+  const getAlertVariant = (status: 'good' | 'warning' | 'error'): 'default' | 'destructive' => {
     switch (status) {
       case 'good':
         return 'default';
       case 'warning':
-        return 'warning';
+        return 'default'; // Use default for warning as well since 'warning' is not a valid variant
       case 'error':
         return 'destructive';
       default:

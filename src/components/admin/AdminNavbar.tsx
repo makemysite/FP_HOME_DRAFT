@@ -1,15 +1,20 @@
 
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { supabase } from "@/integrations/supabase/client";
 
 const AdminNavbar = () => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     navigate('/admin/login');
+  };
+
+  const isActive = (path: string) => {
+    return location.pathname === path || location.pathname.startsWith(`${path}/`);
   };
 
   return (
@@ -21,31 +26,31 @@ const AdminNavbar = () => {
             <div className="flex items-center gap-4">
               <Link 
                 to="/admin" 
-                className="text-gray-600 hover:text-gray-900 transition-colors"
+                className={`transition-colors ${isActive('/admin') && !isActive('/admin/blog-highlights') && !isActive('/admin/contact-submissions') && !isActive('/admin/product-updates') && !isActive('/admin/seo-dashboard') ? 'text-blue-600 font-medium' : 'text-gray-600 hover:text-gray-900'}`}
               >
                 Dashboard
               </Link>
               <Link 
                 to="/admin/blog-highlights" 
-                className="text-gray-600 hover:text-gray-900 transition-colors"
+                className={`transition-colors ${isActive('/admin/blog-highlights') ? 'text-blue-600 font-medium' : 'text-gray-600 hover:text-gray-900'}`}
               >
                 Blog Highlights
               </Link>
               <Link 
                 to="/admin/contact-submissions" 
-                className="text-gray-600 hover:text-gray-900 transition-colors"
+                className={`transition-colors ${isActive('/admin/contact-submissions') ? 'text-blue-600 font-medium' : 'text-gray-600 hover:text-gray-900'}`}
               >
                 Contact Submissions
               </Link>
               <Link 
                 to="/admin/product-updates" 
-                className="text-gray-600 hover:text-gray-900 transition-colors"
+                className={`transition-colors ${isActive('/admin/product-updates') ? 'text-blue-600 font-medium' : 'text-gray-600 hover:text-gray-900'}`}
               >
                 Product Updates
               </Link>
               <Link 
                 to="/admin/seo-dashboard" 
-                className="text-gray-600 hover:text-gray-900 transition-colors"
+                className={`transition-colors ${isActive('/admin/seo-dashboard') ? 'text-blue-600 font-medium' : 'text-gray-600 hover:text-gray-900'}`}
               >
                 SEO Dashboard
               </Link>

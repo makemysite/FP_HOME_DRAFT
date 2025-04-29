@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { useToast } from "sonner";
+import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -18,7 +18,6 @@ const SeoDashboardPage = () => {
   const [currentReport, setCurrentReport] = useState<SeoReport | null>(null);
   const [reports, setReports] = useState<any[]>([]);
   const [geminiApiKey, setGeminiApiKey] = useState('');
-  const toast = useToast();
 
   // Load saved reports and API key on component mount
   useEffect(() => {

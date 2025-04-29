@@ -332,6 +332,33 @@ export type Database = {
           },
         ]
       }
+      seo_reports: {
+        Row: {
+          ai_suggestions: string[] | null
+          factors: Json
+          id: string
+          overall_score: number
+          scan_date: string
+          url: string
+        }
+        Insert: {
+          ai_suggestions?: string[] | null
+          factors: Json
+          id?: string
+          overall_score: number
+          scan_date?: string
+          url: string
+        }
+        Update: {
+          ai_suggestions?: string[] | null
+          factors?: Json
+          id?: string
+          overall_score?: number
+          scan_date?: string
+          url?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
