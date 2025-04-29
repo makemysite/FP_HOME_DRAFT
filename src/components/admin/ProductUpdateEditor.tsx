@@ -28,6 +28,7 @@ import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, PlusCircle, Trash, ArrowUp, ArrowDown, Save } from "lucide-react";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label"; // Import regular Label component
 
 interface ProductUpdateEditorProps {
   isOpen: boolean;
@@ -507,16 +508,20 @@ const ProductUpdateEditor = ({ isOpen, onClose, productUpdate }: ProductUpdateEd
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div>
-                          <FormLabel>Title</FormLabel>
+                          {/* Use regular Label here instead of FormLabel */}
+                          <Label htmlFor={`feature-${index}-title`}>Title</Label>
                           <Input
+                            id={`feature-${index}-title`}
                             value={feature.title}
                             onChange={(e) => handleFeatureChange(index, 'title', e.target.value)}
                             placeholder="Feature title"
                           />
                         </div>
                         <div>
-                          <FormLabel>Description</FormLabel>
+                          {/* Use regular Label here instead of FormLabel */}
+                          <Label htmlFor={`feature-${index}-description`}>Description</Label>
                           <Textarea
+                            id={`feature-${index}-description`}
                             value={feature.description}
                             onChange={(e) => handleFeatureChange(index, 'description', e.target.value)}
                             placeholder="Detailed description of this feature"
@@ -524,8 +529,10 @@ const ProductUpdateEditor = ({ isOpen, onClose, productUpdate }: ProductUpdateEd
                           />
                         </div>
                         <div>
-                          <FormLabel>Image URL (Optional)</FormLabel>
+                          {/* Use regular Label here instead of FormLabel */}
+                          <Label htmlFor={`feature-${index}-image`}>Image URL (Optional)</Label>
                           <Input
+                            id={`feature-${index}-image`}
                             value={feature.image_url || ''}
                             onChange={(e) => handleFeatureChange(index, 'image_url', e.target.value || null)}
                             placeholder="https://example.com/feature-image.jpg"
