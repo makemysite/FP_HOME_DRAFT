@@ -33,21 +33,19 @@ const App = () => {
           <Route path="/pricing" element={<PricingPage />} />
           <Route path="/industries" element={<Industries />} />
           <Route path="/blog" element={<Blog />} />
-          <Route path="/blog/:slug" element={<BlogPost />} />
+          <Route path="/blog/:slug" element={<BlogPost params={{ slug: ':slug' }} />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/product-updates" element={<ProductUpdates />} />
           <Route path="/product-updates/:slug" element={<ProductUpdateDetail />} />
           <Route path="/free-tools" element={<FreeTools />} />
           <Route path="/booking" element={<Booking />} />
           <Route path="/admin/login" element={<AdminLogin />} />
-          <Route path="/admin" element={<AdminRoute />}>
-            <Route element={<AdminLayout />}>
-              <Route index element={<AdminHome />} />
-              <Route path="blog-highlights" element={<BlogHighlightsPage />} />
-              <Route path="contact-submissions" element={<ContactSubmissionsPage />} />
-              <Route path="product-updates" element={<ProductUpdatesPage />} />
-              <Route path="seo-dashboard" element={<SeoDashboardPage />} />
-            </Route>
+          <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
+            <Route index element={<AdminHome />} />
+            <Route path="blog-highlights" element={<BlogHighlightsPage />} />
+            <Route path="contact-submissions" element={<ContactSubmissionsPage />} />
+            <Route path="product-updates" element={<ProductUpdatesPage />} />
+            <Route path="seo-dashboard" element={<SeoDashboardPage />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>

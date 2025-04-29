@@ -1,5 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
+import { Json } from "@/integrations/supabase/types";
 
 export interface SeoFactor {
   name: string;
@@ -238,13 +239,16 @@ export const analyzePage = async (url: string): Promise<SeoReport> => {
 // Save report to database
 export const saveReport = async (report: SeoReport): Promise<void> => {
   try {
+    // Convert SeoFactor[] to Json compatible format
+    const factorsJson = JSON.parse(JSON.stringify(report.factors)) as Json;
+    
     const { error } = await supabase
       .from('seo_reports')
       .insert({
         url: report.url,
         scan_date: report.date,
         overall_score: report.overallScore,
-        factors: report.factors,
+        factors: factorsJson,
         ai_suggestions: report.aiSuggestions,
       });
       
