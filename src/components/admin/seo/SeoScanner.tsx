@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Search, Scan, Loader2 } from 'lucide-react';
+import { Search, Scan, Loader2, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 import { analyzePage, saveReport } from '@/services/seoBot';
 import { generateSeoSuggestions } from '@/services/geminiAiService';
@@ -17,6 +17,7 @@ interface SeoScannerProps {
 const SeoScanner: React.FC<SeoScannerProps> = ({ onScanComplete, geminiApiKey }) => {
   const [url, setUrl] = useState('https://fieldpromax.com');
   const [isScanning, setIsScanning] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleScan = async () => {
     if (!url) {
@@ -26,13 +27,31 @@ const SeoScanner: React.FC<SeoScannerProps> = ({ onScanComplete, geminiApiKey })
 
     try {
       setIsScanning(true);
+      setError(null);
       toast.info('Scanning website for SEO factors...');
 
+      // Test if the URL is valid and accessible
+      try {
+        const testResponse = await fetch(url, { method: 'HEAD' });
+        if (!testResponse.ok) {
+          throw new Error(`Could not access URL: ${testResponse.statusText}`);
+        }
+      } catch (urlError) {
+        console.error('URL access error:', urlError);
+        toast.error(`Could not access the URL. Please check if it's valid and accessible.`);
+        setIsScanning(false);
+        setError('Could not access the URL. Please check if it\'s valid and accessible.');
+        return;
+      }
+
       // Analyze the page
+      console.log('Starting page analysis...');
       const report = await analyzePage(url);
+      console.log('Page analysis complete:', report);
 
       // If Gemini API key is provided, get AI suggestions
       if (geminiApiKey) {
+        console.log('Generating AI suggestions with Gemini...');
         try {
           // Fetch the HTML content for AI analysis
           const pageResponse = await fetch(url);
@@ -46,6 +65,13 @@ const SeoScanner: React.FC<SeoScannerProps> = ({ onScanComplete, geminiApiKey })
             report.factors
           );
           
+          console.log('AI suggestions response:', aiResponse);
+          
+          if (aiResponse.error) {
+            console.error('Error from Gemini API:', aiResponse.error);
+            toast.warning(`AI suggestions error: ${aiResponse.error}. Using standard analysis only.`);
+          }
+          
           if (aiResponse.suggestions?.length) {
             report.aiSuggestions = aiResponse.suggestions;
           }
@@ -54,6 +80,7 @@ const SeoScanner: React.FC<SeoScannerProps> = ({ onScanComplete, geminiApiKey })
           toast.error('Could not generate AI suggestions. Continuing with standard analysis.');
         }
       } else {
+        console.log('No Gemini API key provided, using fallback suggestions.');
         report.aiSuggestions = [
           'Add Gemini API key to get AI-powered suggestions.',
           'Configure your content structure for better keyword relevance.',
@@ -61,8 +88,10 @@ const SeoScanner: React.FC<SeoScannerProps> = ({ onScanComplete, geminiApiKey })
         ];
       }
 
+      console.log('Saving report to database...');
       // Save report to database
       await saveReport(report);
+      console.log('Report saved successfully');
       
       // Update UI with report
       onScanComplete(report);
@@ -70,7 +99,9 @@ const SeoScanner: React.FC<SeoScannerProps> = ({ onScanComplete, geminiApiKey })
       toast.success('SEO scan completed successfully!');
     } catch (error) {
       console.error('Error scanning website:', error);
-      toast.error('Failed to scan website. Please try again.');
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      toast.error(`Failed to scan website: ${errorMessage}`);
+      setError(`Scan failed: ${errorMessage}`);
     } finally {
       setIsScanning(false);
     }
@@ -115,6 +146,13 @@ const SeoScanner: React.FC<SeoScannerProps> = ({ onScanComplete, geminiApiKey })
             </div>
           </div>
           
+          {error && (
+            <div className="bg-red-50 p-3 rounded-md border border-red-200 flex items-start gap-2">
+              <AlertTriangle className="h-5 w-5 text-red-500 mt-0.5" />
+              <p className="text-sm text-red-800">{error}</p>
+            </div>
+          )}
+
           <div className="text-sm text-muted-foreground">
             <p>This will check your website for common SEO issues and generate suggestions for improvement.</p>
           </div>

@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -18,11 +17,14 @@ const SeoDashboardPage = () => {
   const [currentReport, setCurrentReport] = useState<SeoReport | null>(null);
   const [reports, setReports] = useState<any[]>([]);
   const [geminiApiKey, setGeminiApiKey] = useState('');
+  const [apiKeyError, setApiKeyError] = useState<string | null>(null);
+  const [isLoadingKey, setIsLoadingKey] = useState(true);
 
   // Load saved reports and API key on component mount
   useEffect(() => {
     const loadReportsAndApiKey = async () => {
       try {
+        setIsLoadingKey(true);
         // Load saved reports
         const savedReports = await getSavedReports();
         setReports(savedReports);
@@ -41,18 +43,33 @@ const SeoDashboardPage = () => {
         
         // Try to get Gemini API key from supabase secrets
         try {
+          console.log('Fetching Gemini API key...');
           const { data, error } = await supabase.functions.invoke('get-admin-secret', {
             body: { secretName: 'GEMINI_API_KEY' }
           });
           
-          if (data && !error) {
-            setGeminiApiKey(data.value || '');
+          if (error) {
+            console.error('Error invoking get-admin-secret:', error);
+            setApiKeyError(`Failed to retrieve API key: ${error.message}`);
+            toast.error('Failed to retrieve Gemini API key');
+          } else if (data && data.value) {
+            console.log('Gemini API key retrieved successfully');
+            setGeminiApiKey(data.value);
+            setApiKeyError(null);
+          } else {
+            console.warn('No Gemini API key found or empty key returned');
+            setApiKeyError('No API key found. AI-powered suggestions will not be available.');
           }
         } catch (error) {
-          console.error('Error fetching Gemini API key:', error);
+          console.error('Exception fetching Gemini API key:', error);
+          setApiKeyError(`Error fetching API key: ${error instanceof Error ? error.message : String(error)}`);
+          toast.error('Failed to fetch Gemini API key');
         }
       } catch (error) {
         console.error('Error loading data:', error);
+        toast.error('Failed to load SEO dashboard data');
+      } finally {
+        setIsLoadingKey(false);
       }
     };
     
@@ -195,10 +212,30 @@ const SeoDashboardPage = () => {
         </TabsContent>
         
         <TabsContent value="scan" className="mt-6">
-          <SeoScanner 
-            onScanComplete={handleScanComplete}
-            geminiApiKey={geminiApiKey}
-          />
+          {apiKeyError && (
+            <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-md">
+              <div className="flex items-start gap-2">
+                <AlertTriangle className="h-5 w-5 text-yellow-600 mt-0.5" />
+                <div>
+                  <p className="font-medium text-yellow-800">API Key Issue</p>
+                  <p className="text-sm text-yellow-700">{apiKeyError}</p>
+                  <p className="text-sm mt-1 text-yellow-700">
+                    You can still run the scan, but AI-powered suggestions will be limited.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+          {isLoadingKey ? (
+            <div className="flex items-center justify-center p-8">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+          ) : (
+            <SeoScanner 
+              onScanComplete={handleScanComplete}
+              geminiApiKey={geminiApiKey}
+            />
+          )}
         </TabsContent>
         
         <TabsContent value="history" className="mt-6">

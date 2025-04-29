@@ -242,6 +242,14 @@ export const saveReport = async (report: SeoReport): Promise<void> => {
     // Convert SeoFactor[] to Json compatible format
     const factorsJson = JSON.parse(JSON.stringify(report.factors)) as Json;
     
+    console.log('Saving report to database:', {
+      url: report.url,
+      scan_date: report.date,
+      overall_score: report.overallScore,
+      factors_count: report.factors.length,
+      ai_suggestions_count: report.aiSuggestions.length
+    });
+    
     const { error } = await supabase
       .from('seo_reports')
       .insert({
@@ -253,8 +261,11 @@ export const saveReport = async (report: SeoReport): Promise<void> => {
       });
       
     if (error) {
+      console.error('Supabase error while saving report:', error);
       throw error;
     }
+    
+    console.log('Report saved successfully to database');
   } catch (error) {
     console.error('Error saving SEO report:', error);
     throw new Error('Failed to save SEO report');

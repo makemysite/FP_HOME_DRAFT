@@ -14,11 +14,14 @@ export const generateSeoSuggestions = async (
 ): Promise<GeminiAiResponse> => {
   try {
     if (!apiKey) {
+      console.error('Gemini API key is not provided');
       return {
         suggestions: [],
         error: "Gemini API key is not provided"
       };
     }
+
+    console.log('Preparing to call Gemini API with key:', apiKey.substring(0, 4) + '...');
 
     // Create a summary of the SEO factors to send to Gemini
     const factorsSummary = seoFactors.map(factor => {
@@ -40,6 +43,8 @@ export const generateSeoSuggestions = async (
       
       Format each recommendation as a bullet point starting with "- ".
     `;
+    
+    console.log('Sending request to Gemini API...');
     
     // Call the Gemini API
     const response = await fetch(`${GEMINI_API_ENDPOINT}?key=${apiKey}`, {
@@ -64,11 +69,16 @@ export const generateSeoSuggestions = async (
       })
     });
     
+    console.log('Gemini API response status:', response.status);
+    
     if (!response.ok) {
-      throw new Error(`Gemini API error: ${response.statusText}`);
+      const errorText = await response.text();
+      console.error('Gemini API error response:', errorText);
+      throw new Error(`Gemini API error (${response.status}): ${response.statusText}`);
     }
     
     const data = await response.json();
+    console.log('Gemini API response data:', JSON.stringify(data).substring(0, 200) + '...');
     
     // Extract suggestions from the response
     let suggestions: string[] = [];
@@ -78,6 +88,8 @@ export const generateSeoSuggestions = async (
         .split('\n')
         .filter(line => line.trim().startsWith('-'))
         .map(line => line.trim().substring(2).trim());
+      
+      console.log('Extracted suggestions:', suggestions);
     }
     
     return {
