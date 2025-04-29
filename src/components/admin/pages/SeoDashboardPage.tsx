@@ -1,9 +1,10 @@
+
 import React, { useEffect, useState } from 'react';
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Settings, History, LineChart } from 'lucide-react';
+import { PlusCircle, Settings, History, LineChart, AlertTriangle, Loader2 } from 'lucide-react';
 import SeoScanner from '../seo/SeoScanner';
 import SeoScoreCard from '../seo/SeoScoreCard';
 import SeoFactorsList from '../seo/SeoFactorsList';
