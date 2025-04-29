@@ -40,6 +40,17 @@ const AdminHome = () => {
             </CardContent>
           </Card>
         </Link>
+        
+        <Link to="/admin/seo-dashboard">
+          <Card className="hover:shadow-lg transition-shadow">
+            <CardHeader>
+              <CardTitle>SEO Dashboard</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-gray-600">Monitor website SEO performance and get AI-powered suggestions</p>
+            </CardContent>
+          </Card>
+        </Link>
       </div>
     </div>
   );

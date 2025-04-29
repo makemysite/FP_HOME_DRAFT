@@ -3,43 +3,67 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://fieldpromax.com/</loc>
-    <lastmod>2025-04-06</lastmod>
+    <lastmod>2025-04-29</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>https://fieldpromax.com/features</loc>
-    <lastmod>2025-04-06</lastmod>
+    <lastmod>2025-04-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://fieldpromax.com/pricing</loc>
-    <lastmod>2025-04-06</lastmod>
+    <lastmod>2025-04-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://fieldpromax.com/industries</loc>
-    <lastmod>2025-04-06</lastmod>
+    <lastmod>2025-04-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://fieldpromax.com/blog</loc>
-    <lastmod>2025-04-06</lastmod>
+    <lastmod>2025-04-29</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://fieldpromax.com/contact</loc>
-    <lastmod>2025-04-06</lastmod>
+    <lastmod>2025-04-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://fieldpromax.com/about</loc>
-    <lastmod>2025-04-06</lastmod>
+    <lastmod>2025-04-29</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://fieldpromax.com/product-updates</loc>
+    <lastmod>2025-04-29</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://fieldpromax.com/free-tools</loc>
+    <lastmod>2025-04-29</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://fieldpromax.com/free-tools/break-even-calculator</loc>
+    <lastmod>2025-04-29</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://fieldpromax.com/free-tools/roi-calculator</loc>
+    <lastmod>2025-04-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>

@@ -43,6 +43,12 @@ const AdminNavbar = () => {
               >
                 Product Updates
               </Link>
+              <Link 
+                to="/admin/seo-dashboard" 
+                className="text-gray-600 hover:text-gray-900 transition-colors"
+              >
+                SEO Dashboard
+              </Link>
             </div>
           </div>
           <Button 

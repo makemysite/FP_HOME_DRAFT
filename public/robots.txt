@@ -11,7 +11,16 @@ Allow: /blog/
 Allow: /features/
 Allow: /pricing/
 Allow: /industries/
+Allow: /product-updates/
+Allow: /free-tools/
 
-# Block specific directories or files if needed
-# Disallow: /admin/
-# Disallow: /dashboard/
+# Block admin routes
+Disallow: /admin/
+Disallow: /dashboard/
+
+# Additional SEO-friendly directives
+Allow: /*.js
+Allow: /*.css
+Allow: /*.png
+Allow: /*.jpg
+Allow: /*.svg
