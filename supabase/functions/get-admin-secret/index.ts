@@ -63,7 +63,7 @@ serve(async (req) => {
     
     switch (secretName) {
       case 'GEMINI_API_KEY':
-        value = Deno.env.get('GEMINI_API_KEY');
+        value = "AIzaSyD9QgAnu0nPmjQI7oKdhyDvE9u24F7VfFI"; // Add the provided Gemini API key
         break;
       // Add other secret keys as needed
       default:
