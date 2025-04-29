@@ -1,72 +1,208 @@
 
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link, NavLink } from "react-router-dom";
+import { Menu } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import useMobile from "@/hooks/use-mobile";
 
-const Navbar: React.FC = () => {
+const Navbar = () => {
+  const isMobile = useMobile();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 10) {
+        setIsScrolled(true);
+      } else {
+        setIsScrolled(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
   return (
-    <nav className="flex items-center gap-[40px_100px] text-center flex-wrap max-md:max-w-full">
-      <Link to="/">
-        <img
-          src="https://cdn.builder.io/api/v1/image/assets/a720917f9ee741a78621d5e6666ab10a/f5c25da502e1d373adabf184e60dd9d28eead17e?placeholderIfAbsent=true"
-          alt="Field Promax Logo"
-          className="aspect-[1.73] object-contain w-[152px] self-stretch shrink-0 my-auto"
-        />
-      </Link>
-      <div className="self-stretch flex min-w-60 items-center gap-[40px_65px] text-base text-[rgba(7,15,24,1)] font-normal whitespace-nowrap flex-wrap my-auto max-md:max-w-full">
-        <Link
-          to="/"
-          className="text-[rgba(18,20,22,1)] self-stretch my-auto hover:text-[rgba(233,138,35,1)] transition-colors"
-        >
-          Home
-        </Link>
-        <Link
-          to="/features"
-          className="self-stretch my-auto hover:text-[rgba(233,138,35,1)] transition-colors"
-        >
-          Features
-        </Link>
-        <Link
-          to="/pricing"
-          className="self-stretch my-auto hover:text-[rgba(233,138,35,1)] transition-colors"
-        >
-          Pricing
-        </Link>
-        <Link
-          to="/tools"
-          className="self-stretch my-auto hover:text-[rgba(233,138,35,1)] transition-colors"
-        >
-          Tools
-        </Link>
-        <Link
-          to="/industries"
-          className="self-stretch my-auto hover:text-[rgba(233,138,35,1)] transition-colors"
-        >
-          Industries
-        </Link>
-        <Link
-          to="/blog"
-          className="self-stretch my-auto hover:text-[rgba(233,138,35,1)] transition-colors"
-        >
-          Blogs
-        </Link>
-        <Link
-          to="/contact"
-          className="self-stretch my-auto hover:text-[rgba(233,138,35,1)] transition-colors"
-        >
-          Contact
-        </Link>
-      </div>
-      <div className="self-stretch flex min-w-60 items-center gap-8 text-lg my-auto">
-        <div className="self-stretch text-[rgba(7,15,24,1)] font-normal w-[150px] my-auto rounded-[56px]">
-          <button className="bg-[rgba(245,246,251,1)] border px-[15px] py-[19px] rounded-[56px] border-[rgba(233,138,35,1)] border-solid max-md:px-5 w-full hover:bg-[rgba(245,246,251,0.8)] transition-colors">
-            Log in
-          </button>
+    <div
+      className={`w-full px-4 py-4 bg-white ${
+        isScrolled ? "shadow-md" : ""
+      } sticky top-0 z-50 transition-all duration-300 ease-in-out`}
+    >
+      <div className="flex items-center justify-between">
+        <div className="flex items-center">
+          <NavLink to="/" className="flex items-center">
+            <h1 className="text-2xl font-bold text-[#170F49] mr-4">
+              FieldProMax
+            </h1>
+          </NavLink>
+          {!isMobile && (
+            <nav className="hidden md:flex space-x-8">
+              <NavLink
+                to="/features"
+                className={({ isActive }) =>
+                  `text-base font-medium ${
+                    isActive ? "text-[#4A3AFF]" : "text-[#6F6C90]"
+                  } hover:text-[#4A3AFF]`
+                }
+              >
+                Features
+              </NavLink>
+              <NavLink
+                to="/pricing"
+                className={({ isActive }) =>
+                  `text-base font-medium ${
+                    isActive ? "text-[#4A3AFF]" : "text-[#6F6C90]"
+                  } hover:text-[#4A3AFF]`
+                }
+              >
+                Pricing
+              </NavLink>
+              <NavLink
+                to="/industries"
+                className={({ isActive }) =>
+                  `text-base font-medium ${
+                    isActive ? "text-[#4A3AFF]" : "text-[#6F6C90]"
+                  } hover:text-[#4A3AFF]`
+                }
+              >
+                Industries
+              </NavLink>
+              <NavLink
+                to="/blog"
+                className={({ isActive }) =>
+                  `text-base font-medium ${
+                    isActive ? "text-[#4A3AFF]" : "text-[#6F6C90]"
+                  } hover:text-[#4A3AFF]`
+                }
+              >
+                Blog
+              </NavLink>
+              <NavLink
+                to="/product-updates"
+                className={({ isActive }) =>
+                  `text-base font-medium ${
+                    isActive ? "text-[#4A3AFF]" : "text-[#6F6C90]"
+                  } hover:text-[#4A3AFF]`
+                }
+              >
+                Updates
+              </NavLink>
+              <NavLink
+                to="/tools"
+                className={({ isActive }) =>
+                  `text-base font-medium ${
+                    isActive ? "text-[#4A3AFF]" : "text-[#6F6C90]"
+                  } hover:text-[#4A3AFF]`
+                }
+              >
+                Tools
+              </NavLink>
+            </nav>
+          )}
         </div>
-        <button className="self-stretch bg-[rgba(233,138,35,1)] shadow-[0px_3px_12px_rgba(74,58,255,0.18)] min-h-[55px] gap-2 text-white font-medium leading-none w-[193px] my-auto px-[39px] py-[18px] rounded-[56px] max-md:px-5 hover:bg-[rgba(233,138,35,0.9)] transition-colors">
-          Take free trial
-        </button>
+        {!isMobile && (
+          <div className="hidden md:flex space-x-4">
+            <Link to="/contact">
+              <Button variant="outline">Contact</Button>
+            </Link>
+            <Link to="/booking">
+              <Button>Book Demo</Button>
+            </Link>
+          </div>
+        )}
+        {/* Mobile Menu Button */}
+        {isMobile && (
+          <Button variant="ghost" size="icon" onClick={toggleMenu}>
+            <Menu className="h-6 w-6" />
+          </Button>
+        )}
       </div>
-    </nav>
+
+      {/* Mobile Menu */}
+      {isMobile && isMenuOpen && (
+        <div className="md:hidden mt-4 py-4 bg-white border-t">
+          <nav className="flex flex-col space-y-4">
+            <NavLink
+              to="/features"
+              className={({ isActive }) =>
+                `text-base font-medium px-4 py-2 ${
+                  isActive ? "text-[#4A3AFF] bg-gray-100" : "text-[#6F6C90]"
+                } hover:text-[#4A3AFF] hover:bg-gray-50`
+              }
+            >
+              Features
+            </NavLink>
+            <NavLink
+              to="/pricing"
+              className={({ isActive }) =>
+                `text-base font-medium px-4 py-2 ${
+                  isActive ? "text-[#4A3AFF] bg-gray-100" : "text-[#6F6C90]"
+                } hover:text-[#4A3AFF] hover:bg-gray-50`
+              }
+            >
+              Pricing
+            </NavLink>
+            <NavLink
+              to="/industries"
+              className={({ isActive }) =>
+                `text-base font-medium px-4 py-2 ${
+                  isActive ? "text-[#4A3AFF] bg-gray-100" : "text-[#6F6C90]"
+                } hover:text-[#4A3AFF] hover:bg-gray-50`
+              }
+            >
+              Industries
+            </NavLink>
+            <NavLink
+              to="/blog"
+              className={({ isActive }) =>
+                `text-base font-medium px-4 py-2 ${
+                  isActive ? "text-[#4A3AFF] bg-gray-100" : "text-[#6F6C90]"
+                } hover:text-[#4A3AFF] hover:bg-gray-50`
+              }
+            >
+              Blog
+            </NavLink>
+            <NavLink
+              to="/product-updates"
+              className={({ isActive }) =>
+                `text-base font-medium px-4 py-2 ${
+                  isActive ? "text-[#4A3AFF] bg-gray-100" : "text-[#6F6C90]"
+                } hover:text-[#4A3AFF] hover:bg-gray-50`
+              }
+            >
+              Updates
+            </NavLink>
+            <NavLink
+              to="/tools"
+              className={({ isActive }) =>
+                `text-base font-medium px-4 py-2 ${
+                  isActive ? "text-[#4A3AFF] bg-gray-100" : "text-[#6F6C90]"
+                } hover:text-[#4A3AFF] hover:bg-gray-50`
+              }
+            >
+              Tools
+            </NavLink>
+            <div className="flex flex-col space-y-2 px-4 pt-2 border-t">
+              <Link to="/contact" className="w-full">
+                <Button variant="outline" className="w-full">
+                  Contact
+                </Button>
+              </Link>
+              <Link to="/booking" className="w-full">
+                <Button className="w-full">Book Demo</Button>
+              </Link>
+            </div>
+          </nav>
+        </div>
+      )}
+    </div>
   );
 };
 

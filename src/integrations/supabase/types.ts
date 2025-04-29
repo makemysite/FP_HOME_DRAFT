@@ -214,6 +214,89 @@ export type Database = {
         }
         Relationships: []
       }
+      product_update_features: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          image_url: string | null
+          is_key_feature: boolean
+          order_index: number
+          product_update_id: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          image_url?: string | null
+          is_key_feature?: boolean
+          order_index?: number
+          product_update_id: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          image_url?: string | null
+          is_key_feature?: boolean
+          order_index?: number
+          product_update_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_update_features_product_update_id_fkey"
+            columns: ["product_update_id"]
+            isOneToOne: false
+            referencedRelation: "product_updates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_updates: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          image_url: string | null
+          published_at: string | null
+          quarter: string
+          slug: string
+          status: Database["public"]["Enums"]["product_update_status"]
+          title: string
+          updated_at: string
+          year: number
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          image_url?: string | null
+          published_at?: string | null
+          quarter: string
+          slug: string
+          status?: Database["public"]["Enums"]["product_update_status"]
+          title: string
+          updated_at?: string
+          year: number
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          image_url?: string | null
+          published_at?: string | null
+          quarter?: string
+          slug?: string
+          status?: Database["public"]["Enums"]["product_update_status"]
+          title?: string
+          updated_at?: string
+          year?: number
+        }
+        Relationships: []
+      }
       section_content: {
         Row: {
           content: Json
@@ -266,6 +349,7 @@ export type Database = {
         | "Technology Trends"
         | "Growth"
       blog_label: "latest" | "popular" | "trending"
+      product_update_status: "draft" | "published" | "archived"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -388,6 +472,7 @@ export const Constants = {
         "Growth",
       ],
       blog_label: ["latest", "popular", "trending"],
+      product_update_status: ["draft", "published", "archived"],
     },
   },
 } as const

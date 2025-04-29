@@ -37,6 +37,12 @@ const AdminNavbar = () => {
               >
                 Contact Submissions
               </Link>
+              <Link 
+                to="/admin/product-updates" 
+                className="text-gray-600 hover:text-gray-900 transition-colors"
+              >
+                Product Updates
+              </Link>
             </div>
           </div>
           <Button 

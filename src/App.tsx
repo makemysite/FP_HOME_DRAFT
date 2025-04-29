@@ -12,6 +12,7 @@ import AdminLayout from "./components/admin/AdminLayout";
 import AdminHome from "./components/admin/pages/AdminHome";
 import BlogHighlightsPage from "./components/admin/pages/BlogHighlightsPage";
 import ContactSubmissionsPage from "./components/admin/pages/ContactSubmissionsPage";
+import ProductUpdatesPage from "./components/admin/pages/ProductUpdatesPage";
 
 // Import all page components
 import Index from "./pages/Index";
@@ -32,6 +33,8 @@ import ROICalculator from "./pages/tools/ROICalculator";
 import BreakEvenCalculator from "./pages/tools/BreakEvenCalculator";
 import DiscountCalculator from "./pages/tools/DiscountCalculator";
 import OvertimeCalculator from "./pages/tools/OvertimeCalculator";
+import ProductUpdates from "./pages/ProductUpdates";
+import ProductUpdateDetail from "./pages/ProductUpdateDetail";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient({
@@ -57,6 +60,8 @@ const App = () => {
               <Route path="/industries" element={<Industries />} />
               <Route path="/blog" element={<Blog />} />
               <Route path="/blog/:slug" element={<BlogPost />} />
+              <Route path="/product-updates" element={<ProductUpdates />} />
+              <Route path="/product-updates/:slug" element={<ProductUpdateDetail />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/booking" element={<Booking />} />
               <Route path="/tools" element={<FreeTools />} />
@@ -81,6 +86,7 @@ const App = () => {
                 <Route index element={<AdminHome />} />
                 <Route path="blog-highlights" element={<BlogHighlightsPage />} />
                 <Route path="contact-submissions" element={<ContactSubmissionsPage />} />
+                <Route path="product-updates" element={<ProductUpdatesPage />} />
               </Route>
               <Route path="*" element={<NotFound />} />
             </Routes>
