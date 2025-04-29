@@ -154,18 +154,30 @@ const analyzeImages = async (html: string): Promise<SeoFactor> => {
 };
 
 // Function to analyze sitemap and robots.txt
-const analyzeSitemapRobots = async (): Promise<SeoFactor> => {
+const analyzeSitemapRobots = async (baseUrl: string): Promise<SeoFactor> => {
   let hasSitemap = false;
   let hasRobots = false;
   
   try {
-    const sitemapResponse = await fetch('/sitemap.xml');
-    hasSitemap = sitemapResponse.ok;
+    // Extract domain from the URL
+    const url = new URL(baseUrl);
+    const domain = `${url.protocol}//${url.hostname}`;
     
-    const robotsResponse = await fetch('/robots.txt');
-    hasRobots = robotsResponse.ok;
+    try {
+      const sitemapResponse = await fetch(`${domain}/sitemap.xml`);
+      hasSitemap = sitemapResponse.ok;
+    } catch (error) {
+      console.error('Error checking sitemap:', error);
+    }
+    
+    try {
+      const robotsResponse = await fetch(`${domain}/robots.txt`);
+      hasRobots = robotsResponse.ok;
+    } catch (error) {
+      console.error('Error checking robots.txt:', error);
+    }
   } catch (error) {
-    console.error('Error checking sitemap/robots:', error);
+    console.error('Error parsing URL:', error);
   }
   
   const suggestions = [];
@@ -196,16 +208,50 @@ const analyzeSitemapRobots = async (): Promise<SeoFactor> => {
 // Main function to analyze a page
 export const analyzePage = async (url: string): Promise<SeoReport> => {
   try {
-    // Fetch the page content
-    const response = await fetch(url);
-    const html = await response.text();
+    console.log(`Analyzing page: ${url}`);
+    
+    // Try different methods to fetch the page content
+    let html = '';
+    let fetchError = null;
+    
+    // Try direct fetch first
+    try {
+      const response = await fetch(url, { mode: 'no-cors' });
+      html = await response.text();
+      console.log('Successfully fetched HTML directly');
+    } catch (error) {
+      fetchError = error;
+      console.error('Direct fetch failed:', error);
+      
+      // Try using a CORS proxy
+      try {
+        console.log('Attempting to fetch via proxy...');
+        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+        const proxyResponse = await fetch(proxyUrl);
+        
+        if (proxyResponse.ok) {
+          const data = await proxyResponse.json();
+          html = data.contents;
+          console.log('Successfully fetched HTML via proxy');
+        } else {
+          throw new Error(`Proxy fetch failed with status: ${proxyResponse.status}`);
+        }
+      } catch (proxyError) {
+        console.error('Proxy fetch failed:', proxyError);
+        throw fetchError; // Re-throw the original error if proxy also fails
+      }
+    }
+    
+    if (!html) {
+      throw new Error('Could not retrieve page content');
+    }
     
     // Run various SEO checks in parallel
     const [metaResult, headingsResult, imagesResult, sitemapRobotsResult] = await Promise.all([
       analyzeMeta(html),
       analyzeHeadings(html),
       analyzeImages(html),
-      analyzeSitemapRobots(),
+      analyzeSitemapRobots(url),
     ]);
     
     // Collect all factors
@@ -215,8 +261,7 @@ export const analyzePage = async (url: string): Promise<SeoReport> => {
     const totalScore = factors.reduce((sum, factor) => sum + factor.score, 0);
     const overallScore = Math.min(Math.round(totalScore), MAX_SCORE);
     
-    // Generate AI suggestions using Gemini API (placeholder)
-    // This will be replaced with actual Gemini API integration
+    // Default AI suggestions (will be replaced with actual Gemini API integration)
     const aiSuggestions = [
       "Implement structured data markup for better rich snippets",
       "Consider adding more content to improve keyword coverage",
@@ -232,32 +277,47 @@ export const analyzePage = async (url: string): Promise<SeoReport> => {
     };
   } catch (error) {
     console.error('Error analyzing page:', error);
-    throw new Error('Failed to analyze page');
+    throw new Error(`Failed to analyze page: ${error instanceof Error ? error.message : String(error)}`);
   }
 };
 
 // Save report to database
 export const saveReport = async (report: SeoReport): Promise<void> => {
   try {
+    // Ensure all properties in the report are correctly formatted
+    const sanitizedReport = {
+      url: report.url,
+      date: report.date,
+      overallScore: report.overallScore,
+      factors: report.factors.map(factor => ({
+        name: factor.name,
+        description: factor.description,
+        status: factor.status,
+        score: factor.score,
+        suggestions: Array.isArray(factor.suggestions) ? factor.suggestions : []
+      })),
+      aiSuggestions: Array.isArray(report.aiSuggestions) ? report.aiSuggestions : []
+    };
+    
     // Convert SeoFactor[] to Json compatible format
-    const factorsJson = JSON.parse(JSON.stringify(report.factors)) as Json;
+    const factorsJson = JSON.parse(JSON.stringify(sanitizedReport.factors)) as Json;
     
     console.log('Saving report to database:', {
-      url: report.url,
-      scan_date: report.date,
-      overall_score: report.overallScore,
-      factors_count: report.factors.length,
-      ai_suggestions_count: report.aiSuggestions.length
+      url: sanitizedReport.url,
+      scan_date: sanitizedReport.date,
+      overall_score: sanitizedReport.overallScore,
+      factors_count: sanitizedReport.factors.length,
+      ai_suggestions_count: sanitizedReport.aiSuggestions.length
     });
     
     const { error } = await supabase
       .from('seo_reports')
       .insert({
-        url: report.url,
-        scan_date: report.date,
-        overall_score: report.overallScore,
+        url: sanitizedReport.url,
+        scan_date: sanitizedReport.date,
+        overall_score: sanitizedReport.overallScore,
         factors: factorsJson,
-        ai_suggestions: report.aiSuggestions,
+        ai_suggestions: sanitizedReport.aiSuggestions,
       });
       
     if (error) {

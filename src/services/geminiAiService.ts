@@ -25,7 +25,7 @@ export const generateSeoSuggestions = async (
 
     // Create a summary of the SEO factors to send to Gemini
     const factorsSummary = seoFactors.map(factor => {
-      return `${factor.name} (Score: ${factor.score}/100): ${factor.suggestions.join('. ')}`;
+      return `${factor.name} (Score: ${factor.score}/100): ${(factor.suggestions || []).join('. ')}`;
     }).join('\n\n');
 
     // Prepare prompt for Gemini API
@@ -46,9 +46,13 @@ export const generateSeoSuggestions = async (
     
     console.log('Sending request to Gemini API...');
     
-    // Call the Gemini API
+    // Call the Gemini API with timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+    
     const response = await fetch(`${GEMINI_API_ENDPOINT}?key=${apiKey}`, {
       method: 'POST',
+      signal: controller.signal,
       headers: {
         'Content-Type': 'application/json',
       },
@@ -69,6 +73,7 @@ export const generateSeoSuggestions = async (
       })
     });
     
+    clearTimeout(timeoutId);
     console.log('Gemini API response status:', response.status);
     
     if (!response.ok) {

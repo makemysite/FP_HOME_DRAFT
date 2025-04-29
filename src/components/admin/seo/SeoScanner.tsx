@@ -4,10 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Search, Scan, Loader2, AlertTriangle } from 'lucide-react';
+import { Search, Scan, Loader2, AlertTriangle, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
 import { analyzePage, saveReport } from '@/services/seoBot';
 import { generateSeoSuggestions } from '@/services/geminiAiService';
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 interface SeoScannerProps {
   onScanComplete: (report: any) => void;
@@ -18,10 +19,25 @@ const SeoScanner: React.FC<SeoScannerProps> = ({ onScanComplete, geminiApiKey })
   const [url, setUrl] = useState('https://fieldpromax.com');
   const [isScanning, setIsScanning] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  const validateUrl = (url: string): boolean => {
+    try {
+      new URL(url);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  };
 
   const handleScan = async () => {
     if (!url) {
-      toast.error('Please enter a valid URL');
+      toast.error('Please enter a URL');
+      return;
+    }
+
+    if (!validateUrl(url)) {
+      toast.error('Please enter a valid URL format (e.g., https://example.com)');
+      setError('Invalid URL format. Please include http:// or https://');
       return;
     }
 
@@ -30,18 +46,42 @@ const SeoScanner: React.FC<SeoScannerProps> = ({ onScanComplete, geminiApiKey })
       setError(null);
       toast.info('Scanning website for SEO factors...');
 
-      // Test if the URL is valid and accessible
+      // Test if the URL is valid and accessible with timeout
       try {
-        const testResponse = await fetch(url, { method: 'HEAD' });
-        if (!testResponse.ok) {
-          throw new Error(`Could not access URL: ${testResponse.statusText}`);
-        }
+        console.log(`Testing URL accessibility: ${url}`);
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+        
+        const testResponse = await fetch(url, { 
+          method: 'HEAD',
+          signal: controller.signal,
+          mode: 'no-cors' // Try with no-cors mode to avoid CORS issues
+        });
+        
+        clearTimeout(timeoutId);
+        
+        console.log('URL test response:', testResponse);
       } catch (urlError) {
         console.error('URL access error:', urlError);
-        toast.error(`Could not access the URL. Please check if it's valid and accessible.`);
-        setIsScanning(false);
-        setError('Could not access the URL. Please check if it\'s valid and accessible.');
-        return;
+        
+        // Try a second attempt with a proxy for CORS issues
+        try {
+          console.log('Trying alternative method to access URL...');
+          const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+          const proxyResponse = await fetch(proxyUrl);
+          
+          if (!proxyResponse.ok) {
+            throw new Error('Failed to access URL through proxy');
+          }
+          
+          console.log('Successfully accessed URL through proxy');
+        } catch (proxyError) {
+          console.error('Proxy access error:', proxyError);
+          toast.error(`Could not access the URL. Please check if it's valid and accessible.`);
+          setIsScanning(false);
+          setError('Could not access the URL. Please check if it\'s valid and accessible.');
+          return;
+        }
       }
 
       // Analyze the page
@@ -54,7 +94,9 @@ const SeoScanner: React.FC<SeoScannerProps> = ({ onScanComplete, geminiApiKey })
         console.log('Generating AI suggestions with Gemini...');
         try {
           // Fetch the HTML content for AI analysis
-          const pageResponse = await fetch(url);
+          const pageResponse = await fetch(url, { mode: 'no-cors' })
+            .catch(() => fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`));
+            
           const htmlContent = await pageResponse.text();
           
           // Generate AI suggestions
@@ -124,7 +166,7 @@ const SeoScanner: React.FC<SeoScannerProps> = ({ onScanComplete, geminiApiKey })
                 id="url" 
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
-                placeholder="https://fieldpromax.com"
+                placeholder="https://example.com"
                 disabled={isScanning}
               />
               <Button 
@@ -147,10 +189,22 @@ const SeoScanner: React.FC<SeoScannerProps> = ({ onScanComplete, geminiApiKey })
           </div>
           
           {error && (
-            <div className="bg-red-50 p-3 rounded-md border border-red-200 flex items-start gap-2">
-              <AlertTriangle className="h-5 w-5 text-red-500 mt-0.5" />
-              <p className="text-sm text-red-800">{error}</p>
-            </div>
+            <Alert variant="destructive">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription className="flex flex-col gap-2">
+                <p>{error}</p>
+                <div className="text-sm mt-2">
+                  <p className="font-medium">Troubleshooting tips:</p>
+                  <ul className="list-disc pl-5 space-y-1 mt-1">
+                    <li>Check if the URL is correctly formatted (including https://)</li>
+                    <li>Verify that the website is publicly accessible</li>
+                    <li>Ensure there are no CORS restrictions on the domain</li>
+                    <li>Try a different website to see if the issue persists</li>
+                  </ul>
+                </div>
+              </AlertDescription>
+            </Alert>
           )}
 
           <div className="text-sm text-muted-foreground">
@@ -158,6 +212,13 @@ const SeoScanner: React.FC<SeoScannerProps> = ({ onScanComplete, geminiApiKey })
           </div>
         </div>
       </CardContent>
+      <CardFooter className="flex justify-between border-t pt-4">
+        <p className="text-sm text-muted-foreground">Scan time: ~30 seconds</p>
+        <Button variant="outline" size="sm" onClick={() => window.open('https://developers.google.com/search/docs/fundamentals/seo-starter-guide', '_blank')}>
+          <ExternalLink className="h-3.5 w-3.5 mr-1.5" />
+          SEO Best Practices
+        </Button>
+      </CardFooter>
     </Card>
   );
 };
