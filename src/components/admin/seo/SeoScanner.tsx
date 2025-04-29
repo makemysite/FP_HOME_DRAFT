@@ -97,7 +97,13 @@ const SeoScanner: React.FC<SeoScannerProps> = ({ onScanComplete, geminiApiKey })
           const pageResponse = await fetch(url, { mode: 'no-cors' })
             .catch(() => fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`));
             
-          const htmlContent = await pageResponse.text();
+          let htmlContent = '';
+          try {
+            htmlContent = await pageResponse.text();
+          } catch (textError) {
+            console.error('Error extracting text from response:', textError);
+            // Continue with empty HTML content, AI will work with just SEO factors
+          }
           
           // Generate AI suggestions
           const aiResponse = await generateSeoSuggestions(
@@ -131,14 +137,30 @@ const SeoScanner: React.FC<SeoScannerProps> = ({ onScanComplete, geminiApiKey })
       }
 
       console.log('Saving report to database...');
-      // Save report to database
-      await saveReport(report);
-      console.log('Report saved successfully');
-      
-      // Update UI with report
-      onScanComplete(report);
-      
-      toast.success('SEO scan completed successfully!');
+      try {
+        // Save report to database
+        await saveReport(report);
+        console.log('Report saved successfully');
+        
+        // Update UI with report
+        onScanComplete(report);
+        
+        toast.success('SEO scan completed successfully!');
+      } catch (saveError) {
+        console.error('Error saving report to database:', saveError);
+        
+        // Check if the error is related to authentication
+        if (String(saveError).includes('authentication') || String(saveError).includes('not authorized')) {
+          toast.error('Authentication required to save reports. Please log in and try again.');
+          setError('Authentication required to save reports. Please log in and try again.');
+        } else {
+          toast.error(`Failed to save SEO report: ${saveError instanceof Error ? saveError.message : String(saveError)}`);
+          setError(`Failed to save report: ${saveError instanceof Error ? saveError.message : String(saveError)}`);
+          
+          // Still update UI with report even if saving failed
+          onScanComplete(report);
+        }
+      }
     } catch (error) {
       console.error('Error scanning website:', error);
       const errorMessage = error instanceof Error ? error.message : String(error);

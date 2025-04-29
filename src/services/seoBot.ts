@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Json } from "@/integrations/supabase/types";
 
@@ -310,6 +309,13 @@ export const saveReport = async (report: SeoReport): Promise<void> => {
       ai_suggestions_count: sanitizedReport.aiSuggestions.length
     });
     
+    // Check if the user is authenticated
+    const { data: authData, error: authError } = await supabase.auth.getUser();
+    
+    if (authError || !authData.user) {
+      console.warn('User is not authenticated. This might affect saving reports depending on RLS policies.');
+    }
+    
     const { error } = await supabase
       .from('seo_reports')
       .insert({
@@ -322,13 +328,16 @@ export const saveReport = async (report: SeoReport): Promise<void> => {
       
     if (error) {
       console.error('Supabase error while saving report:', error);
+      if (error.code === '42501' || error.message.includes('permission denied')) {
+        throw new Error('Authentication required or insufficient permissions to save report');
+      }
       throw error;
     }
     
     console.log('Report saved successfully to database');
   } catch (error) {
     console.error('Error saving SEO report:', error);
-    throw new Error('Failed to save SEO report');
+    throw error instanceof Error ? error : new Error('Failed to save SEO report');
   }
 };
 
