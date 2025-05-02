@@ -54,8 +54,9 @@ const BlogPostClientContent = ({ initialPost, post, slug, loading, error }: Blog
   }
 
   // Optimize the image path if needed
-  if (blogPost.hero_image) {
-    blogPost.hero_image = blogPost.hero_image || IMAGE_PLACEHOLDER;
+  const optimizedPost = { ...blogPost };
+  if (optimizedPost.hero_image) {
+    optimizedPost.hero_image = optimizedPost.hero_image || IMAGE_PLACEHOLDER;
   }
 
   return (
@@ -68,7 +69,7 @@ const BlogPostClientContent = ({ initialPost, post, slug, loading, error }: Blog
         </Button>
         
         <div className="bg-white rounded-lg overflow-hidden">
-          <BlogRenderer post={blogPost} />
+          <BlogRenderer post={optimizedPost} />
         </div>
       </div>
     </div>

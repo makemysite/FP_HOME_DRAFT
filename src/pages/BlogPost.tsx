@@ -46,7 +46,7 @@ const BlogPost: React.FC = () => {
             variant: "destructive"
           });
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error("Error loading blog post:", err);
         setError("Failed to load blog post");
         toast({
