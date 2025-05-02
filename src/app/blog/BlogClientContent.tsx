@@ -10,6 +10,7 @@ import BlogFilters from "@/components/blog/BlogFilters";
 import { AlertCircle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { 
   Pagination, 
   PaginationContent, 
@@ -33,9 +34,17 @@ interface BlogPost {
 // Number of posts to display per page
 const POSTS_PER_PAGE = 10;
 
-// Default dimensions for blog post thumbnails
+// Image dimensions for blog post thumbnails
 const BLOG_IMAGE_WIDTH = 400;
 const BLOG_IMAGE_HEIGHT = 300;
+
+// Image sizes for different breakpoints
+const IMAGE_SIZES = [
+  { width: 358, breakpoint: 640 },  // sm
+  { width: 400, breakpoint: 768 },  // md
+  { width: 320, breakpoint: 1024 }, // lg
+  { width: 400, breakpoint: 1280 }, // xl
+];
 
 // Default placeholder for missing images
 const IMAGE_PLACEHOLDER = 'https://placehold.co/600x400/e9e9e9/969696?text=Image+Not+Available';
@@ -264,9 +273,39 @@ export default function BlogClientContent() {
 
   // Determine if an image should be eager loaded based on its position
   const shouldEagerLoad = (index: number) => {
-    // Eager load only the first few images that are likely to be in the initial viewport
-    // For desktop, this might be the first 3 or 6 images (depending on layout)
-    return index < 3;
+    // Eager load the first 6 images that are likely to be in the initial viewport
+    return index < 6;
+  };
+
+  // Generate srcset for responsive images
+  const generateSrcSet = (imageUrl: string) => {
+    if (!imageUrl) return '';
+    
+    // Create srcset with multiple sizes
+    return IMAGE_SIZES.map(({ width }) => {
+      // Add width parameter to the URL for dynamic resizing
+      // This assumes your image server supports dynamic resizing
+      // If not, you would need to prepare these images in advance
+      const resizedUrl = imageUrl.includes('?') 
+        ? `${imageUrl}&width=${width}` 
+        : `${imageUrl}?width=${width}`;
+      
+      return `${resizedUrl} ${width}w`;
+    }).join(', ');
+  };
+
+  // Generate sizes attribute based on our grid layout
+  const generateSizes = () => {
+    return '(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw';
+  };
+
+  // Optimize the image path for various CDNs if needed
+  const optimizeImagePath = (imageUrl: string | null) => {
+    if (!imageUrl) return IMAGE_PLACEHOLDER;
+    
+    // If using an image optimization service like Cloudinary, Imgix, etc.
+    // you could transform the URL here
+    return imageUrl;
   };
 
   if (loading) {
@@ -340,28 +379,31 @@ export default function BlogClientContent() {
                 className="bg-white rounded-lg overflow-hidden shadow-md transition-transform hover:scale-105 hover:shadow-lg"
                 style={{ contentVisibility: 'auto' }}
               >
-                <div className="h-48 overflow-hidden">
-                  {post.hero_image ? (
-                    <img 
-                      src={post.hero_image} 
-                      alt={post.title} 
-                      className="w-full h-full object-cover"
-                      loading={shouldEagerLoad(index) ? "eager" : "lazy"}
-                      width={BLOG_IMAGE_WIDTH}
-                      height={BLOG_IMAGE_HEIGHT}
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.src = IMAGE_PLACEHOLDER;
-                      }}
-                      style={{
-                        aspectRatio: `${BLOG_IMAGE_WIDTH}/${BLOG_IMAGE_HEIGHT}`,
-                      }}
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                      <span className="text-gray-400">No image</span>
-                    </div>
-                  )}
+                <div className="relative h-48 overflow-hidden">
+                  <AspectRatio ratio={BLOG_IMAGE_WIDTH/BLOG_IMAGE_HEIGHT} className="bg-gray-100">
+                    {post.hero_image ? (
+                      <img 
+                        src={optimizeImagePath(post.hero_image)}
+                        srcSet={generateSrcSet(post.hero_image)}
+                        sizes={generateSizes()}
+                        alt={post.title} 
+                        className="w-full h-full object-cover"
+                        loading={shouldEagerLoad(index) ? "eager" : "lazy"}
+                        width={BLOG_IMAGE_WIDTH}
+                        height={BLOG_IMAGE_HEIGHT}
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.src = IMAGE_PLACEHOLDER;
+                        }}
+                        style={{ aspectRatio: `${BLOG_IMAGE_WIDTH}/${BLOG_IMAGE_HEIGHT}` }}
+                        fetchPriority={index < 3 ? "high" : "auto"}
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-400">
+                        No image
+                      </div>
+                    )}
+                  </AspectRatio>
                 </div>
                 <div className="p-6">
                   <div className="flex items-center mb-3">
