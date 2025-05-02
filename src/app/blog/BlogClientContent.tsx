@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
@@ -387,7 +388,7 @@ export default function BlogClientContent() {
                           target.src = IMAGE_PLACEHOLDER;
                         }}
                         style={{ aspectRatio: `${BLOG_IMAGE_WIDTH}/${BLOG_IMAGE_HEIGHT}` }}
-                        fetchpriority={index < 3 ? "high" : "auto"}
+                        fetchPriority={index < 3 ? "high" : "auto"}
                       />
                     ) : (
                       <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-400">
