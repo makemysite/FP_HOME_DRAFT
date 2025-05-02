@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import BlogFilters from "@/components/blog/BlogFilters";
+import { AlertCircle } from "lucide-react";
 
 interface BlogPost {
   id: string;
@@ -34,11 +35,22 @@ export default function BlogClientContent() {
     const fetchBlogPosts = async () => {
       try {
         console.log('Fetching blog posts...');
-        const { data, error } = await supabase
+        // Set a timeout to handle network issues
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Request timeout')), 10000)
+        );
+        
+        const fetchPromise = supabase
           .from('blog_posts')
           .select('id, slug, title, description, hero_image, created_at, category')
           .eq('published', true)
           .order('created_at', { ascending: false });
+          
+        // Race between fetch and timeout
+        const { data, error } = await Promise.race([
+          fetchPromise,
+          timeoutPromise.then(() => { throw new Error('Request timeout'); })
+        ]) as any;
         
         if (error) {
           console.error('Error fetching blog posts:', error);
@@ -123,6 +135,9 @@ export default function BlogClientContent() {
   if (error) {
     return (
       <div className="text-center py-12">
+        <div className="flex justify-center mb-4">
+          <AlertCircle className="h-12 w-12 text-red-500" />
+        </div>
         <h3 className="text-xl font-medium text-gray-700 mb-4">Error Loading Blog Posts</h3>
         <p className="text-gray-500 mb-6">{error}</p>
         <button 
@@ -163,6 +178,9 @@ export default function BlogClientContent() {
                     src={post.hero_image} 
                     alt={post.title} 
                     className="w-full h-full object-cover"
+                    loading="lazy" // Add lazy loading
+                    width="400"
+                    height="300"
                   />
                 ) : (
                   <div className="w-full h-full bg-gray-200 flex items-center justify-center">

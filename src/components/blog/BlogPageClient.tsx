@@ -1,13 +1,14 @@
 
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/landing/Navbar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/components/ui/use-toast";
 import Footer from "@/components/features/Footer";
+import { AlertCircle } from "lucide-react";
 
 interface BlogPost {
   id: string;
@@ -22,19 +23,33 @@ interface BlogPost {
 export default function BlogPageClient() {
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
     const fetchBlogPosts = async () => {
       try {
-        const { data, error } = await supabase
+        console.log('Fetching blog posts...');
+        // Set a timeout to handle network issues
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Request timeout')), 10000)
+        );
+        
+        const fetchPromise = supabase
           .from('blog_posts')
           .select('id, slug, title, description, hero_image, created_at, category')
           .eq('published', true)
           .order('created_at', { ascending: false });
+          
+        // Race between fetch and timeout
+        const { data, error } = await Promise.race([
+          fetchPromise,
+          timeoutPromise.then(() => { throw new Error('Request timeout'); })
+        ]) as any;
         
         if (error) {
           console.error('Error fetching blog posts:', error);
+          setError(`Failed to load blog posts: ${error.message}`);
           toast({
             title: "Error",
             description: "Failed to load blog posts. Please try again later.",
@@ -43,9 +58,11 @@ export default function BlogPageClient() {
           return;
         }
         
+        console.log('Blog posts fetched successfully:', data?.length);
         setBlogPosts(data || []);
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error fetching blog posts:', error);
+        setError(`Failed to load blog posts: ${error.message || 'Unknown error'}`);
         toast({
           title: "Error",
           description: "Failed to load blog posts. Please try again later.",
@@ -95,6 +112,20 @@ export default function BlogPageClient() {
               </div>
             ))}
           </div>
+        ) : error ? (
+          <div className="text-center py-12">
+            <div className="flex justify-center mb-4">
+              <AlertCircle className="h-12 w-12 text-red-500" />
+            </div>
+            <h3 className="text-xl font-medium text-gray-700 mb-4">Error Loading Blog Posts</h3>
+            <p className="text-gray-500 mb-6">{error}</p>
+            <button 
+              onClick={() => window.location.reload()} 
+              className="bg-[#E98A23] text-white px-6 py-2 rounded-lg hover:bg-opacity-90 transition-colors"
+            >
+              Try Again
+            </button>
+          </div>
         ) : blogPosts.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {blogPosts.map((post) => (
@@ -109,6 +140,9 @@ export default function BlogPageClient() {
                       src={post.hero_image} 
                       alt={post.title} 
                       className="w-full h-full object-cover"
+                      loading="lazy" // Add lazy loading
+                      width="400"
+                      height="300"
                     />
                   ) : (
                     <div className="w-full h-full bg-gray-200 flex items-center justify-center">

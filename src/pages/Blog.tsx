@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, lazy, Suspense } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/landing/Navbar";
@@ -39,11 +39,22 @@ const Blog = () => {
     try {
       console.log("Attempting to fetch blog posts from Supabase");
       
-      const { data, error } = await supabase
+      // Add timeout for better error handling
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Request timeout')), 10000)
+      );
+      
+      const fetchPromise = supabase
         .from('blog_posts')
         .select('id, slug, title, description, hero_image, created_at, category')
         .eq('published', true)
         .order('created_at', { ascending: false });
+        
+      // Race between fetch and timeout
+      const { data, error } = await Promise.race([
+        fetchPromise,
+        timeoutPromise.then(() => { throw new Error('Request timeout'); })
+      ]) as any;
       
       if (error) {
         console.error('Error fetching blog posts:', error);
@@ -171,6 +182,9 @@ const Blog = () => {
                       src={post.hero_image} 
                       alt={post.title} 
                       className="w-full h-full object-cover"
+                      loading="lazy" // Add lazy loading
+                      width="400"
+                      height="300"
                     />
                   ) : (
                     <div className="w-full h-full bg-gray-200 flex items-center justify-center">

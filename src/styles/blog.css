@@ -5,7 +5,7 @@
   display: flex;
   align-items: flex-start;
   margin-bottom: 0.5rem;
-  margin-top: 1rem; /* Increased margin above each list item */
+  margin-top: 0.75rem; /* Reduced margin for better spacing */
 }
 
 .blog-embed-content-list li::before {
@@ -16,6 +16,7 @@
   display: inline-block;
   min-width: 1em;
   text-align: left;
+  flex-shrink: 0; /* Added to prevent shrinking */
 }
 
 .blog-embed-post ol > li::marker {
