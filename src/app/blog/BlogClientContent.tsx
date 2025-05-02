@@ -10,6 +10,16 @@ import BlogFilters from "@/components/blog/BlogFilters";
 import { AlertCircle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import { 
+  Pagination, 
+  PaginationContent, 
+  PaginationItem, 
+  PaginationLink, 
+  PaginationNext, 
+  PaginationPrevious, 
+  PaginationEllipsis 
+} from "@/components/ui/pagination";
+import { useRouter, useSearchParams } from "next/navigation";
 
 interface BlogPost {
   id: string;
@@ -21,15 +31,24 @@ interface BlogPost {
   category: "Industry Insights" | "Field Operations" | "Technology Trends" | "Growth" | null;
 }
 
+// Number of posts to display per page
+const POSTS_PER_PAGE = 10;
+
 export default function BlogClientContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const currentPage = parseInt(searchParams.get('page') || '1', 10);
+  
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
   const [filteredPosts, setFilteredPosts] = useState<BlogPost[]>([]);
+  const [paginatedPosts, setPaginatedPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [dateRange, setDateRange] = useState<{ from: Date; to: Date } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [retrying, setRetrying] = useState(false);
+  const [totalPosts, setTotalPosts] = useState(0);
   const { toast } = useToast();
 
   const categories = ["Industry Insights", "Field Operations", "Technology Trends", "Growth"];
@@ -47,6 +66,13 @@ export default function BlogClientContent() {
         setTimeout(() => reject(new Error('Request timeout')), timeoutDuration)
       );
       
+      // First, get the count of all published posts
+      const countPromise = supabase
+        .from('blog_posts')
+        .select('id', { count: 'exact', head: true })
+        .eq('published', true);
+      
+      // Then fetch just the posts for the current page
       const fetchPromise = supabase
         .from('blog_posts')
         .select('id, slug, title, description, hero_image, created_at, category')
@@ -54,18 +80,28 @@ export default function BlogClientContent() {
         .order('created_at', { ascending: false });
           
       // Race between fetch and timeout
-      const { data, error: supabaseError } = await Promise.race([
-        fetchPromise,
-        timeoutPromise.then(() => { throw new Error('Request timeout'); })
-      ]) as any;
+      const [countResult, dataResult] = await Promise.all([
+        Promise.race([countPromise, timeoutPromise]),
+        Promise.race([fetchPromise, timeoutPromise])
+      ]) as [any, any];
       
-      if (supabaseError) {
-        throw supabaseError;
+      if (countResult.error) {
+        throw countResult.error;
       }
       
-      console.log('Blog posts fetched successfully:', data?.length);
-      setBlogPosts(data || []);
-      setFilteredPosts(data || []);
+      if (dataResult.error) {
+        throw dataResult.error;
+      }
+      
+      const totalCount = countResult.count || 0;
+      setTotalPosts(totalCount);
+      
+      console.log('Blog posts fetched successfully:', dataResult.data?.length);
+      console.log('Total blog posts:', totalCount);
+      
+      setBlogPosts(dataResult.data || []);
+      setFilteredPosts(dataResult.data || []);
+      
     } catch (error: any) {
       console.error('Error fetching blog posts:', error);
       setError(`Failed to load blog posts: ${error.message || 'Unknown error'}`);
@@ -86,6 +122,15 @@ export default function BlogClientContent() {
       setRetrying(false);
     }
   }, [toast]);
+
+  // Update URL with page parameter when changing pages
+  const handlePageChange = (page: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('page', page.toString());
+    
+    // Reset to page 1 if filters change
+    router.push(`/blog?${params.toString()}`);
+  };
 
   useEffect(() => {
     fetchBlogPosts();
@@ -113,7 +158,20 @@ export default function BlogClientContent() {
     }
 
     setFilteredPosts(filtered);
+    // Reset to page 1 when filters change
+    if (currentPage !== 1) {
+      handlePageChange(1);
+    }
   }, [blogPosts, searchQuery, selectedCategory, dateRange]);
+
+  // Calculate pagination values
+  useEffect(() => {
+    const startIndex = (currentPage - 1) * POSTS_PER_PAGE;
+    const endIndex = startIndex + POSTS_PER_PAGE;
+    setPaginatedPosts(filteredPosts.slice(startIndex, endIndex));
+  }, [filteredPosts, currentPage]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredPosts.length / POSTS_PER_PAGE));
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -125,6 +183,76 @@ export default function BlogClientContent() {
 
   const handleRetry = () => {
     fetchBlogPosts();
+  };
+
+  // Generate pagination items
+  const renderPaginationItems = () => {
+    const items = [];
+    const maxVisiblePages = 5; // Maximum number of page links to show
+
+    // Always show first page
+    items.push(
+      <PaginationItem key="first">
+        <PaginationLink
+          isActive={currentPage === 1}
+          onClick={() => currentPage !== 1 && handlePageChange(1)}
+        >
+          1
+        </PaginationLink>
+      </PaginationItem>
+    );
+
+    // Calculate range of visible pages
+    let startPage = Math.max(2, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages - 1, startPage + maxVisiblePages - 3);
+
+    // Adjust if we're near the beginning
+    if (startPage > 2) {
+      items.push(
+        <PaginationItem key="ellipsis-start">
+          <PaginationEllipsis />
+        </PaginationItem>
+      );
+    }
+
+    // Add middle pages
+    for (let i = startPage; i <= endPage; i++) {
+      items.push(
+        <PaginationItem key={i}>
+          <PaginationLink
+            isActive={currentPage === i}
+            onClick={() => currentPage !== i && handlePageChange(i)}
+          >
+            {i}
+          </PaginationLink>
+        </PaginationItem>
+      );
+    }
+
+    // Add ellipsis if needed
+    if (endPage < totalPages - 1) {
+      items.push(
+        <PaginationItem key="ellipsis-end">
+          <PaginationEllipsis />
+        </PaginationItem>
+      );
+    }
+
+    // Always show last page if there is more than one page
+    if (totalPages > 1) {
+      items.push(
+        <PaginationItem key="last">
+          <PaginationLink
+            isActive={currentPage === totalPages}
+            onClick={() => currentPage !== totalPages && handlePageChange(totalPages)}
+          >
+            {totalPages}
+          </PaginationLink>
+        </PaginationItem>
+      );
+    }
+
+    return items;
   };
 
   if (loading) {
@@ -189,56 +317,83 @@ export default function BlogClientContent() {
           <p className="text-gray-500">Try adjusting your filters or search criteria.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredPosts.map((post) => (
-            <Link 
-              href={`/blog/${post.slug}`} 
-              key={post.id}
-              className="bg-white rounded-lg overflow-hidden shadow-md transition-transform hover:scale-105 hover:shadow-lg"
-            >
-              <div className="h-48 overflow-hidden">
-                {post.hero_image ? (
-                  <img 
-                    src={post.hero_image} 
-                    alt={post.title} 
-                    className="w-full h-full object-cover"
-                    loading="lazy"
-                    width="400"
-                    height="300"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.src = 'https://placehold.co/600x400/e9e9e9/969696?text=Image+Not+Available';
-                    }}
-                  />
-                ) : (
-                  <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                    <span className="text-gray-400">No image</span>
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {paginatedPosts.map((post) => (
+              <Link 
+                href={`/blog/${post.slug}`} 
+                key={post.id}
+                className="bg-white rounded-lg overflow-hidden shadow-md transition-transform hover:scale-105 hover:shadow-lg"
+              >
+                <div className="h-48 overflow-hidden">
+                  {post.hero_image ? (
+                    <img 
+                      src={post.hero_image} 
+                      alt={post.title} 
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                      width="400"
+                      height="300"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = 'https://placehold.co/600x400/e9e9e9/969696?text=Image+Not+Available';
+                      }}
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                      <span className="text-gray-400">No image</span>
+                    </div>
+                  )}
+                </div>
+                <div className="p-6">
+                  <div className="flex items-center mb-3">
+                    <span className="text-sm text-[#E98A23] font-medium">
+                      {post.category || 'Uncategorized'}
+                    </span>
+                    <span className="mx-2 text-gray-300">•</span>
+                    <span className="text-sm text-gray-500">
+                      {formatDate(post.created_at)}
+                    </span>
                   </div>
-                )}
-              </div>
-              <div className="p-6">
-                <div className="flex items-center mb-3">
-                  <span className="text-sm text-[#E98A23] font-medium">
-                    {post.category || 'Uncategorized'}
-                  </span>
-                  <span className="mx-2 text-gray-300">•</span>
-                  <span className="text-sm text-gray-500">
-                    {formatDate(post.created_at)}
-                  </span>
+                  <h2 className="font-bold text-xl mb-3 text-[#170F49] line-clamp-2">
+                    {post.title}
+                  </h2>
+                  <p className="text-gray-600 mb-4 line-clamp-3">
+                    {post.description || "Read more about this topic..."}
+                  </p>
+                  <div className="text-[#E98A23] font-medium hover:underline">
+                    Read More
+                  </div>
                 </div>
-                <h2 className="font-bold text-xl mb-3 text-[#170F49] line-clamp-2">
-                  {post.title}
-                </h2>
-                <p className="text-gray-600 mb-4 line-clamp-3">
-                  {post.description || "Read more about this topic..."}
-                </p>
-                <div className="text-[#E98A23] font-medium hover:underline">
-                  Read More
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
+              </Link>
+            ))}
+          </div>
+          
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="mt-12">
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious 
+                      onClick={() => currentPage > 1 && handlePageChange(currentPage - 1)}
+                      className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                    />
+                  </PaginationItem>
+                  
+                  {renderPaginationItems()}
+                  
+                  <PaginationItem>
+                    <PaginationNext 
+                      onClick={() => currentPage < totalPages && handlePageChange(currentPage + 1)}
+                      className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
+          )}
+        </>
       )}
     </ErrorBoundary>
   );

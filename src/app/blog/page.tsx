@@ -16,7 +16,26 @@ export const metadata: Metadata = {
   },
 };
 
-export default function BlogPage() {
+// This function enables dynamic metadata based on the search params
+export function generateMetadata({ searchParams }: { searchParams: { page?: string } }) {
+  const page = parseInt(searchParams.page || '1');
+  
+  const title = page > 1 
+    ? `Blog Page ${page} | Field Promax - Field Service Management Insights` 
+    : "Blog | Field Promax - Field Service Management Insights";
+  
+  return {
+    title,
+    description: `Expert insights, tips, and strategies for field service management. Page ${page} of our blog.`,
+    openGraph: {
+      title,
+      description: `Expert insights, tips, and strategies for field service management. Page ${page} of our blog.`,
+      type: "website",
+    },
+  };
+}
+
+export default function BlogPage({ searchParams }: { searchParams: { page?: string } }) {
   return (
     <ServerBlogPage>
       <ClientOnly fallback={
