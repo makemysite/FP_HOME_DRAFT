@@ -1,66 +1,67 @@
 
-import React from 'react';
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
-import Index from './pages/Index';
-import FeaturesPage from './app/features/page';
-import PricingPage from './app/pricing/page';
-import Industries from './app/industries/page';
-import Blog from './app/blog/page';
-import BlogPost from './app/blog/[slug]/page';
-import Contact from './pages/Contact';
-import ProductUpdates from './pages/ProductUpdates';
-import ProductUpdateDetail from './pages/ProductUpdateDetail';
-import FreeTools from './pages/FreeTools';
-import NotFound from './pages/NotFound';
-import ErrorBoundary from './components/ErrorBoundary';
-import AdminLogin from './components/admin/AdminLogin';
-import AdminRoute from './components/admin/AdminRoute';
-import AdminLayout from './components/admin/AdminLayout';
-import AdminHome from './components/admin/AdminHome';
-import BlogHighlightsPage from './components/admin/pages/BlogHighlightsPage';
-import ContactSubmissionsPage from './components/admin/pages/ContactSubmissionsPage';
-import ProductUpdatesPage from './components/admin/pages/ProductUpdatesPage';
-import SeoDashboardPage from './components/admin/pages/SeoDashboardPage';
-import Booking from './pages/Booking';
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Index from "./pages/Index";
+import Blog from "./pages/Blog";
+import BlogPost from "./pages/BlogPost";
+import Features from "./pages/Features";
+import Industries from "./pages/Industries";
+import Pricing from "./pages/Pricing";
+import Contact from "./pages/Contact";
+import Booking from "./pages/Booking";
+import FreeTools from "./pages/FreeTools";
+import ProductUpdates from "./pages/ProductUpdates";
+import ProductUpdateDetail from "./pages/ProductUpdateDetail";
+import NotFound from "./pages/NotFound";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { queryClient } from "./lib/query-client-wrapper";
+import { HelmetProvider } from "react-helmet-async";
+import "./App.css";
 
-// Wrapper component for Blog to provide searchParams
-const BlogWithSearchParams = () => {
-  const location = useLocation();
-  const searchParams = new URLSearchParams(location.search);
-  const pageParam = searchParams.get('page');
-  
-  return <Blog searchParams={{ page: pageParam || undefined }} />;
-};
+// Calculator pages
+import BreakEvenCalculator from "./pages/tools/BreakEvenCalculator";
+import DiscountCalculator from "./pages/tools/DiscountCalculator";
+import ROICalculator from "./pages/tools/ROICalculator";
+import ProfitCalculator from "./pages/tools/ProfitCalculator";
+import SalaryCalculator from "./pages/tools/SalaryCalculator";
+import OvertimeCalculator from "./pages/tools/OvertimeCalculator";
+import LoadCalculator from "./pages/tools/LoadCalculator";
+import DuctCalculator from "./pages/tools/DuctCalculator";
+import GrowthCalculator from "./pages/tools/GrowthCalculator";
+import Calculator from "./pages/tools/Calculator";
 
-const App = () => {
+function App() {
   return (
-    <ErrorBoundary>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/features" element={<FeaturesPage />} />
-          <Route path="/pricing" element={<PricingPage />} />
-          <Route path="/industries" element={<Industries />} />
-          <Route path="/blog" element={<BlogWithSearchParams />} />
-          <Route path="/blog/:slug" element={<BlogPost params={{ slug: ':slug' }} />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/product-updates" element={<ProductUpdates />} />
-          <Route path="/product-updates/:slug" element={<ProductUpdateDetail />} />
-          <Route path="/free-tools" element={<FreeTools />} />
-          <Route path="/booking" element={<Booking />} />
-          <Route path="/admin/login" element={<AdminLogin />} />
-          <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
-            <Route index element={<AdminHome />} />
-            <Route path="blog-highlights" element={<BlogHighlightsPage />} />
-            <Route path="contact-submissions" element={<ContactSubmissionsPage />} />
-            <Route path="product-updates" element={<ProductUpdatesPage />} />
-            <Route path="seo-dashboard" element={<SeoDashboardPage />} />
-          </Route>
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <HelmetProvider>
+        <Router>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/blog" element={<Blog />} />
+            <Route path="/blog/:slug" element={<BlogPost />} />
+            <Route path="/features" element={<Features />} />
+            <Route path="/industries" element={<Industries />} />
+            <Route path="/pricing" element={<Pricing />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/book-demo" element={<Booking />} />
+            <Route path="/free-tools" element={<FreeTools />} />
+            <Route path="/product-updates" element={<ProductUpdates />} />
+            <Route path="/product-updates/:slug" element={<ProductUpdateDetail />} />
+            <Route path="/tools/break-even-calculator" element={<BreakEvenCalculator />} />
+            <Route path="/tools/discount-calculator" element={<DiscountCalculator />} />
+            <Route path="/tools/roi-calculator" element={<ROICalculator />} />
+            <Route path="/tools/profit-calculator" element={<ProfitCalculator />} />
+            <Route path="/tools/salary-calculator" element={<SalaryCalculator />} />
+            <Route path="/tools/overtime-calculator" element={<OvertimeCalculator />} />
+            <Route path="/tools/load-calculator" element={<LoadCalculator />} />
+            <Route path="/tools/duct-calculator" element={<DuctCalculator />} />
+            <Route path="/tools/growth-calculator" element={<GrowthCalculator />} />
+            <Route path="/tools/calculator" element={<Calculator />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </Router>
+      </HelmetProvider>
+    </QueryClientProvider>
   );
-};
+}
 
 export default App;
