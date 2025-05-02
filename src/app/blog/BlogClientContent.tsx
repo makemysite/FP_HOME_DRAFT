@@ -1,13 +1,15 @@
 
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import BlogFilters from "@/components/blog/BlogFilters";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import ErrorBoundary from "@/components/ErrorBoundary";
 
 interface BlogPost {
   id: string;
@@ -27,60 +29,67 @@ export default function BlogClientContent() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [dateRange, setDateRange] = useState<{ from: Date; to: Date } | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [retrying, setRetrying] = useState(false);
   const { toast } = useToast();
 
   const categories = ["Industry Insights", "Field Operations", "Technology Trends", "Growth"];
 
-  useEffect(() => {
-    const fetchBlogPosts = async () => {
-      try {
-        console.log('Fetching blog posts...');
-        // Set a timeout to handle network issues
-        const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Request timeout')), 10000)
-        );
-        
-        const fetchPromise = supabase
-          .from('blog_posts')
-          .select('id, slug, title, description, hero_image, created_at, category')
-          .eq('published', true)
-          .order('created_at', { ascending: false });
+  const fetchBlogPosts = useCallback(async (retryAttempt = 0) => {
+    try {
+      setLoading(true);
+      setError(null);
+      setRetrying(retryAttempt > 0);
+      
+      console.log(`Fetching blog posts... (attempt ${retryAttempt + 1})`);
+      // Set a timeout to handle network issues - increase timeout for retries
+      const timeoutDuration = retryAttempt > 0 ? 15000 : 10000;
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Request timeout')), timeoutDuration)
+      );
+      
+      const fetchPromise = supabase
+        .from('blog_posts')
+        .select('id, slug, title, description, hero_image, created_at, category')
+        .eq('published', true)
+        .order('created_at', { ascending: false });
           
-        // Race between fetch and timeout
-        const { data, error } = await Promise.race([
-          fetchPromise,
-          timeoutPromise.then(() => { throw new Error('Request timeout'); })
-        ]) as any;
-        
-        if (error) {
-          console.error('Error fetching blog posts:', error);
-          setError(`Failed to load blog posts: ${error.message}`);
-          toast({
-            title: "Error",
-            description: "Failed to load blog posts. Please try again later.",
-            variant: "destructive"
-          });
-          return;
-        }
-        
-        console.log('Blog posts fetched successfully:', data?.length);
-        setBlogPosts(data || []);
-        setFilteredPosts(data || []);
-      } catch (error: any) {
-        console.error('Error fetching blog posts:', error);
-        setError(`Failed to load blog posts: ${error.message || 'Unknown error'}`);
+      // Race between fetch and timeout
+      const { data, error: supabaseError } = await Promise.race([
+        fetchPromise,
+        timeoutPromise.then(() => { throw new Error('Request timeout'); })
+      ]) as any;
+      
+      if (supabaseError) {
+        throw supabaseError;
+      }
+      
+      console.log('Blog posts fetched successfully:', data?.length);
+      setBlogPosts(data || []);
+      setFilteredPosts(data || []);
+    } catch (error: any) {
+      console.error('Error fetching blog posts:', error);
+      setError(`Failed to load blog posts: ${error.message || 'Unknown error'}`);
+      
+      // Auto-retry once with increased timeout
+      if (retryAttempt < 1) {
+        console.log('Retrying blog post fetch...');
+        setTimeout(() => fetchBlogPosts(retryAttempt + 1), 1000);
+      } else {
         toast({
           title: "Error",
           description: "Failed to load blog posts. Please try again later.",
           variant: "destructive"
         });
-      } finally {
-        setLoading(false);
       }
-    };
-
-    fetchBlogPosts();
+    } finally {
+      setLoading(false);
+      setRetrying(false);
+    }
   }, [toast]);
+
+  useEffect(() => {
+    fetchBlogPosts();
+  }, [fetchBlogPosts]);
 
   useEffect(() => {
     let filtered = [...blogPosts];
@@ -114,6 +123,10 @@ export default function BlogClientContent() {
     });
   };
 
+  const handleRetry = () => {
+    fetchBlogPosts();
+  };
+
   if (loading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -140,18 +153,29 @@ export default function BlogClientContent() {
         </div>
         <h3 className="text-xl font-medium text-gray-700 mb-4">Error Loading Blog Posts</h3>
         <p className="text-gray-500 mb-6">{error}</p>
-        <button 
-          onClick={() => window.location.reload()} 
-          className="bg-[#E98A23] text-white px-6 py-2 rounded-lg hover:bg-opacity-90 transition-colors"
+        <Button 
+          onClick={handleRetry} 
+          className="bg-[#E98A23] text-white px-6 py-2 rounded-lg hover:bg-opacity-90 transition-colors flex items-center gap-2"
+          disabled={retrying}
         >
-          Try Again
-        </button>
+          {retrying ? (
+            <>
+              <RefreshCw className="h-4 w-4 animate-spin" />
+              <span>Retrying...</span>
+            </>
+          ) : (
+            <>
+              <RefreshCw className="h-4 w-4" />
+              <span>Try Again</span>
+            </>
+          )}
+        </Button>
       </div>
     );
   }
 
   return (
-    <>
+    <ErrorBoundary>
       <BlogFilters
         onSearchChange={setSearchQuery}
         onCategoryChange={setSelectedCategory}
@@ -178,9 +202,13 @@ export default function BlogClientContent() {
                     src={post.hero_image} 
                     alt={post.title} 
                     className="w-full h-full object-cover"
-                    loading="lazy" // Add lazy loading
+                    loading="lazy"
                     width="400"
                     height="300"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = 'https://placehold.co/600x400/e9e9e9/969696?text=Image+Not+Available';
+                    }}
                   />
                 ) : (
                   <div className="w-full h-full bg-gray-200 flex items-center justify-center">
@@ -212,6 +240,6 @@ export default function BlogClientContent() {
           ))}
         </div>
       )}
-    </>
+    </ErrorBoundary>
   );
 }
