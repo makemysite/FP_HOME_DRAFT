@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import Index from './pages/Index';
 import FeaturesPage from './app/features/page';
 import PricingPage from './app/pricing/page';
@@ -23,6 +23,15 @@ import ProductUpdatesPage from './components/admin/pages/ProductUpdatesPage';
 import SeoDashboardPage from './components/admin/pages/SeoDashboardPage';
 import Booking from './pages/Booking';
 
+// Wrapper component for Blog to provide searchParams
+const BlogWithSearchParams = () => {
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const pageParam = searchParams.get('page');
+  
+  return <Blog searchParams={{ page: pageParam || undefined }} />;
+};
+
 const App = () => {
   return (
     <ErrorBoundary>
@@ -32,7 +41,7 @@ const App = () => {
           <Route path="/features" element={<FeaturesPage />} />
           <Route path="/pricing" element={<PricingPage />} />
           <Route path="/industries" element={<Industries />} />
-          <Route path="/blog" element={<Blog />} />
+          <Route path="/blog" element={<BlogWithSearchParams />} />
           <Route path="/blog/:slug" element={<BlogPost params={{ slug: ':slug' }} />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/product-updates" element={<ProductUpdates />} />
