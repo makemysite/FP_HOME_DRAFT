@@ -1,33 +1,67 @@
 
 import React from "react";
 import { getBlogPostBySlug } from "@/lib/blog/queries";
-import { useParams } from "react-router-dom";
+import { notFound } from "next/navigation";
+import { Metadata, ResolvingMetadata } from "next";
 import ServerBlogPage from "../ServerBlogPage";
 import BlogPostClientContent from "./BlogPostClientContent";
 import { ClientOnly } from "@/lib/client-utils";
 
-// This component needs to be client-side since we're using React Router
-export default function BlogPostPage() {
-  // Use React Router's useParams instead of Next.js style props
-  const { slug } = useParams<{ slug: string }>();
+type Props = {
+  params: { slug: string }
+}
+
+export async function generateMetadata(
+  { params }: Props,
+  parent: ResolvingMetadata
+): Promise<Metadata> {
+  // Fetch blog post by slug
+  const post = await getBlogPostBySlug(params.slug);
   
-  if (!slug) {
+  if (!post) {
+    return {
+      title: 'Blog Post Not Found',
+      description: 'The requested blog post could not be found.'
+    };
+  }
+
+  return {
+    title: `${post.title} | Field Promax Blog`,
+    description: post.description || "Read this insightful article from Field Promax",
+    openGraph: {
+      title: post.title,
+      description: post.description || "Read this insightful article from Field Promax",
+      type: "article",
+      publishedTime: post.created_at,
+      modifiedTime: post.updated_at || post.created_at,
+      ...(post.hero_image && { images: [post.hero_image] }),
+    },
+    keywords: post.tags || post.category || "field service management",
+  };
+}
+
+export default async function BlogPostPage({ params }: Props) {
+  try {
+    // Pre-fetch the blog post on the server - IMPORTANT: await the promise
+    const post = await getBlogPostBySlug(params.slug);
+    
+    // If post doesn't exist, return 404
+    if (!post) {
+      notFound();
+    }
+    
     return (
-      <ServerBlogPage heading="Blog Post Not Found">
-        <div className="text-center py-12">
-          <h3 className="text-xl font-medium text-gray-700 mb-4">Invalid blog URL</h3>
-          <p className="text-gray-500 mb-6">No blog post slug was provided.</p>
-        </div>
+      <ServerBlogPage 
+        heading={post.title}
+        subheading=""
+      >
+        <ClientOnly>
+          <BlogPostClientContent initialPost={post} slug={params.slug} />
+        </ClientOnly>
       </ServerBlogPage>
     );
+  } catch (error) {
+    console.error("Error fetching blog post:", error);
+    notFound();
   }
-  
-  // Note: We now pass the slug to BlogPostClientContent and let it handle the data fetching
-  return (
-    <ServerBlogPage>
-      <ClientOnly>
-        <BlogPostClientContent slug={slug} />
-      </ClientOnly>
-    </ServerBlogPage>
-  );
 }
