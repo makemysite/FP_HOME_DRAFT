@@ -41,27 +41,22 @@ export async function generateMetadata(
 }
 
 export default async function BlogPostPage({ params }: Props) {
-  try {
-    // Pre-fetch the blog post on the server - IMPORTANT: await the promise
-    const post = await getBlogPostBySlug(params.slug);
-    
-    // If post doesn't exist, return 404
-    if (!post) {
-      notFound();
-    }
-    
-    return (
-      <ServerBlogPage 
-        heading={post.title}
-        subheading=""
-      >
-        <ClientOnly>
-          <BlogPostClientContent initialPost={post} slug={params.slug} />
-        </ClientOnly>
-      </ServerBlogPage>
-    );
-  } catch (error) {
-    console.error("Error fetching blog post:", error);
+  // Pre-fetch the blog post on the server
+  const post = await getBlogPostBySlug(params.slug);
+  
+  // If post doesn't exist, return 404
+  if (!post) {
     notFound();
   }
+  
+  return (
+    <ServerBlogPage 
+      heading={post.title}
+      subheading=""
+    >
+      <ClientOnly>
+        <BlogPostClientContent initialPost={post} slug={params.slug} />
+      </ClientOnly>
+    </ServerBlogPage>
+  );
 }
