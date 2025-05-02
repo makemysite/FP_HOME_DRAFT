@@ -20,7 +20,13 @@ interface BlogPost {
   category: string;
 }
 
-const Blog = () => {
+interface BlogProps {
+  searchParams?: {
+    page?: string;
+  };
+}
+
+const Blog: React.FC<BlogProps> = ({ searchParams }) => {
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
   const [filteredPosts, setFilteredPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
