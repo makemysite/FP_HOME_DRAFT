@@ -3,7 +3,7 @@ import React from 'react';
 import BlogRenderer from '@/components/BlogContent/BlogRenderer';
 import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowLeft } from "lucide-react";
-import Link from 'next/link';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 
 interface BlogPostClientContentProps {
@@ -13,6 +13,9 @@ interface BlogPostClientContentProps {
   loading?: boolean;
   error?: string | null;
 }
+
+// Default placeholder for missing images
+const IMAGE_PLACEHOLDER = 'https://placehold.co/600x400/e9e9e9/969696?text=Image+Not+Available';
 
 const BlogPostClientContent = ({ initialPost, post, slug, loading, error }: BlogPostClientContentProps) => {
   // Use initialPost if provided, otherwise use post
@@ -42,7 +45,7 @@ const BlogPostClientContent = ({ initialPost, post, slug, loading, error }: Blog
         <h3 className="text-xl font-medium text-gray-700 mb-4">{error || "Blog post not found"}</h3>
         <p className="text-gray-500 mb-6">The requested blog post could not be found or loaded.</p>
         <Button asChild>
-          <Link href="/blog">
+          <Link to="/blog">
             Return to Blog
           </Link>
         </Button>
@@ -50,11 +53,16 @@ const BlogPostClientContent = ({ initialPost, post, slug, loading, error }: Blog
     );
   }
 
+  // Optimize the image path if needed
+  if (blogPost.hero_image) {
+    blogPost.hero_image = blogPost.hero_image || IMAGE_PLACEHOLDER;
+  }
+
   return (
     <div className="min-h-screen bg-white">
       <div className="container mx-auto px-4 py-8">
         <Button asChild variant="outline" className="mb-6">
-          <Link href="/blog" className="inline-flex items-center text-primary hover:underline">
+          <Link to="/blog" className="inline-flex items-center text-primary hover:underline">
             <ArrowLeft className="mr-2 h-4 w-4" /> Back to Blog
           </Link>
         </Button>

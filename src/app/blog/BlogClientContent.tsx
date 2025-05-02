@@ -281,30 +281,21 @@ export default function BlogClientContent() {
   const generateSrcSet = (imageUrl: string) => {
     if (!imageUrl) return '';
     
-    // Create srcset with multiple sizes
-    return IMAGE_SIZES.map(({ width }) => {
-      // Add width parameter to the URL for dynamic resizing
-      // This assumes your image server supports dynamic resizing
-      // If not, you would need to prepare these images in advance
-      const resizedUrl = imageUrl.includes('?') 
-        ? `${imageUrl}&width=${width}` 
-        : `${imageUrl}?width=${width}`;
-      
-      return `${resizedUrl} ${width}w`;
-    }).join(', ');
+    return IMAGE_SIZES.map(({ width }) => 
+      `${imageUrl} ${width}w`
+    ).join(', ');
   };
 
   // Generate sizes attribute based on our grid layout
   const generateSizes = () => {
-    return '(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw';
+    return IMAGE_SIZES.map(({ width, breakpoint }) => 
+      `(max-width: ${breakpoint}px) ${width}px`
+    ).join(', ') + ', 400px';
   };
 
   // Optimize the image path for various CDNs if needed
   const optimizeImagePath = (imageUrl: string | null) => {
     if (!imageUrl) return IMAGE_PLACEHOLDER;
-    
-    // If using an image optimization service like Cloudinary, Imgix, etc.
-    // you could transform the URL here
     return imageUrl;
   };
 
@@ -384,7 +375,7 @@ export default function BlogClientContent() {
                     {post.hero_image ? (
                       <img 
                         src={optimizeImagePath(post.hero_image)}
-                        srcSet={generateSrcSet(post.hero_image)}
+                        srcSet={generateSrcSet(optimizeImagePath(post.hero_image))}
                         sizes={generateSizes()}
                         alt={post.title} 
                         className="w-full h-full object-cover"
@@ -396,7 +387,7 @@ export default function BlogClientContent() {
                           target.src = IMAGE_PLACEHOLDER;
                         }}
                         style={{ aspectRatio: `${BLOG_IMAGE_WIDTH}/${BLOG_IMAGE_HEIGHT}` }}
-                        fetchPriority={index < 3 ? "high" : "auto"}
+                        fetchpriority={index < 3 ? "high" : "auto"}
                       />
                     ) : (
                       <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-400">
