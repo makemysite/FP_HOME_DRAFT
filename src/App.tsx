@@ -24,15 +24,6 @@ import SeoDashboardPage from './components/admin/pages/SeoDashboardPage';
 import Booking from './pages/Booking';
 import { QueryClientWrapper } from '@/lib/query-client-wrapper';
 
-// Wrapper component for Blog to provide searchParams
-const BlogWithSearchParams = () => {
-  const location = useLocation();
-  const searchParams = new URLSearchParams(location.search);
-  const pageParam = searchParams.get('page');
-  
-  return <Blog searchParams={{ page: pageParam || undefined }} />;
-};
-
 const App = () => {
   return (
     <ErrorBoundary>
@@ -43,7 +34,7 @@ const App = () => {
             <Route path="/features" element={<FeaturesPage />} />
             <Route path="/pricing" element={<PricingPage />} />
             <Route path="/industries" element={<Industries />} />
-            <Route path="/blog" element={<BlogWithSearchParams />} />
+            <Route path="/blog" element={<Blog />} />
             <Route path="/blog/:slug" element={<BlogPost />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/product-updates" element={<ProductUpdates />} />

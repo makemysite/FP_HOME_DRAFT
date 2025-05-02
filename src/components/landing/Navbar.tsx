@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { Menu } from "lucide-react";
@@ -103,6 +104,16 @@ const Navbar = () => {
               >
                 Tools
               </NavLink>
+              <NavLink
+                to="/admin"
+                className={({ isActive }) =>
+                  `text-base font-medium ${
+                    isActive ? "text-[#4A3AFF]" : "text-[#6F6C90]"
+                  } hover:text-[#4A3AFF]`
+                }
+              >
+                Admin
+              </NavLink>
             </nav>
           )}
         </div>
@@ -187,6 +198,16 @@ const Navbar = () => {
               }
             >
               Tools
+            </NavLink>
+            <NavLink
+              to="/admin"
+              className={({ isActive }) =>
+                `text-base font-medium px-4 py-2 ${
+                  isActive ? "text-[#4A3AFF] bg-gray-100" : "text-[#6F6C90]"
+                } hover:text-[#4A3AFF] hover:bg-gray-50`
+              }
+            >
+              Admin
             </NavLink>
             <div className="flex flex-col space-y-2 px-4 pt-2 border-t">
               <Link to="/contact" className="w-full">
