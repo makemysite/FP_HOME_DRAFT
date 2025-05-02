@@ -5,8 +5,8 @@ import Index from './pages/Index';
 import FeaturesPage from './app/features/page';
 import PricingPage from './app/pricing/page';
 import Industries from './app/industries/page';
-import Blog from './app/blog/page';
-import BlogPost from './app/blog/[slug]/page';
+import Blog from './pages/Blog';
+import BlogPost from './pages/BlogPost';
 import Contact from './pages/Contact';
 import ProductUpdates from './pages/ProductUpdates';
 import ProductUpdateDetail from './pages/ProductUpdateDetail';
@@ -22,6 +22,7 @@ import ContactSubmissionsPage from './components/admin/pages/ContactSubmissionsP
 import ProductUpdatesPage from './components/admin/pages/ProductUpdatesPage';
 import SeoDashboardPage from './components/admin/pages/SeoDashboardPage';
 import Booking from './pages/Booking';
+import { QueryClientWrapper } from '@/lib/query-client-wrapper';
 
 // Wrapper component for Blog to provide searchParams
 const BlogWithSearchParams = () => {
@@ -35,30 +36,32 @@ const BlogWithSearchParams = () => {
 const App = () => {
   return (
     <ErrorBoundary>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/features" element={<FeaturesPage />} />
-          <Route path="/pricing" element={<PricingPage />} />
-          <Route path="/industries" element={<Industries />} />
-          <Route path="/blog" element={<BlogWithSearchParams />} />
-          <Route path="/blog/:slug" element={<BlogPost params={{ slug: ':slug' }} />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/product-updates" element={<ProductUpdates />} />
-          <Route path="/product-updates/:slug" element={<ProductUpdateDetail />} />
-          <Route path="/free-tools" element={<FreeTools />} />
-          <Route path="/booking" element={<Booking />} />
-          <Route path="/admin/login" element={<AdminLogin />} />
-          <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
-            <Route index element={<AdminHome />} />
-            <Route path="blog-highlights" element={<BlogHighlightsPage />} />
-            <Route path="contact-submissions" element={<ContactSubmissionsPage />} />
-            <Route path="product-updates" element={<ProductUpdatesPage />} />
-            <Route path="seo-dashboard" element={<SeoDashboardPage />} />
-          </Route>
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
+      <QueryClientWrapper>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/features" element={<FeaturesPage />} />
+            <Route path="/pricing" element={<PricingPage />} />
+            <Route path="/industries" element={<Industries />} />
+            <Route path="/blog" element={<BlogWithSearchParams />} />
+            <Route path="/blog/:slug" element={<BlogPost />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/product-updates" element={<ProductUpdates />} />
+            <Route path="/product-updates/:slug" element={<ProductUpdateDetail />} />
+            <Route path="/free-tools" element={<FreeTools />} />
+            <Route path="/booking" element={<Booking />} />
+            <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
+              <Route index element={<AdminHome />} />
+              <Route path="blog-highlights" element={<BlogHighlightsPage />} />
+              <Route path="contact-submissions" element={<ContactSubmissionsPage />} />
+              <Route path="product-updates" element={<ProductUpdatesPage />} />
+              <Route path="seo-dashboard" element={<SeoDashboardPage />} />
+            </Route>
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </QueryClientWrapper>
     </ErrorBoundary>
   );
 };

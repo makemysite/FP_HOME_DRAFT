@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { getBlogPostBySlug } from "@/lib/blog/queries";
 import BlogRenderer from "@/components/BlogContent/BlogRenderer";
+import Footer from "@/components/features/Footer";
 
 // Fix the type annotation for useParams
 type BlogPostParams = {
@@ -109,6 +110,8 @@ const BlogPost: React.FC = () => {
           )}
         </div>
       </main>
+      
+      <Footer />
       
       {/* Add the blog post custom styles */}
       <link rel="stylesheet" href="/blog-integration/blog-styles.css" />
