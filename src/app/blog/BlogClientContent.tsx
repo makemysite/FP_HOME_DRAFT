@@ -2,7 +2,8 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import Link from "next/link";
+import { Link } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
@@ -19,7 +20,6 @@ import {
   PaginationPrevious, 
   PaginationEllipsis 
 } from "@/components/ui/pagination";
-import { useRouter, useSearchParams } from "next/navigation";
 
 interface BlogPost {
   id: string;
@@ -35,8 +35,9 @@ interface BlogPost {
 const POSTS_PER_PAGE = 10;
 
 export default function BlogClientContent() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const searchParams = new URLSearchParams(location.search);
   const currentPage = parseInt(searchParams.get('page') || '1', 10);
   
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
@@ -125,11 +126,11 @@ export default function BlogClientContent() {
 
   // Update URL with page parameter when changing pages
   const handlePageChange = (page: number) => {
-    const params = new URLSearchParams(searchParams.toString());
+    const params = new URLSearchParams(location.search);
     params.set('page', page.toString());
     
-    // Reset to page 1 if filters change
-    router.push(`/blog?${params.toString()}`);
+    // Navigate to the new URL with the updated page parameter
+    navigate(`/blog?${params.toString()}`);
   };
 
   useEffect(() => {
@@ -321,7 +322,7 @@ export default function BlogClientContent() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {paginatedPosts.map((post) => (
               <Link 
-                href={`/blog/${post.slug}`} 
+                to={`/blog/${post.slug}`} 
                 key={post.id}
                 className="bg-white rounded-lg overflow-hidden shadow-md transition-transform hover:scale-105 hover:shadow-lg"
               >
