@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
@@ -33,6 +32,13 @@ interface BlogPost {
 
 // Number of posts to display per page
 const POSTS_PER_PAGE = 10;
+
+// Default dimensions for blog post thumbnails
+const BLOG_IMAGE_WIDTH = 400;
+const BLOG_IMAGE_HEIGHT = 300;
+
+// Default placeholder for missing images
+const IMAGE_PLACEHOLDER = 'https://placehold.co/600x400/e9e9e9/969696?text=Image+Not+Available';
 
 export default function BlogClientContent() {
   const location = useLocation();
@@ -256,6 +262,13 @@ export default function BlogClientContent() {
     return items;
   };
 
+  // Determine if an image should be eager loaded based on its position
+  const shouldEagerLoad = (index: number) => {
+    // Eager load only the first few images that are likely to be in the initial viewport
+    // For desktop, this might be the first 3 or 6 images (depending on layout)
+    return index < 3;
+  };
+
   if (loading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -320,11 +333,12 @@ export default function BlogClientContent() {
       ) : (
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {paginatedPosts.map((post) => (
+            {paginatedPosts.map((post, index) => (
               <Link 
                 to={`/blog/${post.slug}`} 
                 key={post.id}
                 className="bg-white rounded-lg overflow-hidden shadow-md transition-transform hover:scale-105 hover:shadow-lg"
+                style={{ contentVisibility: 'auto' }}
               >
                 <div className="h-48 overflow-hidden">
                   {post.hero_image ? (
@@ -332,12 +346,15 @@ export default function BlogClientContent() {
                       src={post.hero_image} 
                       alt={post.title} 
                       className="w-full h-full object-cover"
-                      loading="lazy"
-                      width="400"
-                      height="300"
+                      loading={shouldEagerLoad(index) ? "eager" : "lazy"}
+                      width={BLOG_IMAGE_WIDTH}
+                      height={BLOG_IMAGE_HEIGHT}
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
-                        target.src = 'https://placehold.co/600x400/e9e9e9/969696?text=Image+Not+Available';
+                        target.src = IMAGE_PLACEHOLDER;
+                      }}
+                      style={{
+                        aspectRatio: `${BLOG_IMAGE_WIDTH}/${BLOG_IMAGE_HEIGHT}`,
                       }}
                     />
                   ) : (
