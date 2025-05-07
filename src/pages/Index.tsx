@@ -7,7 +7,7 @@ import Pricing from "@/components/landing/Pricing";
 import BlogHighlights from "@/components/landing/BlogHighlights";
 import Footer from "@/components/features/Footer";
 
-// Import our optimized HeroSection
+// Import our optimized server-rendered HeroSection
 import HeroSection from "@/app/hero-section/page";
 
 // Dynamically import components that are not needed for initial render

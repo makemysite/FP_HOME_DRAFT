@@ -7,6 +7,7 @@ const nextConfig = {
     domains: [
       'localhost',
       'fieldpromax.com',
+      'ik.imagekit.io', // Adding imagekit domain for optimization
       // Add any other image domains you're using, like Supabase storage domains
     ],
   },

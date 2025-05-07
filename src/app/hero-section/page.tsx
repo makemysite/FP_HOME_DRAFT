@@ -1,19 +1,11 @@
 
-"use client";
-
-import React, { useState, useEffect } from "react";
+import React from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-import DemoForm from "./DemoForm";
+import ClientDemoForm from "./ClientDemoForm";
 
+// This is now a Server Component by default
 export default function HeroSection() {
-  const [isClient, setIsClient] = useState(false);
-
-  // Only run this effect on the client side
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
-
   return (
     <section className="w-full max-w-[1243px] mx-auto mt-12 md:mt-[106px] px-4 md:px-0">
       <div className="flex flex-col-reverse md:flex-row gap-5">
@@ -27,27 +19,23 @@ export default function HeroSection() {
               <br className="hidden md:inline" />
               business efficiently with powerful features
             </p>
-            {isClient && (
-              <div className="mt-6 md:mt-[34px]">
-                <DemoForm />
-              </div>
-            )}
+            <div className="mt-6 md:mt-[34px]">
+              <ClientDemoForm />
+            </div>
           </div>
         </div>
         <div className="w-full md:w-[43%] flex justify-center md:justify-end">
-          {isClient ? (
-            <Image
-              src="https://ik.imagekit.io/d1cslxmlo/features/important-information-three-men-protective-helmet-looking-laptop-with-interest-while-standing-construction-site-day%20(1)%20copy.jpg?updatedAt=1743783905301&tr=w-800,h-600,f-auto,q-75"
-              className="w-full h-auto rounded-lg object-cover"
-              width={800}
-              height={600}
-              alt="Field Service Management"
-              priority={true}
-              loading="eager"
-            />
-          ) : (
-            <div className="aspect-[1.35] w-full bg-gray-200 rounded-lg" />
-          )}
+          <Image
+            src="https://ik.imagekit.io/d1cslxmlo/features/important-information-three-men-protective-helmet-looking-laptop-with-interest-while-standing-construction-site-day%20(1)%20copy.jpg?updatedAt=1743783905301&tr=w-800,h-600,f-auto,q-75"
+            className="w-full h-auto rounded-lg object-cover"
+            width={800}
+            height={600}
+            alt="Field Service Management"
+            priority={true}
+            loading="eager"
+            placeholder="blur"
+            blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mM0NjauBwAC0QFXmHzpFwAAAABJRU5ErkJggg=="
+          />
         </div>
       </div>
     </section>

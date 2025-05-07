@@ -38,9 +38,7 @@ export default function DemoForm() {
       }
       
       // Instead of using toast, simply redirect
-      setTimeout(() => {
-        router.push(`/booking?email=${encodeURIComponent(email)}`);
-      }, 1000);
+      router.push(`/booking?email=${encodeURIComponent(email)}`);
       
     } catch (error) {
       console.error("Error submitting demo request:", error);
