@@ -8,6 +8,7 @@ const nextConfig = {
       'localhost',
       'fieldpromax.com',
       'ik.imagekit.io', // Adding imagekit domain for optimization
+      'cdn.builder.io', // Adding builder.io domain for hero images
       // Add any other image domains you're using, like Supabase storage domains
     ],
   },

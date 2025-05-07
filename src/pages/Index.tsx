@@ -7,8 +7,8 @@ import Pricing from "@/components/landing/Pricing";
 import BlogHighlights from "@/components/landing/BlogHighlights";
 import Footer from "@/components/features/Footer";
 
-// Import our optimized server-rendered HeroSection
-import HeroSection from "@/app/hero-section/page";
+// Import our optimized server-rendered HomeHeroSection
+import HomeHeroSection from "@/app/home-hero-section/page";
 
 // Dynamically import components that are not needed for initial render
 const Testimonials = dynamic(() => import("@/components/landing/Testimonials"), {
@@ -24,7 +24,7 @@ const Index = () => {
       </header>
 
       <main className="self-stretch flex w-full flex-col items-center pl-[76px] max-md:max-w-full max-md:pl-5">
-        <HeroSection />
+        <HomeHeroSection />
         <Features />
         <Pricing />
         <BlogHighlights />
