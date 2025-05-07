@@ -74,6 +74,7 @@ export type Database = {
           custom_publish_date: string | null
           description: string | null
           hero_image: string | null
+          hero_image_alt: string | null
           highlight_order: number | null
           id: string
           label: Database["public"]["Enums"]["blog_label"] | null
@@ -94,6 +95,7 @@ export type Database = {
           custom_publish_date?: string | null
           description?: string | null
           hero_image?: string | null
+          hero_image_alt?: string | null
           highlight_order?: number | null
           id?: string
           label?: Database["public"]["Enums"]["blog_label"] | null
@@ -114,6 +116,7 @@ export type Database = {
           custom_publish_date?: string | null
           description?: string | null
           hero_image?: string | null
+          hero_image_alt?: string | null
           highlight_order?: number | null
           id?: string
           label?: Database["public"]["Enums"]["blog_label"] | null

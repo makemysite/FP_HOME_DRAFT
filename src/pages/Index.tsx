@@ -1,12 +1,20 @@
 
 import React from "react";
+import dynamic from "next/dynamic";
 import Navbar from "@/components/landing/Navbar";
-import Hero from "@/components/landing/Hero";
 import Features from "@/components/landing/Features";
 import Pricing from "@/components/landing/Pricing";
 import BlogHighlights from "@/components/landing/BlogHighlights";
-import Testimonials from "@/components/landing/Testimonials";
 import Footer from "@/components/features/Footer";
+
+// Import our optimized HeroSection
+import HeroSection from "@/app/hero-section/page";
+
+// Dynamically import components that are not needed for initial render
+const Testimonials = dynamic(() => import("@/components/landing/Testimonials"), {
+  ssr: true,
+  loading: () => <div className="min-h-[300px] bg-gray-50" />
+});
 
 const Index = () => {
   return (
@@ -16,7 +24,7 @@ const Index = () => {
       </header>
 
       <main className="self-stretch flex w-full flex-col items-center pl-[76px] max-md:max-w-full max-md:pl-5">
-        <Hero />
+        <HeroSection />
         <Features />
         <Pricing />
         <BlogHighlights />
