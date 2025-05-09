@@ -15,12 +15,17 @@ const nextConfig = {
   // Optional: Configure redirects or rewrites if needed
   async redirects() {
     return [
-      // Example redirect
-      // {
-      //   source: '/old-page',
-      //   destination: '/new-page',
-      //   permanent: true,
-      // }
+      // Handle admin path redirection to the separate admin application
+      {
+        source: '/admin',
+        destination: process.env.ADMIN_URL || '/admin-not-configured',
+        permanent: false,
+      },
+      {
+        source: '/admin/:path*',
+        destination: process.env.ADMIN_URL || '/admin-not-configured',
+        permanent: false,
+      }
     ];
   },
   // Optional: Configure webpack if needed
